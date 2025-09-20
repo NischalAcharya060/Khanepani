@@ -9,51 +9,34 @@
 </head>
 <body>
 
-<!-- Top Info Bar -->
-<div class="top-bar">
-    <div class="container">
-        <div class="contact-info">
-            <span>📞 +977 1 4117356, 4117358</span>
-            <span>✉ info@salakpurkhanepani.com</span>
-        </div>
-    </div>
-</div>
-
-<!-- Header -->
-<header>
-    <div class="container header-container">
-        <div class="logo">
-            <img src="assets/images/logo.jpg" alt="Khane Pani Logo">
-            <span>सलकपुर खानेपानी / Salakpur KhanePani</span>
-        </div>
-        <nav class="main-nav">
-            <a href="index.php">Home</a>
-            <a href="notices.php">Notices</a>
-            <a href="gallery.php">Gallery</a>
-            <a href="contact.php">Contact</a>
-        </nav>
-    </div>
-</header>
+<?php include 'components/header.php'; ?>
 
 <!-- Hero Carousel -->
 <section class="hero">
     <div class="carousel">
         <div class="slide active">
-            <img src="assets/images/hero2.jpg" alt="Kanepani building">
-            <div class="caption">Our Water Supply Office</div>
+            <img src="assets/images/hero2.jpg" alt="Kanepani building" class="clickable">
+            <div class="caption">Our Water Supply Container</div>
         </div>
         <div class="slide">
-            <img src="assets/images/hero.jpg" alt="Group image">
+            <img src="assets/images/hero.jpg" alt="Serving the Community" class="clickable">
             <div class="caption">Serving the Community</div>
         </div>
         <div class="slide">
-            <img src="assets/images/hero1.jpg" alt="Group image2">
+            <img src="assets/images/hero1.jpg" alt="Clean & Safe Drinking Water" class="clickable">
             <div class="caption">Clean & Safe Drinking Water</div>
         </div>
         <button class="carousel-btn prev">&#10094;</button>
         <button class="carousel-btn next">&#10095;</button>
     </div>
 </section>
+
+<!-- Lightbox Container -->
+<div id="lightbox" class="lightbox">
+    <span class="close">&times;</span>
+    <img class="lightbox-content" id="lightbox-img">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
 
 <!-- Latest Notices -->
 <section class="latest-notices container">
@@ -81,15 +64,10 @@
     </div>
 </section>
 
-<!-- Footer -->
-<footer>
-    <div class="container">
-        <p>&copy; <?php echo date('Y'); ?> सलकपुर खानेपानी / Salakpur KhanePani. All rights reserved.</p>
-    </div>
-</footer>
+<?php include 'components/footer.php'; ?>
 
 <script>
-    // Hero Carousel JS
+    // Hero Carousel
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
 
@@ -115,15 +93,44 @@
         showSlide(currentSlide);
     }, 8000);
 
-    // Optional: Swipe for mobile
+    // Swipe support for mobile
     let startX = 0;
-    document.querySelector('.carousel').addEventListener('touchstart', e => startX = e.touches[0].clientX);
-    document.querySelector('.carousel').addEventListener('touchend', e => {
+    const carousel = document.querySelector('.carousel');
+    carousel.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    carousel.addEventListener('touchend', e => {
         let diffX = e.changedTouches[0].clientX - startX;
         if(diffX > 50) currentSlide = (currentSlide - 1 + slides.length) % slides.length;
         if(diffX < -50) currentSlide = (currentSlide + 1) % slides.length;
         showSlide(currentSlide);
     });
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const closeBtn = document.querySelector('.lightbox .close');
+
+    document.querySelectorAll('.clickable').forEach(img => {
+        img.addEventListener('click', () => {
+            lightbox.style.display = 'block';
+            lightboxImg.src = img.src;
+            lightboxCaption.innerText = img.alt;
+        });
+    });
+
+    closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
+    lightbox.addEventListener('click', e => {
+        if(e.target === lightbox) lightbox.style.display = 'none';
+    });
+
+    // Hamburger menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mainNav = document.getElementById('main-nav');
+
+    hamburger.addEventListener('click', () => {
+        mainNav.classList.toggle('nav-active');
+    });
+
 </script>
 
 </body>
