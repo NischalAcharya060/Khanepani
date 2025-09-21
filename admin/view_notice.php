@@ -76,7 +76,7 @@ if (!$notice) {
             <strong>Attached File:</strong>
             <?php
             $fileExt = strtolower(pathinfo($notice['file'], PATHINFO_EXTENSION));
-            $filePath = "../uploads/" . $notice['file'];
+            $filePath = "../assets/uploads/" . $notice['file'];
 
             // If image, display preview
             if(in_array($fileExt, ['jpg','jpeg','png','gif'])): ?>

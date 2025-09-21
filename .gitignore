@@ -1,0 +1,15 @@
+# Ignore uploads folder
+/assets/upload/
+
+# Optional: ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore PHP session files (if stored locally)
+*.session
+
+# Ignore environment files
+.env
+
+# Ignore node_modules if using Node.js
+node_modules/

@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Handle file upload
     if (isset($_FILES['file']) && $_FILES['file']['error'] === 0) {
-        $upload_dir = '../uploads/';
+        $upload_dir = '../assets/uploads/';
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
         $file_name = time() . '_' . basename($_FILES['file']['name']);
