@@ -33,7 +33,6 @@ $username = $_SESSION['username'];
 </head>
 <body>
 
-<!-- Header -->
 <header class="admin-header">
     <div class="logo">
         <img src="../assets/images/logo.jpg" alt="Logo">
@@ -46,7 +45,6 @@ $username = $_SESSION['username'];
     </div>
 </header>
 
-<!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
     <ul>
         <li><a href="dashboard.php">🏠 Dashboard</a></li>
@@ -56,10 +54,9 @@ $username = $_SESSION['username'];
     </ul>
 </aside>
 
-<!-- Main Content -->
 <main class="main-content">
     <h2>📢 Manage Notices</h2>
-    <p class="subtitle">Add, edit, or remove notices quickly and efficiently.</p>
+    <p class="subtitle">Add, edit, view, or remove notices quickly and efficiently.</p>
 
     <a href="add_notice.php" class="btn">➕ Add New Notice</a>
 
@@ -80,6 +77,7 @@ $username = $_SESSION['username'];
                     <td><?= htmlspecialchars($notice['title']) ?></td>
                     <td><?= date("d M Y", strtotime($notice['created_at'])) ?></td>
                     <td>
+                        <a href="view_notice.php?id=<?= $notice['id'] ?>" class="btn small">👁 View</a>
                         <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ Edit</a>
                         <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger" onclick="return confirm('Are you sure you want to delete this notice?');">🗑 Delete</a>
                     </td>
