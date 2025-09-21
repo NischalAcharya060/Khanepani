@@ -4,6 +4,7 @@ include '../config/db.php';
 
 // Master admin credentials
 $master_username = "masteradmin";
+$master_email = "master@admin.com";
 $master_password = "admin@123";
 
 // If already logged in, redirect to dashboard
@@ -13,20 +14,20 @@ if (isset($_SESSION['admin'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = trim($_POST['username']);
+    $login = trim($_POST['login']); // username or email
     $password = $_POST['password'];
 
     // Check master admin
-    if ($username === $master_username && $password === $master_password) {
+    if (($login === $master_username || $login === $master_email) && $password === $master_password) {
         $_SESSION['admin'] = "master";
         $_SESSION['username'] = $master_username;
         header("Location: dashboard.php");
         exit();
     }
 
-    // Database users
-    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
-    $stmt->bind_param("s", $username);
+    // Database users: login by username or email
+    $stmt = $conn->prepare("SELECT * FROM admins WHERE username = ? OR email = ?");
+    $stmt->bind_param("ss", $login, $login);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,6 +55,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Admin Login - सलकपुर खानेपानी</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/login.css">
+    <style>
+        /* Optional: small improvements */
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .error { background: #f8d7da; padding: 10px; border-radius: 8px; color: #721c24; margin-bottom: 15px; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -67,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <form method="POST" class="login-form">
             <div class="input-group">
                 <span class="icon">👤</span>
-                <input type="text" name="username" placeholder="Username" required>
+                <input type="text" name="login" placeholder="Username or Email" required>
             </div>
 
             <div class="input-group">
@@ -86,11 +100,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <img src="../assets/images/login_img.png" alt="Login Illustration">
     </div>
 </div>
+
 <script>
     function togglePassword() {
         const passwordInput = document.getElementById('password');
         const toggle = document.querySelector('.toggle-password');
-
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             toggle.textContent = '🙈';
@@ -100,6 +114,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 </script>
-
 </body>
 </html>

@@ -67,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <li><a href="manage_notices.php">📢 Manage Notices</a></li>
         <li><a href="gallery_add.php" class="active">🖼 Add Gallery</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
+        <li><a href="add_admin.php">👤 Add Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>

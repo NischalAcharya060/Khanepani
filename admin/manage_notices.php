@@ -51,6 +51,7 @@ $username = $_SESSION['username'];
         <li><a href="manage_notices.php" class="active">📢 Manage Notices</a></li>
         <li><a href="gallery_add.php">🖼 Add Gallery</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
+        <li><a href="add_admin.php">👤 Add Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>

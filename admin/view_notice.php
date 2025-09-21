@@ -58,6 +58,7 @@ if (!$notice) {
         <li><a href="dashboard.php">🏠 Dashboard</a></li>
         <li><a href="manage_notices.php" class="active">📢 Manage Notices</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
+        <li><a href="add_admin.php">👤 Add Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>
