@@ -260,6 +260,67 @@ h1, h2, h3 {
     margin-top: 15px;
 }
 
+/* Add Gallery Form */
+.gallery-form {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.gallery-form h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: #222;
+    text-align: center;
+}
+
+.gallery-form .input-group {
+    margin-bottom: 18px;
+}
+
+.gallery-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #444;
+}
+
+.gallery-form input[type="text"],
+.gallery-form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border 0.3s;
+}
+
+.gallery-form input[type="text"]:focus,
+.gallery-form input[type="file"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.gallery-form .btn-submit {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.gallery-form .btn-submit:hover {
+    background: #0056b3;
+}
+
 /* ================================
    RESPONSIVE
 ================================ */
