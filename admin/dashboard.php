@@ -10,7 +10,7 @@ $username = $_SESSION['username'];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - Khane Pani Office</title>
+    <title>Admin Dashboard - सलकपुर खानेपानी</title>
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -20,16 +20,24 @@ $username = $_SESSION['username'];
 <header class="admin-header">
     <div class="logo">
         <img src="../assets/images/logo.jpg" alt="Logo">
-        <h1>Khane Pani Admin Dashboard</h1>
+        <h1>सलकपुर खानेपानी</h1>
     </div>
     <div class="user-info">
         <span>👤 <?= htmlspecialchars($username) ?></span>
         <a href="../admin/logout.php" class="logout-btn">Logout</a>
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     </div>
 </header>
 
-<!-- Include Sidebar -->
-<?php include 'sidebar.php'; ?>
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <ul>
+        <li><a href="dashboard.php" class="active">🏠 Dashboard</a></li>
+        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
+        <li><a href="messages.php">📬 Messages</a></li>
+        <li><a href="settings.php">⚙ Settings</a></li>
+    </ul>
+</aside>
 
 <!-- Main Content -->
 <main class="main-content">
@@ -39,7 +47,7 @@ $username = $_SESSION['username'];
     <div class="cards">
         <div class="card">
             <h3>📢 Notices</h3>
-            <p>Create, publish and manage office notices.</p>
+            <p>Create, publish, and manage office notices.</p>
             <a href="manage_notices.php" class="btn">Manage</a>
         </div>
 
@@ -51,11 +59,18 @@ $username = $_SESSION['username'];
 
         <div class="card">
             <h3>⚙ Settings</h3>
-            <p>Change password, update profile and system settings.</p>
+            <p>Change password, update profile, and system settings.</p>
             <a href="settings.php" class="btn">Settings</a>
         </div>
     </div>
 </main>
+
+<script>
+    // Sidebar toggle for mobile view
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+</script>
 
 </body>
 </html>
