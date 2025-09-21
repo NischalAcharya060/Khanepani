@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard - Add Admin</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <style>
         /* Main content */
@@ -174,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <li><a href="manage_notices.php">📢 Manage Notices</a></li>
         <li><a href="gallery_add.php">🖼 Add Gallery</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="add_admin.php" class="active">👤 Add Admin</a></li>
+        <li><a href="manage_admin.php" class="active">👥 Manage Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>

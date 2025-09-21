@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gallery - Khane Pani Office</title>
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>

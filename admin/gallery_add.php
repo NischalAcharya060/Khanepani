@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Add Gallery Image - सलकपुर खानेपानी</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -67,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <li><a href="manage_notices.php">📢 Manage Notices</a></li>
         <li><a href="gallery_add.php" class="active">🖼 Add Gallery</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="add_admin.php">👤 Add Admin</a></li>
+        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>

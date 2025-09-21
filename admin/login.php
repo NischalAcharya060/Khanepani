@@ -33,9 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($result->num_rows === 1) {
         $admin = $result->fetch_assoc();
-        if (password_verify($password, $admin['password'])) {
+
+        if ($admin['status'] === 'banned') {
+            $error = "🚫 Your account is banned. Contact Master Admin.";
+        } elseif (password_verify($password, $admin['password'])) {
             $_SESSION['admin'] = $admin['id'];
             $_SESSION['username'] = $admin['username'];
+            $_SESSION['is_master'] = false;
+
+            // Update last login time
+            $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
+            $stmt_update->bind_param("i", $admin['id']);
+            $stmt_update->execute();
+
             header("Location: dashboard.php");
             exit();
         } else {
@@ -53,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - सलकपुर खानेपानी</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/login.css">
     <style>

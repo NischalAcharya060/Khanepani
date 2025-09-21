@@ -28,6 +28,7 @@ $username = $_SESSION['username'];
 <head>
     <meta charset="UTF-8">
     <title>Manage Notices - सलकपुर खानेपानी</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -51,7 +52,7 @@ $username = $_SESSION['username'];
         <li><a href="manage_notices.php" class="active">📢 Manage Notices</a></li>
         <li><a href="gallery_add.php">🖼 Add Gallery</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="add_admin.php">👤 Add Admin</a></li>
+        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>

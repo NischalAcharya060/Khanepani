@@ -35,6 +35,7 @@ if (!$notice) {
 <head>
     <meta charset="UTF-8">
     <title>View Notice - <?= htmlspecialchars($notice['title']) ?> - सलकपुर खानेपानी</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
@@ -58,7 +59,7 @@ if (!$notice) {
         <li><a href="dashboard.php">🏠 Dashboard</a></li>
         <li><a href="manage_notices.php" class="active">📢 Manage Notices</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="add_admin.php">👤 Add Admin</a></li>
+        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
     </ul>
 </aside>

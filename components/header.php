@@ -19,7 +19,14 @@
         <nav class="main-nav" id="main-nav">
             <a href="../index.php">Home</a>
             <a href="../notices.php">Notices</a>
-            <a href="../gallery.php">Gallery</a>
+
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">Resources ▾</a>
+                <div class="dropdown-content">
+                    <a href="../gallery.php">Gallery</a>
+                </div>
+            </div>
+
             <a href="../contact.php">Contact</a>
         </nav>
 

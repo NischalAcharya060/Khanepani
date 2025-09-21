@@ -24,6 +24,7 @@ $notice = mysqli_fetch_assoc($result);
     <meta charset="UTF-8">
     <title><?= $notice['title'] ?> - Khane Pani Office</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
