@@ -49,14 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Login - Khane Pani Office</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - सलकपुर खानेपानी</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/login.css">
 </head>
 <body>
+<div class="container">
+    <div class="left">
+        <h2>सलकपुर खानेपानी Login</h2>
+        <p>Welcome! Please enter your credentials to access the admin dashboard.</p>
 
-<div class="login-wrapper">
-    <div class="login-container">
-        <h2>🔑 Admin Login</h2>
         <?php if(isset($error)): ?>
             <p class="error"><?= $error ?></p>
         <?php endif; ?>
@@ -66,14 +69,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <span class="icon">👤</span>
                 <input type="text" name="username" placeholder="Username" required>
             </div>
+
             <div class="input-group">
                 <span class="icon">🔒</span>
-                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="password" id="password" placeholder="Password" required>
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
             </div>
-            <button type="submit" name="login">Login</button>
+
+            <button type="submit" class="btn">Login Now</button>
         </form>
+
+        <a href="../index.php" class="back-btn">⬅ Back to Home</a>
+    </div>
+
+    <div class="right">
+        <img src="../assets/images/login_img.png" alt="Login Illustration">
     </div>
 </div>
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggle = document.querySelector('.toggle-password');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggle.textContent = '🙈';
+        } else {
+            passwordInput.type = 'password';
+            toggle.textContent = '👁️';
+        }
+    }
+</script>
 
 </body>
 </html>

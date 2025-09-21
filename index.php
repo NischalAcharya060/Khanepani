@@ -48,17 +48,20 @@
 
         if(mysqli_num_rows($result) > 0){
             while ($row = mysqli_fetch_assoc($result)) {
-                echo "<div class='notice'>";
-                echo "<h3>".$row['title']."</h3>";
-                echo "<p>".substr($row['content'],0,150)."...</p>";
-                if (!empty($row['file'])) {
-                    echo "<a class='download-btn' href='uploads/".$row['file']."' download>Download File</a>";
-                }
-                echo "<a class='read-more' href='notice.php?id=".$row['id']."'>Read More</a>";
-                echo "</div>";
+                ?>
+                <a href="notice.php?id=<?= $row['id'] ?>" class="notice-card">
+                    <?php if(!empty($row['image'])): ?>
+                        <img src="uploads/<?= $row['image'] ?>" alt="<?= $row['title'] ?>" class="clickable">
+                    <?php endif; ?>
+                    <div class="notice-content">
+                        <h3><?= $row['title'] ?></h3>
+                        <p><?= substr($row['content'],0,150) ?>...</p>
+                    </div>
+                </a>
+                <?php
             }
         } else {
-            echo "<p>No notices found.</p>";
+            echo "<p class='no-notices'>No notices found.</p>";
         }
         ?>
     </div>
@@ -71,7 +74,7 @@
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
 
-    const showSlide = (index) => {
+    const showSlide = index => {
         slides.forEach((slide, i) => {
             slide.classList.toggle('active', i === index);
         });
@@ -87,11 +90,11 @@
         showSlide(currentSlide);
     });
 
-    // Auto slide every 8 seconds
+    // Auto slide every 10 seconds
     setInterval(() => {
         currentSlide = (currentSlide + 1) % slides.length;
         showSlide(currentSlide);
-    }, 8000);
+    }, 10000);
 
     // Swipe support for mobile
     let startX = 0;
@@ -104,15 +107,16 @@
         showSlide(currentSlide);
     });
 
-    // Lightbox
+    // Lightbox for clickable images
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxCaption = document.getElementById('lightbox-caption');
     const closeBtn = document.querySelector('.lightbox .close');
 
     document.querySelectorAll('.clickable').forEach(img => {
-        img.addEventListener('click', () => {
-            lightbox.style.display = 'block';
+        img.addEventListener('click', (e) => {
+            e.preventDefault(); // prevent following card link
+            lightbox.style.display = 'flex';
             lightboxImg.src = img.src;
             lightboxCaption.innerText = img.alt;
         });
@@ -132,6 +136,5 @@
     });
 
 </script>
-
 </body>
 </html>

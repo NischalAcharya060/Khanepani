@@ -1,57 +1,48 @@
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
 }
-
 body {
-    background: linear-gradient(135deg, #004080, #0066cc);
+    font-family: 'Roboto', sans-serif;
+    background-image: url('../assets/images/login_background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
-
-/* Wrapper to center */
-.login-wrapper {
+.container {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 900px;
     width: 100%;
-    padding: 20px;
-}
-
-/* Card */
-.login-container {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
     background: #fff;
-    padding: 40px 30px;
-    border-radius: 15px;
-    width: 360px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    transition: transform 0.3s, box-shadow 0.3s;
 }
-
-.login-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+.left {
+    flex: 1;
+    padding: 50px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
-
-.login-container h2 {
-    margin-bottom: 25px;
-    color: #004080;
+.left h2 {
     font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #4f46e5;
+    text-align: center;
 }
-
-/* Error message */
-.error {
-    color: red;
-    margin-bottom: 15px;
+.left p {
     font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 30px;
+    text-align: center;
 }
-
-/* Input group with icon */
 .input-group {
     position: relative;
     margin-bottom: 20px;
@@ -59,49 +50,96 @@ body {
 
 .input-group .icon {
     position: absolute;
-    top: 50%;
     left: 12px;
+    top: 50%;
     transform: translateY(-50%);
-    font-size: 18px;
-    color: #004080;
+    font-size: 16px;
+    color: #6b7280;
+    pointer-events: none;
 }
 
-.login-form input {
+.input-group input {
     width: 100%;
     padding: 12px 12px 12px 40px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    border: none;
     outline: none;
-    font-size: 15px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    font-size: 14px;
     transition: 0.3s;
 }
 
-.login-form input:focus {
-    border-color: #004080;
-    box-shadow: 0 0 8px rgba(0,64,128,0.4);
+.input-group input:focus {
+    background: #e0e7ff;
 }
 
-.login-form button {
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #6b7280;
+    cursor: pointer;
+    user-select: none;
+}
+.toggle-password:hover {
+    color: #4f46e5;
+}
+
+.btn {
     width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    background: #004080;
+    padding: 14px;
+    background: #4f46e5;
     color: #fff;
+    border: none;
+    border-radius: 10px;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    transition: 0.3s, transform 0.3s;
+    transition: 0.3s;
 }
-
-.login-form button:hover {
-    background: #0066cc;
-    transform: scale(1.03);
+.btn:hover {
+    background: #4338ca;
 }
-
-@media screen and (max-width: 400px) {
-    .login-container {
-        width: 90%;
-        padding: 30px 20px;
+.error {
+    color: #dc2626;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+.back-btn {
+    text-align: center;
+    display: block;
+    margin-top: 20px;
+    color: #4f46e5;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.back-btn:hover {
+    text-decoration: none;
+    cursor: pointer;
+}
+.right {
+    flex: 1;
+    background: linear-gradient(135deg, #6d28d9, #4f46e5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+.right img {
+    width: 80%;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+@media (max-width: 800px) {
+    .container {
+        flex-direction: column;
+        max-width: 95%;
+    }
+    .right {
+        order: -1;
+        padding: 30px;
     }
 }

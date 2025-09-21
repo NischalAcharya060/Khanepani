@@ -206,42 +206,59 @@ header {
     color: #004080;
     margin-bottom: 25px;
 }
+/* Notices Section */
 .notice-wrapper {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
 }
-.notice {
+
+.notice-card {
+    display: flex;
+    flex-direction: column;
     background: #fff;
-    padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
 }
-.notice:hover {
+.notice-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
-.notice h3 {
+
+.notice-card img.clickable {
+    width: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+.notice-card img.clickable:hover {
+    transform: scale(1.03);
+}
+
+.notice-content {
+    padding: 20px;
+}
+
+.notice-content h3 {
     color: #004080;
     margin-top: 0;
+    font-size: 18px;
 }
-.notice p {
+
+.notice-content p {
     color: #333;
+    font-size: 14px;
 }
-.download-btn, .read-more {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 6px 12px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: #fff;
-    background: #004080;
-    margin-right: 10px;
-    transition: 0.3s;
-}
-.download-btn:hover, .read-more:hover {
-    background: #ff6600;
+
+.no-notices {
+    text-align: center;
+    color: #6b7280;
+    font-size: 16px;
+    grid-column: 1 / -1;
 }
 
 /* Notice Search Bar */
@@ -263,17 +280,64 @@ header {
     box-shadow: 0 0 5px rgba(0, 64, 128, 0.5);
 }
 
-/* Notice images clickable */
-.notice img.clickable {
+.notice-detail {
+    margin: 40px 0;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.notice-detail h2 {
+    color: #004080;
+    margin-top: 0;
+}
+
+.notice-detail p {
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.notice-detail .notice-image {
     width: 100%;
+    max-height: 400px;
+    object-fit: cover;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     cursor: pointer;
     transition: transform 0.3s;
 }
-.notice img.clickable:hover {
-    transform: scale(1.03);
+.notice-detail .notice-image:hover {
+    transform: scale(1.02);
 }
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    text-decoration: none;
+    color: #004080;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.back-btn:hover {
+    color: #ff6600;
+}
+
+.download-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    background: #004080;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 20px;
+    transition: background 0.3s;
+}
+.download-btn:hover {
+    background: #ff6600;
+}
+
 
 /* Gallery Section */
 .gallery h2 {

@@ -27,27 +27,26 @@
 
         if(mysqli_num_rows($result) > 0){
             while ($row = mysqli_fetch_assoc($result)) {
-                echo "<div class='notice'>";
-                if(!empty($row['image'])){
-                    echo "<img src='uploads/".$row['image']."' alt='".$row['title']."' class='clickable'>";
-                }
-                echo "<h3>".$row['title']."</h3>";
-                echo "<p>".substr($row['content'],0,200)."...</p>";
-                if (!empty($row['file'])) {
-                    echo "<a class='download-btn' href='uploads/".$row['file']."' download>Download File</a>";
-                }
-                echo "<a class='read-more' href='notice.php?id=".$row['id']."'>Read More</a>";
-                echo "</div>";
+                ?>
+                <a href="notice.php?id=<?= $row['id'] ?>" class="notice-card">
+                    <?php if(!empty($row['image'])): ?>
+                        <img src="../assets/uploads/<?= $row['image'] ?>" alt="<?= $row['title'] ?>" class="clickable">
+                    <?php endif; ?>
+                    <div class="notice-content">
+                        <h3><?= $row['title'] ?></h3>
+                        <p><?= substr($row['content'], 0, 200) ?>...</p>
+                    </div>
+                </a>
+                <?php
             }
         } else {
-            echo "<p>No notices found.</p>";
+            echo "<p class='no-notices'>No notices found.</p>";
         }
         ?>
     </div>
 </section>
 
 <?php include 'components/footer.php'; ?>
-
 
 <!-- Lightbox for notice images -->
 <div id="lightbox" class="lightbox">
@@ -56,25 +55,22 @@
     <div class="lightbox-caption" id="lightbox-caption"></div>
 </div>
 
+<!-- JS -->
 <script>
     // Search Functionality
     const searchInput = document.getElementById('noticeSearch');
     const noticeWrapper = document.getElementById('noticeWrapper');
     searchInput.addEventListener('keyup', () => {
         const filter = searchInput.value.toLowerCase();
-        const notices = noticeWrapper.getElementsByClassName('notice');
+        const notices = noticeWrapper.getElementsByClassName('notice-card');
         Array.from(notices).forEach(notice => {
-            let title = notice.getElementsByTagName('h3')[0].innerText.toLowerCase();
-            let content = notice.getElementsByTagName('p')[0].innerText.toLowerCase();
-            if(title.includes(filter) || content.includes(filter)){
-                notice.style.display = '';
-            } else {
-                notice.style.display = 'none';
-            }
+            let title = notice.querySelector('h3').innerText.toLowerCase();
+            let content = notice.querySelector('p').innerText.toLowerCase();
+            notice.style.display = (title.includes(filter) || content.includes(filter)) ? '' : 'none';
         });
     });
 
-    // Lightbox JS
+    // Lightbox
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxCaption = document.getElementById('lightbox-caption');
@@ -82,14 +78,14 @@
 
     document.querySelectorAll('.clickable').forEach(img => {
         img.addEventListener('click', () => {
-            lightbox.style.display = 'block';
+            lightbox.style.display = 'flex';
             lightboxImg.src = img.src;
             lightboxCaption.innerText = img.alt;
         });
     });
 
     closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
-    lightbox.addEventListener('click', (e) => {
+    lightbox.addEventListener('click', e => {
         if (e.target === lightbox) lightbox.style.display = 'none';
     });
 </script>
