@@ -1,15 +1,5 @@
-# Ignore uploads folder
-/assets/upload/
+# Ignore everything inside uploads folder
+/assets/uploads/
 
-# Optional: ignore system files
-.DS_Store
-Thumbs.db
-
-# Ignore PHP session files (if stored locally)
-*.session
-
-# Ignore environment files
-.env
-
-# Ignore node_modules if using Node.js
-node_modules/
+# But keep the folder itself (so it exists in repo, just empty)
+!/assets/uploads/.gitkeep
