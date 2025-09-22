@@ -1,4 +1,14 @@
 <?php include 'config/db.php'; ?>
+<?php
+function isMobile() {
+    return preg_match('/(android|iphone|ipad|ipod|blackberry|windows phone|opera mini|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
+}
+
+if (isMobile()) {
+    header("Location: mobile-block.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
