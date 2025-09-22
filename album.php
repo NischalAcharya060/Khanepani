@@ -106,7 +106,7 @@ $images_result = mysqli_query($conn, $images_sql);
             object-fit: cover;
             display: block;
             transition: transform 0.6s ease, filter 0.6s ease;
-            border-radius: 15px 15px 0 0;
+            border-radius: 15px;
             filter: brightness(0.95);
         }
         .album-item:hover img {

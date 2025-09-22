@@ -43,44 +43,44 @@
             cursor: pointer;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
             border-radius: 10px;
-            z-index: 1; /* keep card above the pile layers */
+            display: inline-block;
         }
         .album-card:hover {
             transform: translateY(-8px) scale(1.02);
         }
 
-        /* Album Pile */
-        .album-pile {
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-            background: #fff;
-            z-index: 2;
-        }
-
-        /* Pile layers */
-        .album-pile::before,
-        .album-pile::after {
+        /* Pile layers (only when .pile class exists) */
+        .album-card.pile::before,
+        .album-card.pile::after {
             content: "";
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: -10px;
-            bottom: -10px;
+            top: 12px;
+            left: 12px;
+            right: -12px;
+            bottom: -12px;
             border-radius: 10px;
             background: #fff;
             box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-            z-index: -1;
-            transform: rotate(-3deg);
+            z-index: 0;
+            transform: rotate(-4deg);
         }
-        .album-pile::after {
-            top: 18px;
-            left: 18px;
-            right: -18px;
-            bottom: -18px;
-            transform: rotate(4deg);
+        .album-card.pile::after {
+            top: 20px;
+            left: 20px;
+            right: -20px;
+            bottom: -20px;
+            transform: rotate(5deg);
             opacity: 0.9;
+        }
+
+        /* Album Pile (main card stays above pile) */
+        .album-pile {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden; /* Keep only the image clean inside */
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            background: #fff;
+            z-index: 1;
         }
 
         /* Album Image */
@@ -100,7 +100,7 @@
             transform: scale(1.08);
         }
 
-        /* Overlay for title & count */
+        /* Overlay */
         .overlay {
             position: absolute;
             bottom: 0;
@@ -110,6 +110,7 @@
             color: #fff;
             padding: 12px;
             border-radius: 0 0 10px 10px;
+            z-index: 2;
         }
         .overlay .title {
             font-size: 16px;
@@ -148,7 +149,9 @@
 
             if(count($images) > 0) {
                 $coverImage = "assets/uploads/".$images[0];
-                echo "<div class='album-card' onclick=\"location.href='album.php?id=$album_id'\">";
+                $pileClass = (count($images) > 1) ? "pile" : ""; // add pile effect only if more than 1 image
+
+                echo "<div class='album-card $pileClass' onclick=\"location.href='album.php?id=$album_id'\">";
                 echo "  <div class='album-pile'>";
                 echo "      <div class='album-image'>";
                 echo "          <img src='$coverImage' alt='$album_name'>";
