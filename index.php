@@ -6,8 +6,144 @@
     <title>Khane Pani Office</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
+<style>
+    /* Section Wrapper */
+    .latest-notices {
+        margin: 50px auto;
+        padding: 20px;
+        max-width: 1200px;
+    }
+
+    .latest-notices h2 {
+        font-size: 28px;
+        font-weight: bold;
+        color: #0a2a66;
+        text-align: center;
+        margin-bottom: 30px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+
+    .latest-notices h2::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #ff3366, #0056d6);
+        border-radius: 2px;
+    }
+
+    /* Notices Grid */
+    .notice-grid {
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr;
+        gap: 40px;
+        align-items: start;
+    }
+
+    /* Column Layout */
+    .notice-column {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    /* Notice Item */
+    .notice-item {
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .notice-meta {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 5px;
+    }
+
+    .notice-source {
+        font-weight: bold;
+        color: #0056d6;
+        margin-right: 10px;
+    }
+
+    .notice-date {
+        color: #777;
+    }
+
+    .notice-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .notice-title a {
+        color: #0a2a66;
+        text-decoration: none;
+    }
+
+    .notice-title a:hover {
+        text-decoration: none;
+    }
+
+    .read-more {
+        display: inline-block;
+        margin-top: 5px;
+        color: #0056d6;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .read-more:hover {
+        color: #003d99;
+    }
+
+    /* Separator */
+    .notice-separator {
+        background: #e0e0e0;
+        width: 1px;
+    }
+
+    .see-all {
+        text-align: right;
+        margin-top: 25px;
+        padding-right: 10px;
+    }
+
+    .see-all a {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0056d6;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .see-all a:hover {
+        text-decoration: none;
+        color: #003d99;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .notice-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .notice-separator {
+            display: none;
+        }
+    }
+</style>
 <body>
 
 <?php include 'components/header.php'; ?>
@@ -41,30 +177,66 @@
 
 <!-- Latest Notices -->
 <section class="latest-notices container">
-    <h2>Latest Notices</h2>
-    <div class="notice-wrapper">
-        <?php
-        $sql = "SELECT * FROM notices ORDER BY created_at DESC LIMIT 5";
-        $result = mysqli_query($conn, $sql);
+    <h2>📢 Latest Notices</h2>
+    <div class="notice-grid">
+        <!-- Left Column -->
+        <div class="notice-column">
+            <?php
+            $sql = "SELECT * FROM notices ORDER BY created_at DESC LIMIT 6";
+            $result = mysqli_query($conn, $sql);
 
-        if(mysqli_num_rows($result) > 0){
+            $notices = [];
             while ($row = mysqli_fetch_assoc($result)) {
+                $notices[] = $row;
+            }
+
+            $leftNotices = array_slice($notices, 0, 3);
+            foreach ($leftNotices as $row) {
+                $date = date("d M Y", strtotime($row['created_at']));
                 ?>
-                <a href="notice.php?id=<?= $row['id'] ?>" class="notice-card">
-                    <?php if(!empty($row['image'])): ?>
-                        <img src="uploads/<?= $row['image'] ?>" alt="<?= $row['title'] ?>" class="clickable">
-                    <?php endif; ?>
-                    <div class="notice-content">
-                        <h3><?= $row['title'] ?></h3>
-                        <p><?= substr($row['content'],0,150) ?>...</p>
+                <div class="notice-item">
+                    <div class="notice-meta">
+                        <span class="notice-source">Notice</span>
+                        <span class="notice-date"><?= $date ?></span>
                     </div>
-                </a>
+                    <h3 class="notice-title">
+                        <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
+                    </h3>
+                    <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
+                </div>
                 <?php
             }
-        } else {
-            echo "<p class='no-notices'>No notices found.</p>";
-        }
-        ?>
+            ?>
+        </div>
+
+        <!-- Separator -->
+        <div class="notice-separator"></div>
+
+        <!-- Right Column -->
+        <div class="notice-column">
+            <?php
+            $rightNotices = array_slice($notices, 3, 3);
+            foreach ($rightNotices as $row) {
+                $date = date("d M Y", strtotime($row['created_at']));
+                ?>
+                <div class="notice-item">
+                    <div class="notice-meta">
+                        <span class="notice-source">Notice</span>
+                        <span class="notice-date"><?= $date ?></span>
+                    </div>
+                    <h3 class="notice-title">
+                        <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
+                    </h3>
+                    <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
+    </div>
+
+    <div class="see-all">
+        <a href="notices.php">See all notices →</a>
     </div>
 </section>
 

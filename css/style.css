@@ -521,9 +521,89 @@ header {
 footer {
     background: #004080;
     color: #fff;
-    text-align: center;
-    padding: 15px 0;
     margin-top: 30px;
+    font-family: 'Arial', sans-serif;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-section h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #1e90ff;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin: 6px 0;
+}
+
+.footer-section ul li a {
+    color: #ddd;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #1e90ff;
+}
+
+/* Contact Info */
+.footer-section p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* Social icon */
+.footer-section.social .social-icons {
+    margin-top: 10px;
+}
+
+.footer-section.social a {
+    font-size: 20px;
+    color: #ddd;
+    margin-right: 12px;
+    display: inline-block;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.footer-section.social a:hover {
+    color: #1e90ff;
+    transform: scale(1.2);
+}
+
+/* Map */
+.footer-section iframe {
+    width: 320px;
+    height: 200px;
+    border: 0;
+    border-radius: 8px;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    background: #003366;
+    text-align: center;
+    padding: 15px;
+    font-size: 14px;
+    border-top: 1px solid #00264d;
+}
+
+.footer-bottom p {
+    margin: 0;
 }
 
 /* Responsive / Hamburger Menu */
