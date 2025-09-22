@@ -21,6 +21,7 @@
             margin: 50px auto;
             padding: 0 20px;
         }
+
         .gallery h2 {
             text-align: center;
             margin-bottom: 40px;
@@ -32,41 +33,74 @@
         /* Grid layout */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
         }
 
         /* Album Card */
         .album-card {
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            position: relative;
             cursor: pointer;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
+            border-radius: 10px;
+            z-index: 1; /* keep card above the pile layers */
         }
         .album-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        /* Album Pile */
+        .album-pile {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            background: #fff;
+            z-index: 2;
+        }
+
+        /* Pile layers */
+        .album-pile::before,
+        .album-pile::after {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+            z-index: -1;
+            transform: rotate(-3deg);
+        }
+        .album-pile::after {
+            top: 18px;
+            left: 18px;
+            right: -18px;
+            bottom: -18px;
+            transform: rotate(4deg);
+            opacity: 0.9;
         }
 
         /* Album Image */
         .album-image {
-            position: relative;
-            height: 200px;
+            height: 220px;
             overflow: hidden;
+            border-radius: 10px;
         }
         .album-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
             transition: transform 0.4s ease;
         }
         .album-card:hover .album-image img {
             transform: scale(1.08);
         }
 
-        /* Overlay */
+        /* Overlay for title & count */
         .overlay {
             position: absolute;
             bottom: 0;
@@ -74,15 +108,16 @@
             width: 100%;
             background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
             color: #fff;
-            padding: 15px;
+            padding: 12px;
+            border-radius: 0 0 10px 10px;
         }
         .overlay .title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
             margin-bottom: 4px;
         }
         .overlay .count {
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0.85;
         }
     </style>
@@ -114,8 +149,10 @@
             if(count($images) > 0) {
                 $coverImage = "assets/uploads/".$images[0];
                 echo "<div class='album-card' onclick=\"location.href='album.php?id=$album_id'\">";
-                echo "  <div class='album-image'>";
-                echo "      <img src='$coverImage' alt='$album_name'>";
+                echo "  <div class='album-pile'>";
+                echo "      <div class='album-image'>";
+                echo "          <img src='$coverImage' alt='$album_name'>";
+                echo "      </div>";
                 echo "      <div class='overlay'>";
                 echo "          <div class='title'>$album_name</div>";
                 echo "          <div class='count'>".count($images)." images</div>";
