@@ -9,21 +9,47 @@ if (!isset($_SESSION['admin'])) {
 }
 $username = $_SESSION['username'];
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// ✅ Handle Album Creation
+if (isset($_POST['create_album'])) {
+    $albumName = mysqli_real_escape_string($conn, $_POST['album_name']);
+    $albumDesc = mysqli_real_escape_string($conn, $_POST['album_description']);
+
+    $sql = "INSERT INTO albums (name, description) VALUES ('$albumName', '$albumDesc')";
+    if (mysqli_query($conn, $sql)) {
+        $success = "✅ Album created successfully!";
+    } else {
+        $error = "❌ Database error (Album): " . mysqli_error($conn);
+    }
+}
+
+// ✅ Handle Image Upload
+if (isset($_POST['upload_image'])) {
+    $album_id = intval($_POST['album_id']); // chosen album
     $title = mysqli_real_escape_string($conn, $_POST['title']);
     $imageName = $_FILES['image']['name'];
     $imageTmp = $_FILES['image']['tmp_name'];
     $targetDir = "../assets/uploads/";
     $targetFile = $targetDir . basename($imageName);
 
-    // Allow only image types
     $allowedTypes = ['jpg','jpeg','png','gif'];
     $fileExt = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
+    // ✅ If no album selected, use/create "Unsorted"
+    if ($album_id == 0) {
+        $checkDefault = mysqli_query($conn, "SELECT id FROM albums WHERE name='Unsorted' LIMIT 1");
+        if (mysqli_num_rows($checkDefault) > 0) {
+            $defaultAlbum = mysqli_fetch_assoc($checkDefault);
+            $album_id = $defaultAlbum['id'];
+        } else {
+            mysqli_query($conn, "INSERT INTO albums (name, description) VALUES ('Unsorted', 'Default album for uncategorized images')");
+            $album_id = mysqli_insert_id($conn);
+        }
+    }
+
     if (in_array($fileExt, $allowedTypes)) {
         if (move_uploaded_file($imageTmp, $targetFile)) {
-            $sql = "INSERT INTO gallery (title, image, created_at) VALUES ('$title', '$imageName', NOW())";
+            $sql = "INSERT INTO gallery (album_id, title, image, created_at) 
+                    VALUES ('$album_id', '$title', '$imageName', NOW())";
             if (mysqli_query($conn, $sql)) {
                 $success = "✅ Image uploaded successfully!";
             } else {
@@ -36,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "❌ Only JPG, JPEG, PNG, GIF allowed.";
     }
 }
+
+// ✅ Fetch Albums for dropdown
+$albums = mysqli_query($conn, "SELECT * FROM albums ORDER BY created_at DESC");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <ul>
         <li><a href="dashboard.php">🏠 Dashboard</a></li>
         <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="gallery_add.php" class="active">🖼 Add Gallery</a></li>
+        <li><a href="manage_gallery.php" class="active">🖼 Manage Gallery</a></li>
         <li><a href="messages.php">📬 Messages</a></li>
         <li><a href="manage_admin.php">👥 Manage Admin</a></li>
         <li><a href="settings.php">⚙ Settings</a></li>
@@ -75,31 +104,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <!-- Main Content -->
 <main class="main-content">
-    <h2>🖼 Add New Image to Gallery</h2>
-    <p class="subtitle">Upload photos to display in the public gallery.</p>
+    <h2>➕ Add Image</h2>
+    <p class="subtitle">Create albums and upload photos for different occasions.</p>
 
     <?php if (isset($success)) echo "<p style='color:green;'>$success</p>"; ?>
     <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
 
-    <form method="POST" enctype="multipart/form-data" class="gallery-form">
-        <div class="input-group">
-            <label>Image Title (optional)</label>
-            <input type="text" name="title" placeholder="Enter image title">
-        </div>
+    <!-- Album Create Form -->
+    <section>
+        <h3>📂 Create New Album</h3>
+        <form method="POST" class="gallery-form">
+            <div class="input-group">
+                <label>Album Name</label>
+                <input type="text" name="album_name" placeholder="Enter album name" required>
+            </div>
+            <div class="input-group">
+                <label>Description (optional)</label>
+                <textarea name="album_description" placeholder="Album description"></textarea>
+            </div>
+            <button type="submit" name="create_album" class="btn-submit">➕ Create Album</button>
+        </form>
+    </section>
 
-        <div class="input-group">
-            <label>Select Image</label>
-            <input type="file" name="image" id="imageInput" accept="image/*" required>
-        </div>
+    <hr>
 
-        <!-- Image Preview -->
-        <div class="input-group" id="previewContainer" style="display:none;">
-            <label>Preview:</label>
-            <img id="imagePreview" src="" alt="Image Preview" style="max-width:100%; border-radius:8px; margin-top:10px;">
-        </div>
+    <!-- Image Upload Form -->
+    <section>
+        <h3>🖼 Add New Image to Album</h3>
+        <form method="POST" enctype="multipart/form-data" class="gallery-form">
+            <div class="input-group">
+                <label>Select Album</label>
+                <select name="album_id">
+                    <option value="0">-- No Album (Save in Unsorted) --</option>
+                    <?php while($row = mysqli_fetch_assoc($albums)) { ?>
+                        <option value="<?= $row['id'] ?>"><?= htmlspecialchars($row['name']) ?></option>
+                    <?php } ?>
+                </select>
+            </div>
 
-        <button type="submit" class="btn-submit">📤 Upload</button>
-    </form>
+            <div class="input-group">
+                <label>Image Title (optional)</label>
+                <input type="text" name="title" placeholder="Enter image title">
+            </div>
+
+            <div class="input-group">
+                <label>Select Image</label>
+                <input type="file" name="image" id="imageInput" accept="image/*" required>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="input-group" id="previewContainer" style="display:none;">
+                <label>Preview:</label>
+                <img id="imagePreview" src="" alt="Image Preview" style="max-width:100%; border-radius:8px; margin-top:10px;">
+            </div>
+
+            <button type="submit" class="btn-submit" name="upload_image">📤 Upload</button>
+        </form>
+    </section>
 </main>
 
 <script>
@@ -121,9 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             previewContainer.style.display = 'none';
         }
     });
-</script>
 
-<script>
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
     }
