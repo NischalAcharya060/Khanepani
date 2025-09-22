@@ -3,7 +3,7 @@
         <div class="footer-section">
             <h4>RESOURCES</h4>
             <ul>
-                <li><a href="#">Photo Gallery</a></li>
+                <li><a href="../gallery.php">Photo Gallery</a></li>
                 <li><a href="#">Privacy Policy</a></li>
             </ul>
         </div>

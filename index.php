@@ -178,66 +178,67 @@
 <!-- Latest Notices -->
 <section class="latest-notices container">
     <h2>📢 Latest Notices</h2>
-    <div class="notice-grid">
-        <!-- Left Column -->
-        <div class="notice-column">
-            <?php
-            $sql = "SELECT * FROM notices ORDER BY created_at DESC LIMIT 6";
-            $result = mysqli_query($conn, $sql);
 
-            $notices = [];
-            while ($row = mysqli_fetch_assoc($result)) {
-                $notices[] = $row;
-            }
+    <?php
+    $sql = "SELECT * FROM notices ORDER BY created_at DESC LIMIT 6";
+    $result = mysqli_query($conn, $sql);
 
-            $leftNotices = array_slice($notices, 0, 3);
-            foreach ($leftNotices as $row) {
-                $date = date("d M Y", strtotime($row['created_at']));
-                ?>
-                <div class="notice-item">
-                    <div class="notice-meta">
-                        <span class="notice-source">Notice</span>
-                        <span class="notice-date"><?= $date ?></span>
+    $notices = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $notices[] = $row;
+    }
+
+    if (count($notices) > 0) {
+        $leftNotices = array_slice($notices, 0, 3);
+        $rightNotices = array_slice($notices, 3, 3);
+        ?>
+        <div class="notice-grid">
+            <!-- Left Column -->
+            <div class="notice-column">
+                <?php foreach ($leftNotices as $row):
+                    $date = date("d M Y", strtotime($row['created_at'])); ?>
+                    <div class="notice-item">
+                        <div class="notice-meta">
+                            <span class="notice-source">Notice</span>
+                            <span class="notice-date"><?= $date ?></span>
+                        </div>
+                        <h3 class="notice-title">
+                            <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
+                        </h3>
+                        <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
                     </div>
-                    <h3 class="notice-title">
-                        <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
-                    </h3>
-                    <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
-                </div>
-                <?php
-            }
-            ?>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Separator -->
+            <div class="notice-separator"></div>
+
+            <!-- Right Column -->
+            <div class="notice-column">
+                <?php foreach ($rightNotices as $row):
+                    $date = date("d M Y", strtotime($row['created_at'])); ?>
+                    <div class="notice-item">
+                        <div class="notice-meta">
+                            <span class="notice-source">Notice</span>
+                            <span class="notice-date"><?= $date ?></span>
+                        </div>
+                        <h3 class="notice-title">
+                            <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
+                        </h3>
+                        <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
 
-        <!-- Separator -->
-        <div class="notice-separator"></div>
-
-        <!-- Right Column -->
-        <div class="notice-column">
-            <?php
-            $rightNotices = array_slice($notices, 3, 3);
-            foreach ($rightNotices as $row) {
-                $date = date("d M Y", strtotime($row['created_at']));
-                ?>
-                <div class="notice-item">
-                    <div class="notice-meta">
-                        <span class="notice-source">Notice</span>
-                        <span class="notice-date"><?= $date ?></span>
-                    </div>
-                    <h3 class="notice-title">
-                        <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
-                    </h3>
-                    <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
-                </div>
-                <?php
-            }
-            ?>
+        <div class="see-all">
+            <a href="notices.php">See all notices →</a>
         </div>
-    </div>
-
-    <div class="see-all">
-        <a href="notices.php">See all notices →</a>
-    </div>
+        <?php
+    } else {
+        echo "<p class='no-notices'>No latest notices at the moment.</p>";
+    }
+    ?>
 </section>
 
 <?php include 'components/footer.php'; ?>
