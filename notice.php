@@ -11,7 +11,7 @@ $sql = "SELECT * FROM notices WHERE id = $id";
 $result = mysqli_query($conn, $sql);
 
 if(mysqli_num_rows($result) === 0){
-    echo "<p style='text-align:center; margin-top:50px;'>Notice not found.</p>";
+    echo "<p style='text-align:center; margin-top:50px; font-size:18px;'>Notice not found.</p>";
     exit();
 }
 
@@ -22,7 +22,7 @@ $notice = mysqli_fetch_assoc($result);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= $notice['title'] ?> - Khane Pani Office</title>
+    <title><?= $notice['title'] ?> - Salkpur Khanepani</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -30,7 +30,7 @@ $notice = mysqli_fetch_assoc($result);
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: #f8f9fa;
+            background: #f5f7fa;
             margin: 0;
             padding: 0;
         }
@@ -38,16 +38,17 @@ $notice = mysqli_fetch_assoc($result);
         .notice-detail {
             max-width: 900px;
             margin: 50px auto;
-            padding: 30px;
+            padding: 30px 25px;
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
         .notice-detail h2 {
-            font-size: 28px;
+            font-size: 30px;
             margin-bottom: 15px;
-            color: #222;
+            color: #004080;
+            font-weight: 700;
         }
 
         .notice-meta {
@@ -56,16 +57,21 @@ $notice = mysqli_fetch_assoc($result);
             margin-bottom: 20px;
         }
 
+        .notice-meta i {
+            margin-right: 6px;
+        }
+
         .notice-detail img.notice-image {
             max-width: 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             margin: 20px 0;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .notice-detail img.notice-image:hover {
             transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
         .notice-detail p {
@@ -79,17 +85,22 @@ $notice = mysqli_fetch_assoc($result);
             display: inline-block;
             margin-top: 20px;
             text-decoration: none;
-            padding: 10px 18px;
+            padding: 12px 20px;
             border-radius: 8px;
-            font-size: 14px;
-            transition: background 0.3s;
+            font-size: 15px;
+            transition: all 0.3s ease;
         }
 
         .back-btn {
             background: #007bff;
             color: #fff;
+            margin-right: 10px;
         }
-        .back-btn:hover { background: #0056b3; }
+        .back-btn:hover {
+            background: #054d8f;
+            color: #fff;
+            font-weight: bold;
+        }
 
         .download-btn {
             background: #28a745;
@@ -118,28 +129,44 @@ $notice = mysqli_fetch_assoc($result);
             padding: 20px;
         }
 
-        .lightbox-content {
-            width: 90%;
-            height: 80%;
-            border-radius: 10px;
-            background: #fff;
-        }
-
         .lightbox .close {
             position: absolute;
-            top: 25px;
-            right: 40px;
+            top: 20px;
+            right: 35px;
             font-size: 40px;
             color: #fff;
             cursor: pointer;
             font-weight: bold;
+            transition: color 0.3s;
         }
+        .lightbox .close:hover { color: #ff6600; }
 
         .lightbox-caption {
             margin-top: 12px;
             color: #ddd;
             text-align: center;
             font-size: 14px;
+        }
+
+        #lightbox-img {
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90%;
+            display: none;
+        }
+
+        #previewFrame {
+            display: none;
+            border: none;
+            border-radius: 12px;
+            width: 90%;
+            height: 90%;
+        }
+
+        @media (max-width: 600px) {
+            .notice-detail { padding: 20px 15px; }
+            .notice-detail h2 { font-size: 24px; }
+            .action-btn { font-size: 14px; padding: 10px 16px; }
         }
     </style>
 </head>
@@ -148,15 +175,15 @@ $notice = mysqli_fetch_assoc($result);
 <?php include 'components/header.php'; ?>
 
 <section class="notice-detail container">
-    <a href="index.php" class="action-btn back-btn">⬅ Back to Home</a>
+    <a href="notices.php" class="action-btn back-btn">⬅ Back to Home</a>
 
     <h2><?= $notice['title'] ?></h2>
-    <div class="notice-meta">📅 Posted on: <?= date("F d, Y", strtotime($notice['created_at'])) ?></div>
+    <div class="notice-meta">
+        <i class="fa-regular fa-calendar"></i> <?= date("F d, Y, h:i A", strtotime($notice['created_at'])) ?>
+    </div>
 
     <?php if(!empty($notice['image'])): ?>
-        <img src="../assets/uploads/<?= $notice['image'] ?>"
-             alt="<?= $notice['title'] ?>"
-             class="clickable notice-image">
+        <img src="../assets/uploads/<?= $notice['image'] ?>" alt="<?= $notice['title'] ?>" class="clickable notice-image">
     <?php endif; ?>
 
     <p><?= nl2br($notice['content']) ?></p>
@@ -174,13 +201,13 @@ $notice = mysqli_fetch_assoc($result);
             </button>
         </div>
     <?php endif; ?>
-
 </section>
 
 <!-- Lightbox -->
 <div id="lightbox" class="lightbox">
     <span class="close">&times;</span>
-    <iframe class="lightbox-content" id="previewFrame"></iframe>
+    <img id="lightbox-img">
+    <iframe id="previewFrame"></iframe>
     <div class="lightbox-caption" id="lightbox-caption"></div>
 </div>
 
@@ -188,35 +215,56 @@ $notice = mysqli_fetch_assoc($result);
 
 <script>
     const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
     const previewFrame = document.getElementById('previewFrame');
     const closeBtn = document.querySelector('.lightbox .close');
+    const caption = document.getElementById('lightbox-caption');
 
     function openPreview(filePath, fileExt) {
-        let src = "";
+        lightbox.style.display = 'flex';
+        caption.innerText = "";
 
-        if (fileExt === 'pdf') {
-            src = filePath;
-        } else if (['jpg','jpeg','png','gif'].includes(fileExt)) {
-            src = filePath;
+        if (['jpg','jpeg','png','gif'].includes(fileExt)) {
+            previewFrame.style.display = 'none';
+            lightboxImg.style.display = 'block';
+            lightboxImg.src = filePath;
+
+            lightboxImg.onload = function() {
+                const maxWidth = window.innerWidth * 0.9;
+                const maxHeight = window.innerHeight * 0.9;
+                let width = lightboxImg.naturalWidth;
+                let height = lightboxImg.naturalHeight;
+                const scale = Math.min(maxWidth/width, maxHeight/height, 1);
+                lightboxImg.style.width = width * scale + "px";
+                lightboxImg.style.height = height * scale + "px";
+            };
+            caption.innerText = "Image Preview";
+        } else if(fileExt === 'pdf') {
+            lightboxImg.style.display = 'none';
+            previewFrame.style.display = 'block';
+            previewFrame.src = filePath;
+            caption.innerText = "PDF Preview";
         } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(fileExt)) {
-            src = "https://docs.google.com/gview?url=" + encodeURIComponent(window.location.origin + "/" + filePath) + "&embedded=true";
+            lightboxImg.style.display = 'none';
+            previewFrame.style.display = 'block';
+            previewFrame.src = "https://docs.google.com/gview?url=" + encodeURIComponent(window.location.origin + "/" + filePath) + "&embedded=true";
+            caption.innerText = "Document Preview";
         } else {
             alert("Preview not supported for this file type. Please download.");
-            return;
+            lightbox.style.display = 'none';
         }
-
-        previewFrame.src = src;
-        lightbox.style.display = 'flex';
     }
 
     closeBtn.addEventListener('click', () => {
         lightbox.style.display = 'none';
-        previewFrame.src = ""; // clear iframe
+        lightboxImg.src = "";
+        previewFrame.src = "";
     });
 
     lightbox.addEventListener('click', e => {
         if(e.target === lightbox) {
             lightbox.style.display = 'none';
+            lightboxImg.src = "";
             previewFrame.src = "";
         }
     });
