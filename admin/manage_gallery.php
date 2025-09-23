@@ -27,13 +27,25 @@ if (isset($_GET['delete'])) {
     exit();
 }
 
-// ✅ Fetch images with album names
+// ✅ Pagination settings
+$limit = 5;
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($page - 1) * $limit;
+
+// ✅ Fetch images with album names using LIMIT
 $result = mysqli_query($conn, "
     SELECT g.*, a.name AS album_name 
     FROM gallery g
     LEFT JOIN albums a ON g.album_id = a.id
     ORDER BY g.created_at DESC
+    LIMIT $offset, $limit
 ");
+
+// ✅ Get total images for pagination
+$total_result = mysqli_query($conn, "SELECT COUNT(*) as total FROM gallery");
+$total_row = mysqli_fetch_assoc($total_result);
+$total_pages = ceil($total_row['total'] / $limit);
+
 $hasImages = mysqli_num_rows($result) > 0;
 ?>
 <!DOCTYPE html>
@@ -115,6 +127,28 @@ $hasImages = mysqli_num_rows($result) > 0;
         .success { background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
         .warning { background: #fff3cd; color: #856404; border-left: 5px solid #ffc107; }
 
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #0056d6;
+        }
+        .pagination a.active {
+            background-color: #0056d6;
+            color: white;
+            border-color: #0056d6;
+        }
+        .pagination a:hover {
+            background-color: #0056d6;
+            color: white;
+        }
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
@@ -168,7 +202,7 @@ $hasImages = mysqli_num_rows($result) > 0;
             </tr>
             </thead>
             <tbody>
-            <?php $sn = 1; ?>
+            <?php $sn = $offset + 1; ?>
             <?php while($row = mysqli_fetch_assoc($result)): ?>
                 <tr>
                     <td><?= $sn++ ?></td>
@@ -185,6 +219,25 @@ $hasImages = mysqli_num_rows($result) > 0;
             <?php endwhile; ?>
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <?php if($page > 1): ?>
+                <a href="?page=<?= $page-1 ?>">« Previous</a>
+            <?php endif; ?>
+
+            <?php
+            $start = max(1, $page - 2);
+            $end = min($total_pages, $page + 2);
+            for($p = $start; $p <= $end; $p++): ?>
+                <a href="?page=<?= $p ?>" class="<?= ($p == $page) ? 'active' : '' ?>"><?= $p ?></a>
+            <?php endfor; ?>
+
+            <?php if($page < $total_pages): ?>
+                <a href="?page=<?= $page+1 ?>">Next »</a>
+            <?php endif; ?>
+        </div>
+
     <?php else: ?>
         <div class="message warning" style="text-align:center; font-size:15px;">
             ⚠ No images in gallery yet.
