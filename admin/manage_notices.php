@@ -73,17 +73,7 @@ $username = $_SESSION['username'];
 </head>
 <body>
 
-<header class="admin-header">
-    <div class="logo">
-        <img src="../assets/images/logo.jpg" alt="Logo">
-        <h1>सलकपुर खानेपानी</h1>
-    </div>
-    <div class="user-info">
-        <span>👤 <?= htmlspecialchars($username) ?></span>
-        <a href="../admin/logout.php" class="logout-btn">Logout</a>
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    </div>
-</header>
+<?php include '../components/admin_header.php'; ?>
 
 <aside class="sidebar" id="sidebar">
     <ul>

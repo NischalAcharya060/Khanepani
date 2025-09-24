@@ -77,18 +77,7 @@ $albums = mysqli_query($conn, "SELECT * FROM albums ORDER BY created_at DESC");
 </head>
 <body>
 
-<!-- Header -->
-<header class="admin-header">
-    <div class="logo">
-        <img src="../assets/images/logo.jpg" alt="Logo">
-        <h1>सलकपुर खानेपानी</h1>
-    </div>
-    <div class="user-info">
-        <span>👤 <?= htmlspecialchars($username) ?></span>
-        <a href="../admin/logout.php" class="logout-btn">Logout</a>
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    </div>
-</header>
+<?php include '../components/admin_header.php'; ?>
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">

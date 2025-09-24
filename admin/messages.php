@@ -13,19 +13,24 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Handle deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'], $_POST['csrf_token'])) {
+// Handle status toggle
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_id'], $_POST['csrf_token'])) {
     if (hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        $id = intval($_POST['delete_id']);
-        $stmt = $conn->prepare("DELETE FROM contact_messages WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        header("Location: messages.php");
+        $id = intval($_POST['toggle_id']);
+        $result = $conn->query("SELECT is_read FROM contact_messages WHERE id = $id");
+        if ($result && $row = $result->fetch_assoc()) {
+            $new_status = $row['is_read'] == 1 ? 0 : 1; // Toggle
+            $stmt = $conn->prepare("UPDATE contact_messages SET is_read = ? WHERE id = ?");
+            $stmt->bind_param("ii", $new_status, $id);
+            $stmt->execute();
+        }
+        header("Location: messages.php?page=" . $page);
         exit();
     } else {
         die("Invalid CSRF token.");
     }
 }
+
 
 // Pagination settings
 $limit = 5;
@@ -84,17 +89,7 @@ $username = $_SESSION['username'];
 </head>
 <body>
 
-<header class="admin-header">
-    <div class="logo">
-        <img src="../assets/images/logo.jpg" alt="Logo">
-        <h1>सलकपुर खानेपानी</h1>
-    </div>
-    <div class="user-info">
-        <span>👤 <?= htmlspecialchars($username) ?></span>
-        <a href="../admin/logout.php" class="logout-btn">Logout</a>
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    </div>
-</header>
+<?php include '../components/admin_header.php'; ?>
 
 <aside class="sidebar" id="sidebar">
     <ul>
@@ -119,6 +114,7 @@ $username = $_SESSION['username'];
             <th>Email</th>
             <th>Subject</th>
             <th>Message</th>
+            <th>Status</th>
             <th>Date</th>
             <th>Actions</th>
         </tr>
@@ -134,6 +130,21 @@ $username = $_SESSION['username'];
                     <td><?= htmlspecialchars($msg['subject']) ?></td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         <?= nl2br(htmlspecialchars($msg['message'])) ?>
+                    </td>
+                    <td>
+                        <?php if ($msg['is_read'] == 1): ?>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="toggle_id" value="<?= $msg['id'] ?>">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                <button type="submit" class="btn small" style="background:green; color:white;">✔ Read</button>
+                            </form>
+                        <?php else: ?>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="toggle_id" value="<?= $msg['id'] ?>">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                <button type="submit" class="btn small" style="background:red; color:white;">✉ Unread</button>
+                            </form>
+                        <?php endif; ?>
                     </td>
                     <td><?= date("d M Y, h:i A", strtotime($msg['created_at'])) ?></td>
                     <td>

@@ -29,6 +29,15 @@ if (!$message) {
     header("Location: messages.php");
     exit();
 }
+
+// Mark as read
+$update = $conn->prepare("UPDATE contact_messages SET is_read = 1 WHERE id = ?");
+$update->bind_param("i", $id);
+$update->execute();
+
+// Get unread count for notification
+$countResult = $conn->query("SELECT COUNT(*) AS unread_count FROM contact_messages WHERE is_read = 0");
+$unread = $countResult->fetch_assoc()['unread_count'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,8 +88,28 @@ if (!$message) {
             font-size: 15px;
             color: #333;
         }
-
         .message-value.email { color: #007bff; font-weight: 500; }
+
+        /* Notification */
+        .notification {
+            position: relative;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+        .notification i {
+            font-size: 22px;
+            color: #333;
+        }
+        .notification .badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            padding: 3px 6px;
+            border-radius: 50%;
+        }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
@@ -90,17 +119,7 @@ if (!$message) {
 </head>
 <body>
 
-<header class="admin-header">
-    <div class="logo">
-        <img src="../assets/images/logo.jpg" alt="Logo">
-        <h1>सलकपुर खानेपानी</h1>
-    </div>
-    <div class="user-info">
-        <span>👤 <?= htmlspecialchars($username) ?></span>
-        <a href="../admin/logout.php" class="logout-btn">Logout</a>
-        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    </div>
-</header>
+<?php include '../components/admin_header.php'; ?>
 
 <aside class="sidebar" id="sidebar">
     <ul>
