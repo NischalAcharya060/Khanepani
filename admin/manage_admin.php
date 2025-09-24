@@ -142,18 +142,6 @@ if (isset($_GET['unban'])) {
 <body>
 <?php include '../components/admin_header.php'; ?>
 
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="manage_gallery.php">🖼 Manage Gallery</a></li>
-        <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="manage_admin.php" class="active">👥 Manage Admin</a></li>
-        <li><a href="settings.php">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <main class="main-content">
     <h2>👥 Manage Admins</h2>
     <a href="add_admin.php" class="add-btn">➕ Add Admin</a>
@@ -229,10 +217,5 @@ if (isset($_GET['unban'])) {
     <?php endif; ?>
 </main>
 
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 </body>
 </html>

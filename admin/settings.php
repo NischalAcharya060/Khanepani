@@ -61,18 +61,6 @@ $settings = mysqli_fetch_assoc($result);
 
 <?php include '../components/admin_header.php'; ?>
 
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="gallery_add.php">🖼 Add Gallery</a></li>
-        <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
-        <li><a href="settings.php" class="active">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <main class="main-content">
     <h2>⚙ Admin Settings</h2>
 
@@ -93,12 +81,6 @@ $settings = mysqli_fetch_assoc($result);
         <button type="submit">Update Settings</button>
     </form>
 </main>
-
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 
 </body>
 </html>

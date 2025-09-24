@@ -158,17 +158,6 @@ $hasImages = mysqli_num_rows($result) > 0;
 <body>
 <?php include '../components/admin_header.php'; ?>
 
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="manage_gallery.php" class="active">🖼 Manage Gallery</a></li>
-        <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
-        <li><a href="settings.php">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <main class="main-content">
     <h2>🖼 Manage Gallery</h2>
     <a href="gallery_add.php" class="add-btn">➕ Add New Image</a>
@@ -235,10 +224,5 @@ $hasImages = mysqli_num_rows($result) > 0;
     <?php endif; ?>
 </main>
 
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 </body>
 </html>

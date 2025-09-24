@@ -19,18 +19,6 @@ $username = $_SESSION['username'];
 
 <?php include '../components/admin_header.php'; ?>
 
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php" class="active">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="manage_gallery.php">🖼 Manage Gallery</a></li>
-        <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
-        <li><a href="settings.php">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <!-- Main Content -->
 <main class="main-content">
     <h2>Welcome back, <?= htmlspecialchars($username) ?> 👋</h2>
@@ -56,13 +44,6 @@ $username = $_SESSION['username'];
         </div>
     </div>
 </main>
-
-<script>
-    // Sidebar toggle for mobile view
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 
 </body>
 </html>

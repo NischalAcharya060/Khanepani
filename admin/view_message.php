@@ -121,17 +121,6 @@ $unread = $countResult->fetch_assoc()['unread_count'];
 
 <?php include '../components/admin_header.php'; ?>
 
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="manage_gallery.php">🖼 Manage Gallery</a></li>
-        <li><a href="messages.php" class="active">📬 Messages</a></li>
-        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
-        <li><a href="settings.php">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <main class="main-content">
     <div class="message-card">
         <div class="message-header">
@@ -165,12 +154,6 @@ $unread = $countResult->fetch_assoc()['unread_count'];
         </div>
     </div>
 </main>
-
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 
 </body>
 </html>

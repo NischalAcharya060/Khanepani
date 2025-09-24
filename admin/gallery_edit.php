@@ -138,17 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php include '../components/admin_header.php'; ?>
 
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="manage_gallery.php" class="active">🖼 Manage Gallery</a></li>
-        <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="manage_admin.php">👥 Manage Admin</a></li>
-        <li><a href="settings.php">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <main class="main-content">
     <form method="POST" enctype="multipart/form-data" class="edit-form">
         <h2>✏ Edit Image</h2>
@@ -183,12 +172,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit" class="btn-submit">💾 Save Changes</button>
     </form>
 </main>
-
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 
 </body>
 </html>

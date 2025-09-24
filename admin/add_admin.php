@@ -157,18 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <?php include '../components/admin_header.php'; ?>
 
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <ul>
-        <li><a href="dashboard.php">🏠 Dashboard</a></li>
-        <li><a href="manage_notices.php">📢 Manage Notices</a></li>
-        <li><a href="manage_gallery.php">🖼 Manage Gallery</a></li>
-        <li><a href="messages.php">📬 Messages</a></li>
-        <li><a href="manage_admin.php" class="active">👥 Manage Admin</a></li>
-        <li><a href="settings.php">⚙ Settings</a></li>
-    </ul>
-</aside>
-
 <main class="main-content">
     <h2>➕ Add New Admin</h2>
     <p class="subtitle">Create a new admin account to manage the dashboard.</p>
@@ -200,13 +188,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit" class="btn">Add Admin</button>
     </form>
 </main>
-
-<script>
-    // Sidebar toggle for mobile view
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-</script>
 
 </body>
 </html>
