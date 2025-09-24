@@ -6,6 +6,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include '../config/db.php';
 
+// Language handling
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en'; // default
+}
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+include '../lang/' . $_SESSION['lang'] . '.php';
+
 // Get current filename for active sidebar
 $current_page = basename($_SERVER['PHP_SELF']);
 
@@ -28,9 +37,16 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
 <header class="admin-header">
     <div class="logo">
         <img src="../assets/images/logo.jpg" alt="Logo">
-        <h1>सलकपुर खानेपानी</h1>
+        <h1><?= $lang['logo'] ?></h1>
+
     </div>
     <div class="user-info">
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+            <a href="?lang=en" class="<?= $_SESSION['lang']=='en'?'active-lang':'' ?>">🇬🇧 EN</a> |
+            <a href="?lang=np" class="<?= $_SESSION['lang']=='np'?'active-lang':'' ?>">🇳🇵 NP</a>
+        </div>
+
         <!-- Notification Bell -->
         <div class="notification" id="notifBell">
             🔔
@@ -40,7 +56,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
         </div>
 
         <span>👤 <?= htmlspecialchars($username) ?></span>
-        <a href="../admin/logout.php" class="logout-btn">Logout</a>
+        <a href="../admin/logout.php" class="logout-btn"><?= $lang['logout'] ?></a>
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     </div>
 </header>
@@ -49,7 +65,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
 <div id="notifModal" class="notif-modal">
     <div class="notif-modal-content">
         <span class="close-btn" id="closeNotif">&times;</span>
-        <h3>Unread Messages</h3>
+        <h3><?= $lang['unread_messages'] ?? 'Unread Messages' ?></h3>
         <?php if ($unread_count > 0): ?>
             <ul>
                 <?php foreach ($unread_messages as $msg): ?>
@@ -61,7 +77,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p>No unread messages.</p>
+            <p><?= $lang['no_unread'] ?? 'No unread messages.' ?></p>
         <?php endif; ?>
     </div>
 </div>
@@ -73,12 +89,12 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
         <button class="collapse-toggle" onclick="toggleSidebarCollapse()">⮜</button>
     </div>
     <ul>
-        <li><a href="../admin/dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">🏠 <span class="link-text">Dashboard</span></a></li>
-        <li><a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">📢 <span class="link-text">Manage Notices</span></a></li>
-        <li><a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">🖼 <span class="link-text">Manage Gallery</span></a></li>
-        <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text">Messages</span></a></li>
-        <li><a href="../admin/manage_admin.php" class="<?= $current_page == 'manage_admin.php' ? 'active' : '' ?>">👥 <span class="link-text">Manage Admin</span></a></li>
-        <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text">Settings</span></a></li>
+        <li><a href="../admin/dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">🏠 <span class="link-text"><?= $lang['dashboard'] ?></span></a></li>
+        <li><a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">📢 <span class="link-text"><?= $lang['manage_notices'] ?></span></a></li>
+        <li><a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">🖼 <span class="link-text"><?= $lang['manage_gallery'] ?></span></a></li>
+        <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
+        <li><a href="../admin/manage_admin.php" class="<?= $current_page == 'manage_admin.php' ? 'active' : '' ?>">👥 <span class="link-text"><?= $lang['manage_admin'] ?></span></a></li>
+        <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
     </ul>
 </aside>
 
@@ -369,16 +385,6 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
         to { opacity: 1; }
     }
 
-    @keyframes sidebarBlink {
-        0%, 100% { box-shadow: 0 0 10px rgba(255, 102, 0, 0.8); }
-        50% { box-shadow: 0 0 25px rgba(255, 102, 0, 1); }
-    }
-
-    .sidebar.blink {
-        animation: sidebarBlink 1s ease-in-out 2;
-    }
-
-
     /* ================================
        RESPONSIVE
     ================================ */
@@ -386,6 +392,24 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
         .menu-toggle { display: block; }
         .sidebar { transform: translateX(-100%); }
         .sidebar.active { transform: translateX(0); }
+    }
+
+    /* ===== Language Switcher ===== */
+    .lang-switcher {
+        margin-right: 15px;
+        font-weight: 600;
+    }
+    .lang-switcher a {
+        color: white;
+        text-decoration: none;
+        margin: 0 3px;
+        padding: 4px 6px;
+        border-radius: 4px;
+        transition: background 0.3s;
+    }
+    .lang-switcher a:hover,
+    .lang-switcher a.active-lang {
+        background: rgba(255,255,255,0.2);
     }
 </style>
 

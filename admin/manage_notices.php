@@ -8,6 +8,18 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
+// Language handling
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en'; // default
+}
+if (isset($_GET['lang'])) {
+    $allowed_langs = ['en','np'];
+    if (in_array($_GET['lang'], $allowed_langs)) {
+        $_SESSION['lang'] = $_GET['lang'];
+    }
+}
+include '../lang/' . $_SESSION['lang'] . '.php';
+
 // Handle deletion
 if (isset($_GET['delete'])) {
     $id = intval($_GET['delete']);
@@ -34,41 +46,20 @@ $total_pages = ceil($total_row['total'] / $limit);
 $username = $_SESSION['username'];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $_SESSION['lang'] ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Notices - सलकपुर खानेपानी</title>
+    <title><?= $lang['manage_notices'] ?> - सलकपुर खानेपानी</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        .notice-table th, .notice-table td {
-            padding: 12px 8px;
-        }
-        .notice-table tr:hover {
-            background: #f1f1f1;
-        }
-        .pagination {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .pagination a {
-            margin: 0 5px;
-            text-decoration: none;
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            color: #0056d6;
-        }
-        .pagination a.active {
-            background-color: #0056d6;
-            color: white;
-            border-color: #0056d6;
-        }
-        .pagination a:hover {
-            background-color: #0056d6;
-            color: white;
-        }
+        .notice-table th, .notice-table td { padding: 12px 8px; }
+        .notice-table tr:hover { background: #f1f1f1; }
+        .pagination { text-align: center; margin-top: 20px; }
+        .pagination a { margin: 0 5px; text-decoration: none; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; color: #0056d6; }
+        .pagination a.active { background-color: #0056d6; color: white; border-color: #0056d6; }
+        .pagination a:hover { background-color: #0056d6; color: white; }
     </style>
 </head>
 <body>
@@ -76,18 +67,18 @@ $username = $_SESSION['username'];
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
-    <h2>📢 Manage Notices</h2>
-    <p class="subtitle">Add, edit, view, or remove notices quickly and efficiently.</p>
+    <h2>📢 <?= $lang['manage_notices'] ?></h2>
+    <p class="subtitle"><?= $lang['manage_notices_subtitle'] ?? 'Add, edit, view, or remove notices quickly and efficiently.' ?></p>
 
-    <a href="add_notice.php" class="btn">➕ Add New Notice</a>
+    <a href="add_notice.php" class="btn">➕ <?= $lang['add_new_notice'] ?? 'Add New Notice' ?></a>
 
     <table class="notice-table">
         <thead>
         <tr>
-            <th>S.N.</th>
-            <th>Title</th>
-            <th>Date</th>
-            <th>Actions</th>
+            <th><?= $lang['sn'] ?? 'S.N.' ?></th>
+            <th><?= $lang['title'] ?? 'Title' ?></th>
+            <th><?= $lang['date'] ?? 'Date' ?></th>
+            <th><?= $lang['actions'] ?? 'Actions' ?></th>
         </tr>
         </thead>
         <tbody>
@@ -99,14 +90,14 @@ $username = $_SESSION['username'];
                     <td><?= htmlspecialchars($notice['title']) ?></td>
                     <td><?= date("d M Y", strtotime($notice['created_at'])) ?></td>
                     <td>
-                        <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ Edit</a>
-                        <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger" onclick="return confirm('Are you sure you want to delete this notice?');">🗑 Delete</a>
+                        <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ <?= $lang['edit'] ?? 'Edit' ?></a>
+                        <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger" onclick="return confirm('<?= $lang['delete_confirm'] ?? 'Are you sure you want to delete this notice?' ?>');">🗑 <?= $lang['delete'] ?? 'Delete' ?></a>
                     </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="4" style="text-align:center; padding:20px;">No notices found.</td>
+                <td colspan="4" style="text-align:center; padding:20px;"><?= $lang['no_notices'] ?? 'No notices found.' ?></td>
             </tr>
         <?php endif; ?>
         </tbody>
@@ -115,7 +106,7 @@ $username = $_SESSION['username'];
     <!-- Pagination -->
     <div class="pagination">
         <?php if($page > 1): ?>
-            <a href="?page=<?= $page-1 ?>">« Previous</a>
+            <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?? '« Previous' ?></a>
         <?php endif; ?>
 
         <?php
@@ -126,7 +117,7 @@ $username = $_SESSION['username'];
         <?php endfor; ?>
 
         <?php if($page < $total_pages): ?>
-            <a href="?page=<?= $page+1 ?>">Next »</a>
+            <a href="?page=<?= $page+1 ?>"><?= $lang['next'] ?? 'Next »' ?></a>
         <?php endif; ?>
     </div>
 </main>
