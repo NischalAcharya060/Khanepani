@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/db.php';
+include '../config/lang.php';
 
 // ✅ Restrict access
 if (!isset($_SESSION['admin'])) {
@@ -52,7 +53,7 @@ $hasImages = mysqli_num_rows($result) > 0;
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Gallery - सलकपुर खानेपानी</title>
+    <title><?= $lang['manage_gallery'] ?? "Manage Gallery" ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <style>
@@ -159,10 +160,10 @@ $hasImages = mysqli_num_rows($result) > 0;
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
-    <h2>🖼 Manage Gallery</h2>
-    <a href="gallery_add.php" class="add-btn">➕ Add New Image</a>
+    <h2>🖼 <?= $lang['manage_gallery'] ?? "Manage Gallery" ?></h2>
+    <a href="gallery_add.php" class="add-btn">➕ <?= $lang['add_image'] ?? "Add New Image" ?></a>
     <div style="clear: both;"></div>
-    <p class="subtitle">View, edit, or delete uploaded images.</p>
+    <p class="subtitle"><?= $lang['subtitle_gallery'] ?? "View, edit, or delete uploaded images." ?></p>
 
     <?php if(isset($_SESSION['msg'])): ?>
         <div class="message success"><?= $_SESSION['msg']; unset($_SESSION['msg']); ?></div>
@@ -172,12 +173,12 @@ $hasImages = mysqli_num_rows($result) > 0;
         <table>
             <thead>
             <tr>
-                <th>S.N.</th>
-                <th>🖼 Image</th>
-                <th>📄 Title</th>
-                <th>📂 Album</th>
-                <th>📅 Uploaded At</th>
-                <th>⚡ Action</th>
+                <th><?= $lang['sn'] ?? "S.N." ?></th>
+                <th><?= $lang['image'] ?? "Image" ?></th>
+                <th><?= $lang['title'] ?? "Title" ?></th>
+                <th><?= $lang['album'] ?? "Album" ?></th>
+                <th><?= $lang['uploaded_at'] ?? "Uploaded At" ?></th>
+                <th><?= $lang['actions'] ?? "Actions" ?></th>
             </tr>
             </thead>
             <tbody>
@@ -186,13 +187,13 @@ $hasImages = mysqli_num_rows($result) > 0;
                 <tr>
                     <td><?= $sn++ ?></td>
                     <td><img src="../assets/uploads/<?= htmlspecialchars($row['image']) ?>" class="gallery-img"></td>
-                    <td><?= $row['title'] ? htmlspecialchars($row['title']) : '<em>No Title</em>' ?></td>
-                    <td><?= $row['album_name'] ? htmlspecialchars($row['album_name']) : '<em>Uncategorized</em>' ?></td>
+                    <td><?= $row['title'] ? htmlspecialchars($row['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
+                    <td><?= $row['album_name'] ? htmlspecialchars($row['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
                     <td><?= date("M d, Y h:i A", strtotime($row['created_at'])) ?></td>
                     <td>
-                        <a href="gallery_edit.php?id=<?= $row['id'] ?>" class="btn btn-edit">✏ Edit</a>
+                        <a href="gallery_edit.php?id=<?= $row['id'] ?>" class="btn btn-edit">✏ <?= $lang['edit'] ?? "Edit" ?></a>
                         <a href="manage_gallery.php?delete=<?= $row['id'] ?>" class="btn btn-delete"
-                           onclick="return confirm('⚠️ Are you sure you want to delete this image?')">🗑️ Delete</a>
+                           onclick="return confirm('<?= $lang['delete_confirm_image'] ?? "Are you sure you want to delete this image?" ?>')">🗑 <?= $lang['delete'] ?? "Delete" ?></a>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -202,7 +203,7 @@ $hasImages = mysqli_num_rows($result) > 0;
         <!-- Pagination -->
         <div class="pagination">
             <?php if($page > 1): ?>
-                <a href="?page=<?= $page-1 ?>">« Previous</a>
+                <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?? "« Previous" ?></a>
             <?php endif; ?>
 
             <?php
@@ -213,16 +214,14 @@ $hasImages = mysqli_num_rows($result) > 0;
             <?php endfor; ?>
 
             <?php if($page < $total_pages): ?>
-                <a href="?page=<?= $page+1 ?>">Next »</a>
+                <a href="?page=<?= $page+1 ?>"><?= $lang['next'] ?? "Next »" ?></a>
             <?php endif; ?>
         </div>
-
     <?php else: ?>
         <div class="message warning" style="text-align:center; font-size:15px;">
-            ⚠ No images in gallery yet.
+            ⚠ <?= $lang['no_images'] ?? "No images in gallery yet." ?>
         </div>
     <?php endif; ?>
 </main>
-
 </body>
 </html>

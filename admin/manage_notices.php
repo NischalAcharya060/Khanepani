@@ -70,7 +70,7 @@ $username = $_SESSION['username'];
     <h2>📢 <?= $lang['manage_notices'] ?></h2>
     <p class="subtitle"><?= $lang['manage_notices_subtitle'] ?? 'Add, edit, view, or remove notices quickly and efficiently.' ?></p>
 
-    <a href="add_notice.php" class="btn">➕ <?= $lang['add_new_notice'] ?? 'Add New Notice' ?></a>
+    <a href="add_notice.php" class="btn">➕ <?= $lang['add_notice'] ?? 'Add New Notice' ?></a>
 
     <table class="notice-table">
         <thead>

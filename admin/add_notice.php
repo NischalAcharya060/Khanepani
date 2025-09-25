@@ -8,6 +8,15 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
+// Include language
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en';
+}
+if (isset($_GET['lang'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+include "../lang/" . $_SESSION['lang'] . ".php";
+
 $username = $_SESSION['username'];
 
 // Handle form submission
@@ -27,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (move_uploaded_file($_FILES['file']['tmp_name'], $target_file)) {
             $file_path = $file_name;
         } else {
-            $error = "Failed to upload file.";
+            $error = $lang['file_upload_failed'] ?? "Failed to upload file.";
         }
     }
 
@@ -39,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: manage_notices.php");
         exit();
     } else {
-        $error = "Please fill in all required fields!";
+        $error = $lang['fill_required'] ?? "Please fill in all required fields!";
     }
 }
 ?>
@@ -47,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Notice - Admin - सलकपुर खानेपानी</title>
+    <title><?= $lang['add_notice'] ?> - Admin - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
@@ -56,23 +65,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
-    <h2>➕ Add New Notice</h2>
+    <h2>➕ <?= $lang['add_notice'] ?></h2>
     <?php if(isset($error)): ?>
         <p class="error"><?= $error ?></p>
     <?php endif; ?>
     <form method="POST" class="notice-form" enctype="multipart/form-data">
-        <label for="title">Title:</label>
+        <label for="title"><?= $lang['notice_title'] ?>:</label>
         <input type="text" name="title" id="title" required>
 
-        <label for="content">Content:</label>
+        <label for="content"><?= $lang['notice_description'] ?>:</label>
         <textarea name="content" id="content" rows="8" required></textarea>
 
-        <label for="file">Upload Image or File (optional):</label>
+        <label for="file"><?= $lang['notice_file_optional'] ?? 'Upload Image or File (optional):' ?></label>
         <input type="file" name="file" id="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx">
 
         <div style="margin-top: 15px;">
-            <button type="submit" class="btn">Add Notice</button>
-            <a href="manage_notices.php" class="btn" style="background:#888;">Back</a>
+            <button type="submit" class="btn"><?= $lang['add_notice'] ?></button>
+            <a href="manage_notices.php" class="btn" style="background:#888;"><?= $lang['back'] ?? 'Back' ?></a>
         </div>
     </form>
 </main>

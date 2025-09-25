@@ -6,6 +6,7 @@ if (!isset($_SESSION['admin'])) {
 }
 
 include '../config/db.php';
+include '../config/lang.php';
 $username = $_SESSION['username'];
 
 // Handle form submission
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - Add Admin</title>
+    <title><?= $lang['manage_admin'] ?? 'Add Admin' ?> - Dashboard</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <style>
@@ -158,36 +159,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
-    <h2>➕ Add New Admin</h2>
-    <p class="subtitle">Create a new admin account to manage the dashboard.</p>
+    <h2>➕ <?= $lang['add'] ?? 'Add' ?> <?= $lang['manage_admin'] ?? 'Admin' ?></h2>
+    <p class="subtitle"><?= $lang['subtitle_add_admin'] ?? 'Create a new admin account to manage the dashboard.' ?></p>
 
     <?php if(isset($success)) echo "<div class='message success'>$success</div>"; ?>
     <?php if(isset($error)) echo "<div class='message error'>$error</div>"; ?>
 
     <form method="POST" class="form">
         <div class="input-group">
-            <label>Username <span class="required">*</span></label>
-            <input type="text" name="username" required placeholder="Enter username">
+            <label><?= $lang['username'] ?? 'Username' ?> <span class="required">*</span></label>
+            <input type="text" name="username" required placeholder="<?= $lang['username_placeholder'] ?? 'Enter username' ?>">
         </div>
 
         <div class="input-group">
-            <label>Email (optional)</label>
-            <input type="email" name="email" placeholder="Enter email">
+            <label><?= $lang['email'] ?? 'Email' ?> (<?= $lang['optional'] ?? 'optional' ?>)</label>
+            <input type="email" name="email" placeholder="<?= $lang['email_placeholder'] ?? 'Enter email' ?>">
         </div>
 
         <div class="input-group">
-            <label>Password <span class="required">*</span></label>
-            <input type="password" name="password" required placeholder="Enter password">
+            <label><?= $lang['password'] ?? 'Password' ?> <span class="required">*</span></label>
+            <input type="password" name="password" required placeholder="<?= $lang['password_placeholder'] ?? 'Enter password' ?>">
         </div>
 
         <div class="input-group">
-            <label>Confirm Password <span class="required">*</span></label>
-            <input type="password" name="confirm_password" required placeholder="Confirm password">
+            <label><?= $lang['confirm_password'] ?? 'Confirm Password' ?> <span class="required">*</span></label>
+            <input type="password" name="confirm_password" required placeholder="<?= $lang['confirm_password_placeholder'] ?? 'Confirm password' ?>">
         </div>
 
-        <button type="submit" class="btn">Add Admin</button>
+        <button type="submit" class="btn"><?= $lang['add'] ?? 'Add' ?> <?= $lang['manage_admin'] ?? 'Admin' ?></button>
     </form>
 </main>
-
 </body>
 </html>

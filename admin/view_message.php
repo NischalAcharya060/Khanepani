@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/db.php';
+include '../config/lang.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['admin'])) {
@@ -43,7 +44,7 @@ $unread = $countResult->fetch_assoc()['unread_count'];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>View Message - सलकपुर खानेपानी</title>
+    <title><?= $lang['view'] ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -124,32 +125,32 @@ $unread = $countResult->fetch_assoc()['unread_count'];
 <main class="main-content">
     <div class="message-card">
         <div class="message-header">
-            <h2>📬 Message Details</h2>
-            <a href="messages.php">« Back</a>
+            <h2>📬 <?= $lang['view'] ?> <?= $lang['message'] ?></h2>
+            <a href="messages.php">« <?= $lang['back'] ?></a>
         </div>
 
         <div class="message-field">
-            <span class="message-label">Name</span>
+            <span class="message-label"><?= $lang['name'] ?></span>
             <div class="message-value"><?= htmlspecialchars($message['name']) ?></div>
         </div>
 
         <div class="message-field">
-            <span class="message-label">Email</span>
+            <span class="message-label"><?= $lang['email'] ?></span>
             <div class="message-value email"><?= htmlspecialchars($message['email']) ?></div>
         </div>
 
         <div class="message-field">
-            <span class="message-label">Subject</span>
+            <span class="message-label"><?= $lang['subject'] ?></span>
             <div class="message-value"><?= htmlspecialchars($message['subject']) ?></div>
         </div>
 
         <div class="message-field">
-            <span class="message-label">Message</span>
+            <span class="message-label"><?= $lang['message'] ?></span>
             <div class="message-value"><?= nl2br(htmlspecialchars($message['message'])) ?></div>
         </div>
 
         <div class="message-field">
-            <span class="message-label">Sent At</span>
+            <span class="message-label"><?= $lang['date'] ?></span>
             <div class="message-value"><?= date("d M Y, h:i A", strtotime($message['created_at'])) ?></div>
         </div>
     </div>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/db.php';
+include '../config/lang.php';
 
 // Restrict access
 if (!isset($_SESSION['admin'])) {
@@ -54,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Image - सलकपुर खानेपानी</title>
+    <title><?= $lang['edit_image'] ?? "Edit Image" ?> - <?= $lang['logo'] ?? "Salakpur KhanePani" ?></title>
     <link rel="stylesheet" href="../css/admin.css">
     <style>
         /* Main Content */
@@ -140,17 +141,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <main class="main-content">
     <form method="POST" enctype="multipart/form-data" class="edit-form">
-        <h2>✏ Edit Image</h2>
+        <h2>✏ <?= $lang['edit_image'] ?? "Edit Image" ?></h2>
+
+        <?php if(isset($error)): ?>
+            <p class="error"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
         <div class="input-group">
-            <label>📄 Title</label>
+            <label>📄 <?= $lang['image_title'] ?? "Title" ?></label>
             <input type="text" name="title" value="<?= htmlspecialchars($image['title']) ?>" required>
         </div>
 
         <div class="input-group">
-            <label>📂 Album</label>
+            <label>📂 <?= $lang['image_album'] ?? "Album" ?></label>
             <select name="album_id">
-                <option value="0">Uncategorized</option>
+                <option value="0"><?= $lang['uncategorized'] ?? "Uncategorized" ?></option>
                 <?php while($a = mysqli_fetch_assoc($albums)): ?>
                     <option value="<?= $a['id'] ?>" <?= $image['album_id'] == $a['id'] ? 'selected' : '' ?>>
                         <?= htmlspecialchars($a['name']) ?>
@@ -160,16 +165,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="current-img">
-            <label>Current Image:</label><br>
+            <label><?= $lang['view'] ?? "Current Image" ?>:</label><br>
             <img src="../assets/uploads/<?= htmlspecialchars($image['image']) ?>" alt="Current Image">
         </div>
 
         <div class="input-group">
-            <label>Replace Image</label>
+            <label><?= $lang['replace_file'] ?? "Replace Image" ?></label>
             <input type="file" name="image" accept="image/*">
         </div>
 
-        <button type="submit" class="btn-submit">💾 Save Changes</button>
+        <button type="submit" class="btn-submit">💾 <?= $lang['save'] ?? "Save Changes" ?></button>
     </form>
 </main>
 

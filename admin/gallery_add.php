@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/db.php';
+include '../config/lang.php';
 
 // ✅ Restrict access (only logged-in admin)
 if (!isset($_SESSION['admin'])) {
@@ -70,7 +71,7 @@ $albums = mysqli_query($conn, "SELECT * FROM albums ORDER BY created_at DESC");
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Gallery Image - सलकपुर खानेपानी</title>
+    <title><?= $lang['add_gallery_image'] ?? "Add Gallery Image" ?> - <?= $lang['logo'] ?? "Salakpur KhanePani" ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -81,25 +82,25 @@ $albums = mysqli_query($conn, "SELECT * FROM albums ORDER BY created_at DESC");
 
 <!-- Main Content -->
 <main class="main-content">
-    <h2>➕ Add Image</h2>
-    <p class="subtitle">Create albums and upload photos for different occasions.</p>
+    <h2>➕ <?= $lang['add_image'] ?? "Add Image" ?></h2>
+    <p class="subtitle"><?= $lang['gallery_subtitle'] ?? "Create albums and upload photos for different occasions." ?></p>
 
     <?php if (isset($success)) echo "<p style='color:green;'>$success</p>"; ?>
     <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
 
     <!-- Album Create Form -->
     <section>
-        <h3>📂 Create New Album</h3>
+        <h3>📂 <?= $lang['create_album'] ?? "Create New Album" ?></h3>
         <form method="POST" class="gallery-form">
             <div class="input-group">
-                <label>Album Name</label>
-                <input type="text" name="album_name" placeholder="Enter album name" required>
+                <label><?= $lang['album_name'] ?? "Album Name" ?></label>
+                <input type="text" name="album_name" placeholder="<?= $lang['album_name_placeholder'] ?? "Enter album name" ?>" required>
             </div>
             <div class="input-group">
-                <label>Description (optional)</label>
-                <textarea name="album_description" placeholder="Album description"></textarea>
+                <label><?= $lang['album_description'] ?? "Description (optional)" ?></label>
+                <textarea name="album_description" placeholder="<?= $lang['album_description_placeholder'] ?? "Album description" ?>"></textarea>
             </div>
-            <button type="submit" name="create_album" class="btn-submit">➕ Create Album</button>
+            <button type="submit" name="create_album" class="btn-submit">➕ <?= $lang['create_album_btn'] ?? "Create Album" ?></button>
         </form>
     </section>
 
@@ -107,12 +108,12 @@ $albums = mysqli_query($conn, "SELECT * FROM albums ORDER BY created_at DESC");
 
     <!-- Image Upload Form -->
     <section>
-        <h3>🖼 Add New Image to Album</h3>
+        <h3>🖼 <?= $lang['upload_new_image'] ?? "Add New Image to Album" ?></h3>
         <form method="POST" enctype="multipart/form-data" class="gallery-form">
             <div class="input-group">
-                <label>Select Album</label>
+                <label><?= $lang['select_album'] ?? "Select Album" ?></label>
                 <select name="album_id">
-                    <option value="0">-- No Album (Save in Unsorted) --</option>
+                    <option value="0">-- <?= $lang['no_album'] ?? "No Album (Save in Unsorted)" ?> --</option>
                     <?php while($row = mysqli_fetch_assoc($albums)) { ?>
                         <option value="<?= $row['id'] ?>"><?= htmlspecialchars($row['name']) ?></option>
                     <?php } ?>
@@ -120,22 +121,21 @@ $albums = mysqli_query($conn, "SELECT * FROM albums ORDER BY created_at DESC");
             </div>
 
             <div class="input-group">
-                <label>Image Title (optional)</label>
-                <input type="text" name="title" placeholder="Enter image title">
+                <label><?= $lang['image_title_optional'] ?? "Image Title (optional)" ?></label>
+                <input type="text" name="title" placeholder="<?= $lang['image_title_placeholder'] ?? "Enter image title" ?>">
             </div>
 
             <div class="input-group">
-                <label>Select Image</label>
+                <label><?= $lang['select_image'] ?? "Select Image" ?></label>
                 <input type="file" name="image" id="imageInput" accept="image/*" required>
             </div>
 
-            <!-- Image Preview -->
             <div class="input-group" id="previewContainer" style="display:none;">
-                <label>Preview:</label>
-                <img id="imagePreview" src="" alt="Image Preview" style="max-width:100%; border-radius:8px; margin-top:10px;">
+                <label><?= $lang['preview'] ?? "Preview" ?>:</label>
+                <img id="imagePreview" src="" alt="<?= $lang['preview'] ?? "Preview" ?>" style="max-width:100%; border-radius:8px; margin-top:10px;">
             </div>
 
-            <button type="submit" class="btn-submit" name="upload_image">📤 Upload</button>
+            <button type="submit" class="btn-submit" name="upload_image">📤 <?= $lang['upload_image_btn'] ?? "Upload" ?></button>
         </form>
     </section>
 </main>

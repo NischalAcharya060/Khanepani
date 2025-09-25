@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/db.php';
+include '../config/lang.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin'])) {
@@ -53,7 +54,7 @@ if (isset($_GET['unban'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Admin - सलकपुर खानेपानी</title>
+    <title><?= $lang['manage_admin'] ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <style>
@@ -143,10 +144,10 @@ if (isset($_GET['unban'])) {
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
-    <h2>👥 Manage Admins</h2>
-    <a href="add_admin.php" class="add-btn">➕ Add Admin</a>
+    <h2>👥 <?= $lang['manage_admin'] ?></h2>
+    <a href="add_admin.php" class="add-btn">➕ <?= $lang['add'] ?> <?= $lang['manage_admin'] ?></a>
     <div style="clear: both;"></div>
-    <p class="subtitle">Ban/unban admin accounts (Master Admin excluded).</p>
+    <p class="subtitle"><?= $lang['subtitle'] ?? 'Ban/unban admin accounts (Master Admin excluded).' ?></p>
 
     <?php if(isset($_SESSION['msg'])): ?>
         <div class="message success"><?= $_SESSION['msg']; unset($_SESSION['msg']); ?></div>
@@ -156,13 +157,13 @@ if (isset($_GET['unban'])) {
         <table>
             <thead>
             <tr>
-                <th>S.N.</th>
-                <th>👤 Username</th>
-                <th>📧 Email</th>
-                <th>📅 Created At</th>
-                <th>Status</th>
-                <th>🕒 Last Login</th>
-                <th>⚡ Action</th>
+                <th><?= $lang['sn'] ?></th>
+                <th>👤 <?= $lang['username'] ?? 'Username' ?></th>
+                <th>📧 <?= $lang['email'] ?></th>
+                <th>📅 <?= $lang['date'] ?? 'Created At' ?></th>
+                <th><?= $lang['status'] ?></th>
+                <th>🕒 <?= $lang['last_login'] ?? 'Last Login' ?></th>
+                <th>⚡ <?= $lang['actions'] ?></th>
             </tr>
             </thead>
             <tbody>
@@ -175,9 +176,9 @@ if (isset($_GET['unban'])) {
                     <td><?= date("M d, Y h:i A", strtotime($row['created_at'])) ?></td>
                     <td>
                         <?php if($row['status'] === 'active'): ?>
-                            <span class="badge badge-success">✅ Active</span>
+                            <span class="badge badge-success">✅ <?= $lang['active'] ?? 'Active' ?></span>
                         <?php else: ?>
-                            <span class="badge badge-danger">🚫 Banned</span>
+                            <span class="badge badge-danger">🚫 <?= $lang['banned'] ?? 'Banned' ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -186,10 +187,10 @@ if (isset($_GET['unban'])) {
                     <td>
                         <?php if($row['status'] === 'active'): ?>
                             <a href="manage_admin.php?ban=<?= $row['id'] ?>" class="btn-ban"
-                               title="Ban Admin" onclick="return confirm('Ban this admin?')">🚫 Ban</a>
+                               title="<?= $lang['ban'] ?? 'Ban Admin' ?>" onclick="return confirm('Ban this admin?')">🚫 <?= $lang['ban'] ?? 'Ban' ?></a>
                         <?php else: ?>
                             <a href="manage_admin.php?unban=<?= $row['id'] ?>" class="btn-unban"
-                               title="Unban Admin" onclick="return confirm('Unban this admin?')">✅ Unban</a>
+                               title="<?= $lang['unban'] ?? 'Unban Admin' ?>" onclick="return confirm('Unban this admin?')">✅ <?= $lang['unban'] ?? 'Unban' ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -197,25 +198,13 @@ if (isset($_GET['unban'])) {
             </tbody>
         </table>
     <?php else: ?>
-        <div style="
-        text-align: center;
-        background: #fff3cd;
-        color: #856404;
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid #ffeeba;
-        font-size: 16px;
-        margin-top: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    ">
+        <div style="text-align: center; background: #fff3cd; color: #856404; padding: 20px; border-radius: 10px; border: 1px solid #ffeeba; font-size: 16px; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
             <span style="font-size: 24px;">⚠</span>
-            <span>No admins available.</span>
+            <span><?= $lang['no_admins'] ?? 'No admins available.' ?></span>
         </div>
     <?php endif; ?>
 </main>
+
 
 </body>
 </html>

@@ -43,14 +43,20 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
     <div class="user-info">
         <!-- Language Switcher -->
         <div class="lang-switcher">
-            <a href="?lang=en" class="<?= $_SESSION['lang']=='en'?'active-lang':'' ?>">🇬🇧 EN</a> |
-            <a href="?lang=np" class="<?= $_SESSION['lang']=='np'?'active-lang':'' ?>">🇳🇵 NP</a>
+            <a href="?lang=en" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'en' ? 'active-lang' : '' ?>" title="English">
+                <img src="../assets/images/gb.webp" alt="EN" class="flag-icon">
+                <span>EN</span>
+            </a>
+            <a href="?lang=np" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'np' ? 'active-lang' : '' ?>" title="नेपाली">
+                <img src="../assets/images/np.png" alt="NP" class="flag-icon">
+                <span>NP</span>
+            </a>
         </div>
 
         <!-- Notification Bell -->
         <div class="notification" id="notifBell">
             🔔
-            <?php if ($unread_count > 0): ?>
+            <?php if (!empty($unread_count) && $unread_count > 0): ?>
                 <span class="notif-badge"><?= $unread_count ?></span>
             <?php endif; ?>
         </div>
@@ -139,6 +145,36 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
         align-items: center;
         gap: 18px;
         font-weight: 500;
+    }
+
+    .lang-switcher {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px;
+    }
+
+    .lang-link {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px; /* pill shape */
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .flag-icon {
+        width: 22px;
+        height: 14px;
+        border-radius: 3px;
+        object-fit: cover;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
 
     /* Logout button */

@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../config/db.php';
+include '../config/lang.php';
 
 // Redirect if not logged in
 if (!isset($_SESSION['admin'])) {
@@ -51,7 +52,7 @@ $username = $_SESSION['username'];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Messages - सलकपुर खानेपानी</title>
+    <title><?= $lang['messages'] ?> - सलकपुर खानेपानी</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -92,20 +93,20 @@ $username = $_SESSION['username'];
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
-    <h2>📬 Messages</h2>
-    <p class="subtitle">View messages sent from the contact form.</p>
+    <h2>📬 <?= $lang['messages'] ?></h2>
+    <p class="subtitle"><?= $lang['messages_subtitle'] ?? "View messages sent from the contact form." ?></p>
 
     <table class="notice-table">
         <thead>
         <tr>
-            <th>S.N.</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Subject</th>
-            <th>Message</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Actions</th>
+            <th><?= $lang['sn'] ?></th>
+            <th><?= $lang['name'] ?? "Name" ?></th>
+            <th><?= $lang['email'] ?? "Email" ?></th>
+            <th><?= $lang['subject'] ?? "Subject" ?></th>
+            <th><?= $lang['message'] ?? "Message" ?></th>
+            <th><?= $lang['status'] ?? "Status" ?></th>
+            <th><?= $lang['date'] ?? "Date" ?></th>
+            <th><?= $lang['actions'] ?></th>
         </tr>
         </thead>
         <tbody>
@@ -125,30 +126,34 @@ $username = $_SESSION['username'];
                             <form method="POST" style="display:inline;">
                                 <input type="hidden" name="toggle_id" value="<?= $msg['id'] ?>">
                                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                <button type="submit" class="btn small" style="background:green; color:white;">✔ Read</button>
+                                <button type="submit" class="btn small" style="background:green; color:white;">
+                                    <?= $lang['read'] ?? "✔ Read" ?>
+                                </button>
                             </form>
                         <?php else: ?>
                             <form method="POST" style="display:inline;">
                                 <input type="hidden" name="toggle_id" value="<?= $msg['id'] ?>">
                                 <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                <button type="submit" class="btn small" style="background:red; color:white;">✉ Unread</button>
+                                <button type="submit" class="btn small" style="background:red; color:white;">
+                                    <?= $lang['unread'] ?? "✉ Unread" ?>
+                                </button>
                             </form>
                         <?php endif; ?>
                     </td>
                     <td><?= date("d M Y, h:i A", strtotime($msg['created_at'])) ?></td>
                     <td>
-                        <a href="view_message.php?id=<?= $msg['id'] ?>" class="btn small">👁 View</a>
-                        <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this message?');">
+                        <a href="view_message.php?id=<?= $msg['id'] ?>" class="btn small"><?= $lang['view'] ?? "👁 View" ?></a>
+                        <form method="POST" style="display:inline;" onsubmit="return confirm('<?= $lang['delete_confirm_message'] ?? "Delete this message?" ?>');">
                             <input type="hidden" name="delete_id" value="<?= $msg['id'] ?>">
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                            <button type="submit" class="btn small danger">🗑 Delete</button>
+                            <button type="submit" class="btn small danger"><?= $lang['delete'] ?? "🗑 Delete" ?></button>
                         </form>
                     </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="7" style="text-align:center; padding:20px;">No messages found.</td>
+                <td colspan="8" style="text-align:center; padding:20px;"><?= $lang['no_messages'] ?? "No messages found." ?></td>
             </tr>
         <?php endif; ?>
         </tbody>
@@ -157,11 +162,10 @@ $username = $_SESSION['username'];
     <!-- Pagination -->
     <div class="pagination">
         <?php if($page > 1): ?>
-            <a href="?page=<?= $page-1 ?>">« Previous</a>
+            <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?></a>
         <?php endif; ?>
 
         <?php
-        // Show max 5 pages around current
         $start = max(1, $page - 2);
         $end = min($total_pages, $page + 2);
         for($p=$start; $p<=$end; $p++):
@@ -170,10 +174,11 @@ $username = $_SESSION['username'];
         <?php endfor; ?>
 
         <?php if($page < $total_pages): ?>
-            <a href="?page=<?= $page+1 ?>">Next »</a>
+            <a href="?page=<?= $page+1 ?>"><?= $lang['next'] ?></a>
         <?php endif; ?>
     </div>
 </main>
+
 
 </body>
 </html>
