@@ -14,7 +14,7 @@ $lang = [
     "unread_messages" => "Unread Messages",
     "no_unread" => "No unread messages.",
 
-    //Dashboard
+    // Dashboard
     'welcome_back' => 'Welcome back',
     'dashboard_subtitle' => 'Manage your office efficiently with quick access to tools below.',
     'notices_desc' => 'Create, publish, and manage office notices.',
@@ -47,6 +47,17 @@ $lang = [
     "no_notices" => "No notices available.",
     "fill_required" => "Please fill in all required fields!",
     "replace_file" => "Replace File/Image (optional)",
+
+    // New keys for homepage
+    "site_title" => "Khane Pani Office",
+    "hero_caption1" => "Our Water Supply Container",
+    "hero_caption2" => "Serving the Community",
+    "hero_caption3" => "Clean & Safe Drinking Water",
+    "latest_notices" => "Latest Notices",
+    "notice_label" => "Notice",
+    "read_more" => "Read more →",
+    "see_all_notices" => "See all notices →",
+    "user_no_notices" => "No latest notices at the moment.",
 
     // Gallery
     "gallery" => "Gallery",
@@ -127,7 +138,7 @@ $lang = [
     "file_upload_failed" => "Failed to upload file.",
     "allowed_types" => "Only JPG, JPEG, PNG, GIF allowed.",
 
-    //Add admin
+    // Add admin
     'username' => 'Username',
     'password' => 'Password',
     'password_mismatch' => 'Passwords do not match.',
@@ -140,4 +151,64 @@ $lang = [
     'confirm_password' => 'Confirm Password',
     'confirm_password_placeholder' => 'Confirm password',
     'optional' => 'optional',
+
+    // User side
+    "home" => "Home",
+    "user_notices" => "Notices",
+    "resources" => "Resources",
+    "user_gallery" => "Gallery",
+    "contact" => "Contact",
+    "search_placeholder" => "Search notices...",
+    "newest_first" => "Newest First",
+    "oldest_first" => "Oldest First",
+    "no_search_results" => "🔍 No notices match your search.",
+
+    'all_notices' => 'All Notices',
+    'notice_not_found' => 'Notice not found.',
+    'download' => 'Download File',
+    'view_file' => 'View File',
+    'image_preview' => 'Image Preview',
+    'pdf_preview' => 'PDF Preview',
+    'doc_preview' => 'Document Preview',
+    'preview_not_supported' => 'Preview not supported for this file type. Please download.',
+
+    //User Gallery
+    'photo_gallery' => 'Photo Gallery',
+    'images' => 'images',
+    'back_to_albums' => 'Back to Albums',
+    'no_images_in_album' => 'No images found in this album',
+    'user_album' => 'Album',
+
+    // Contact Us
+    'user_contact_us' => 'Contact Us',
+    'contact_details' => 'Contact Details',
+    'send_message' => 'Send Us a Message',
+    'select_message_type' => '-- Select Message Type --',
+    'general_message' => 'General Message',
+    'complaint' => 'Complaint',
+    'suggestion_feedback' => 'Suggestion / Feedback',
+    'user_subject' => 'Subject',
+    'your_name' => 'Your Name',
+    'your_email' => 'Your Email',
+    'complaint_ref' => 'Complaint Reference Number (if any)',
+    'complaint_details' => 'Complaint Details',
+    'your_message' => 'Your Message',
+    'additional_complaint_info' => 'Provide any additional information about your complaint',
+    'suggestion_feedback_placeholder' => 'Write your suggestion or feedback here',
+
+
+    // Footer / New keys
+    'privacy_policy' => 'Privacy Policy',
+    'quick_links' => 'QUICK LINKS',
+    'our_services' => 'Our Services',
+    'contact_us' => 'CONTACT US',
+    'office_name' => 'Salakpur KhanePani',
+    'office_address' => 'Salakpur, Nepal',
+    'phone' => 'Phone',
+    'fax' => 'Fax',
+    'user_email' => 'Email',
+    'zip_code' => 'Zip code',
+    'social_media' => 'SOCIAL MEDIA',
+    'our_location' => 'OUR LOCATION',
+    'all_rights' => 'All rights reserved.',
 ];

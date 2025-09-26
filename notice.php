@@ -1,6 +1,13 @@
 <?php
-include 'config/db.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+// Include database
+include 'config/db.php';
+include 'config/lang.php';
+?>
+<?php
 if(!isset($_GET['id'])) {
     header("Location: index.php");
     exit();
@@ -22,7 +29,7 @@ $notice = mysqli_fetch_assoc($result);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= $notice['title'] ?> - Salkpur Khanepani</title>
+    <title><?= htmlspecialchars($notice['title']) ?> - <?= $lang['logo'] ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -175,29 +182,29 @@ $notice = mysqli_fetch_assoc($result);
 <?php include 'components/header.php'; ?>
 
 <section class="notice-detail container">
-    <a href="notices.php" class="action-btn back-btn">⬅ Back to Home</a>
+    <a href="notices.php" class="action-btn back-btn">⬅ <?= $lang['back'] ?></a>
 
-    <h2><?= $notice['title'] ?></h2>
+    <h2><?= htmlspecialchars($notice['title']) ?></h2>
     <div class="notice-meta">
         <i class="fa-regular fa-calendar"></i> <?= date("F d, Y, h:i A", strtotime($notice['created_at'])) ?>
     </div>
 
     <?php if(!empty($notice['image'])): ?>
-        <img src="../assets/uploads/<?= $notice['image'] ?>" alt="<?= $notice['title'] ?>" class="clickable notice-image">
+        <img src="../assets/uploads/<?= $notice['image'] ?>" alt="<?= htmlspecialchars($notice['title']) ?>" class="clickable notice-image">
     <?php endif; ?>
 
-    <p><?= nl2br($notice['content']) ?></p>
+    <p><?= nl2br(htmlspecialchars($notice['content'])) ?></p>
 
     <?php if(!empty($notice['file'])):
         $filePath = "../assets/uploads/".$notice['file'];
         $fileExt = strtolower(pathinfo($notice['file'], PATHINFO_EXTENSION));
         ?>
         <div>
-            <a href="<?= $filePath ?>" download class="action-btn download-btn">⬇ Download File</a>
+            <a href="<?= $filePath ?>" download class="action-btn download-btn">⬇ <?= $lang['download'] ?></a>
             <button type="button"
                     class="action-btn preview-btn"
                     onclick="openPreview('<?= $filePath ?>', '<?= $fileExt ?>')">
-                👁 View File
+                👁 <?= $lang['view_file'] ?>
             </button>
         </div>
     <?php endif; ?>
@@ -228,29 +235,19 @@ $notice = mysqli_fetch_assoc($result);
             previewFrame.style.display = 'none';
             lightboxImg.style.display = 'block';
             lightboxImg.src = filePath;
-
-            lightboxImg.onload = function() {
-                const maxWidth = window.innerWidth * 0.9;
-                const maxHeight = window.innerHeight * 0.9;
-                let width = lightboxImg.naturalWidth;
-                let height = lightboxImg.naturalHeight;
-                const scale = Math.min(maxWidth/width, maxHeight/height, 1);
-                lightboxImg.style.width = width * scale + "px";
-                lightboxImg.style.height = height * scale + "px";
-            };
-            caption.innerText = "Image Preview";
+            caption.innerText = "<?= $lang['image_preview'] ?>";
         } else if(fileExt === 'pdf') {
             lightboxImg.style.display = 'none';
             previewFrame.style.display = 'block';
             previewFrame.src = filePath;
-            caption.innerText = "PDF Preview";
+            caption.innerText = "<?= $lang['pdf_preview'] ?>";
         } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(fileExt)) {
             lightboxImg.style.display = 'none';
             previewFrame.style.display = 'block';
             previewFrame.src = "https://docs.google.com/gview?url=" + encodeURIComponent(window.location.origin + "/" + filePath) + "&embedded=true";
-            caption.innerText = "Document Preview";
+            caption.innerText = "<?= $lang['doc_preview'] ?>";
         } else {
-            alert("Preview not supported for this file type. Please download.");
+            alert("<?= $lang['preview_not_supported'] ?>");
             lightbox.style.display = 'none';
         }
     }

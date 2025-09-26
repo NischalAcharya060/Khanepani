@@ -1,9 +1,33 @@
-<?php include 'config/db.php'; ?>
+<?php
+// Start session safely
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include database and language
+include 'config/db.php';
+
+// Language handling
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en';
+}
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','np'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Include language file
+$langFile = __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
+if (file_exists($langFile)) {
+    include $langFile;
+} else {
+    include __DIR__ . '/lang/en.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gallery - Khane Pani Office</title>
+    <title><?= $lang['photo_gallery'] ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -128,7 +152,7 @@
 <?php include 'components/header.php'; ?>
 
 <section class="gallery container">
-    <h2>Photo Gallery</h2>
+    <h2><?= $lang['photo_gallery'] ?></h2>
     <div class="gallery-grid">
         <?php
         // Fetch albums - latest first

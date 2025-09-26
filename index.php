@@ -1,4 +1,7 @@
-<?php include 'config/db.php'; ?>
+<?php
+include 'config/db.php';
+include 'config/lang.php';
+?>
 <?php
 function isMobile() {
     return preg_match('/(android|iphone|ipad|ipod|blackberry|windows phone|opera mini|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
@@ -13,7 +16,7 @@ if (isMobile()) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Khane Pani Office</title>
+    <title><?= $lang['site_title'] ?? 'Khane Pani Office' ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -163,15 +166,15 @@ if (isMobile()) {
     <div class="carousel">
         <div class="slide active">
             <img src="assets/images/hero2.jpg" alt="Kanepani building" class="clickable">
-            <div class="caption">Our Water Supply Container</div>
+            <div class="caption"><?= $lang['hero_caption1'] ?? 'Our Water Supply Container' ?></div>
         </div>
         <div class="slide">
             <img src="assets/images/hero.jpg" alt="Serving the Community" class="clickable">
-            <div class="caption">Serving the Community</div>
+            <div class="caption"><?= $lang['hero_caption2'] ?? 'Serving the Community' ?></div>
         </div>
         <div class="slide">
             <img src="assets/images/hero1.jpg" alt="Clean & Safe Drinking Water" class="clickable">
-            <div class="caption">Clean & Safe Drinking Water</div>
+            <div class="caption"><?= $lang['hero_caption3'] ?? 'Clean & Safe Drinking Water' ?></div>
         </div>
         <button class="carousel-btn prev">&#10094;</button>
         <button class="carousel-btn next">&#10095;</button>
@@ -187,7 +190,7 @@ if (isMobile()) {
 
 <!-- Latest Notices -->
 <section class="latest-notices container">
-    <h2>📢 Latest Notices</h2>
+    <h2>📢 <?= $lang['latest_notices'] ?? 'Latest Notices' ?></h2>
 
     <?php
     $sql = "SELECT * FROM notices ORDER BY created_at DESC LIMIT 6";
@@ -203,50 +206,44 @@ if (isMobile()) {
         $rightNotices = array_slice($notices, 3, 3);
         ?>
         <div class="notice-grid">
-            <!-- Left Column -->
             <div class="notice-column">
                 <?php foreach ($leftNotices as $row):
                     $date = date("d M Y", strtotime($row['created_at'])); ?>
                     <div class="notice-item">
                         <div class="notice-meta">
-                            <span class="notice-source">Notice</span>
+                            <span class="notice-source"><?= $lang['notice_label'] ?? 'Notice' ?></span>
                             <span class="notice-date"><?= $date ?></span>
                         </div>
                         <h3 class="notice-title">
                             <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
                         </h3>
-                        <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
+                        <a href="notice.php?id=<?= $row['id'] ?>" class="read-more"><?= $lang['read_more'] ?? 'Read more →' ?></a>
                     </div>
                 <?php endforeach; ?>
             </div>
-
-            <!-- Separator -->
             <div class="notice-separator"></div>
-
-            <!-- Right Column -->
             <div class="notice-column">
                 <?php foreach ($rightNotices as $row):
                     $date = date("d M Y", strtotime($row['created_at'])); ?>
                     <div class="notice-item">
                         <div class="notice-meta">
-                            <span class="notice-source">Notice</span>
+                            <span class="notice-source"><?= $lang['notice_label'] ?? 'Notice' ?></span>
                             <span class="notice-date"><?= $date ?></span>
                         </div>
                         <h3 class="notice-title">
                             <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
                         </h3>
-                        <a href="notice.php?id=<?= $row['id'] ?>" class="read-more">Read more →</a>
+                        <a href="notice.php?id=<?= $row['id'] ?>" class="read-more"><?= $lang['read_more'] ?? 'Read more →' ?></a>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
-
         <div class="see-all">
-            <a href="notices.php">See all notices →</a>
+            <a href="notices.php"><?= $lang['see_all_notices'] ?? 'See all notices →' ?></a>
         </div>
         <?php
     } else {
-        echo "<p class='no-notices'>No latest notices at the moment.</p>";
+        echo "<p class='no-notices'>".$lang['user_no_notices'] ?? 'No latest notices at the moment.'."</p>";
     }
     ?>
 </section>

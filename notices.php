@@ -1,9 +1,17 @@
-<?php include 'config/db.php'; ?>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include database
+include 'config/db.php';
+include 'config/lang.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Notices - Salkpur Khanepani</title>
+    <title><?= $lang['all_notices'] ?> - <?= $lang['logo'] ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -193,17 +201,17 @@
 
 <!-- Notices Section -->
 <section class="latest-notices">
-    <h2>📢 All Notices</h2>
+    <h2>📢 <?= $lang['all_notices'] ?></h2>
 
     <!-- Controls -->
     <div class="notice-controls">
         <div class="search-box">
-            <input type="text" id="noticeSearch" placeholder="Search notices...">
+            <input type="text" id="noticeSearch" placeholder="<?= $lang['search_placeholder'] ?>">
             <span class="clear-btn" id="clearSearch">&times;</span>
         </div>
         <select id="noticeFilter">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
+            <option value="newest"><?= $lang['newest_first'] ?></option>
+            <option value="oldest"><?= $lang['oldest_first'] ?></option>
         </select>
     </div>
 
@@ -228,13 +236,12 @@
                 <?php
             }
         } else {
-            echo "<p class='no-notices'>No notices found.</p>";
+            echo "<p class='no-notices'>{$lang['no_notices']}</p>";
         }
         ?>
     </div>
 
-    <!-- Search Not Found -->
-    <p id="noSearchResult" class="no-notices" style="display:none;">🔍 No notices match your search.</p>
+    <p id="noSearchResult" class="no-notices" style="display:none;"><?= $lang['no_search_results'] ?></p>
 </section>
 
 <?php include 'components/footer.php'; ?>

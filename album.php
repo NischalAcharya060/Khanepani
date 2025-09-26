@@ -1,5 +1,28 @@
-<?php include 'config/db.php'; ?>
 <?php
+// Start session safely
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+include 'config/db.php';
+
+// Language handling
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en';
+}
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','np'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Include language file
+$langFile = __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
+if (file_exists($langFile)) {
+    include $langFile;
+} else {
+    include __DIR__ . '/lang/en.php';
+}
+
+// Validate album id
 if(!isset($_GET['id'])) {
     header("Location: gallery.php");
     exit();
@@ -10,7 +33,7 @@ $album_id = intval($_GET['id']);
 $album_sql = "SELECT name FROM albums WHERE id = $album_id";
 $album_result = mysqli_query($conn, $album_sql);
 $album = mysqli_fetch_assoc($album_result);
-$album_name = $album ? $album['name'] : "Album";
+$album_name = $album ? $album['name'] : $lang['user_album'];
 
 // Get all images in this album
 $images_sql = "SELECT * FROM gallery WHERE album_id = $album_id ORDER BY created_at DESC";
@@ -20,7 +43,7 @@ $images_result = mysqli_query($conn, $images_sql);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo $album_name; ?> - Gallery</title>
+    <title><?= htmlspecialchars($album_name) ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -148,7 +171,7 @@ $images_result = mysqli_query($conn, $images_sql);
 <?php include 'components/header.php'; ?>
 
 <section class="album-container">
-    <a href="gallery.php" class="back-link">« Back to Albums</a>
+    <a href="gallery.php" class="back-link">« <?= $lang['back_to_albums'] ?></a>
     <h2><?php echo $album_name; ?></h2>
     <div class="album-grid">
         <?php
