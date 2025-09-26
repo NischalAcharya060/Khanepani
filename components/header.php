@@ -59,6 +59,7 @@ if (file_exists($langFile)) {
                 </a>
                 <div class="dropdown-content">
                     <a href="../gallery.php"><?= $lang['user_gallery'] ?? 'Gallery' ?></a>
+                    <a href="../nepali_unicode.php"><?= $lang['nepali_unicode'] ?? 'Nepali Unicode' ?></a>
                 </div>
             </div>
 

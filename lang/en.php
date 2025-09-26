@@ -163,6 +163,7 @@ $lang = [
     "oldest_first" => "Oldest First",
     "no_search_results" => "🔍 No notices match your search.",
 
+    //User Notices
     'all_notices' => 'All Notices',
     'notice_not_found' => 'Notice not found.',
     'download' => 'Download File',
@@ -196,6 +197,19 @@ $lang = [
     'additional_complaint_info' => 'Provide any additional information about your complaint',
     'suggestion_feedback_placeholder' => 'Write your suggestion or feedback here',
 
+
+    //Unicode
+    'nepali_unicode' => 'Nepali Unicode',
+    'nepali_unicode_romanized' => 'Nepali Unicode Romanized',
+    'nepali_unicode_traditional' => 'Nepali Unicode Traditional',
+    'kalimati_font' => 'Kalimati Font',
+    'typing_guide' => 'Nepali Unicode Typing Guide Sheet',
+    'user_download' => 'Download',
+    'nepali_unicode_desc' => 'Type in Nepali using Unicode standard.',
+    'nepali_unicode_romanized_desc' => 'Type Nepali text using Romanized script that converts to Unicode.',
+    'nepali_unicode_traditional_desc' => 'Traditional Nepali Unicode layout for typing.',
+    'kalimati_font_desc' => 'Nepali Kalimati font for typing and display.',
+    'typing_guide_desc' => 'Download the Nepali Unicode typing guide sheet.',
 
     // Footer / New keys
     'privacy_policy' => 'Privacy Policy',
