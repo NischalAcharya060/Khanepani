@@ -50,5 +50,8 @@
 
     <div class="footer-bottom">
         <p>&copy; <?php echo date('Y'); ?> <?= $lang['office_name'] ?? 'सलकपुर खानेपानी / Salakpur KhanePani' ?>. <?= $lang['all_rights'] ?? 'All rights reserved.' ?></p>
+        <span style="display:none;">
+        <a href="https://acharyanischal.com.np" target="_blank">Developed by Nischal Acharya</a>
+        </span>
     </div>
 </footer>

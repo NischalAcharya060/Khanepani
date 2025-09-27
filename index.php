@@ -16,6 +16,7 @@ if (isMobile()) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="developer" content="Developed by Nischal Acharya">
     <title><?= $lang['site_title'] ?? 'Khane Pani Office' ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
