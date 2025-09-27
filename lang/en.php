@@ -196,6 +196,10 @@ $lang = [
     'your_message' => 'Your Message',
     'additional_complaint_info' => 'Provide any additional information about your complaint',
     'suggestion_feedback_placeholder' => 'Write your suggestion or feedback here',
+    'default_subject' => 'New Message',
+    'fill_required_fields' => 'Please fill all required fields correctly.',
+    'message_saved' => 'Thank you! Your message has been saved successfully.',
+    'message_failed' => 'Sorry, your message could not be saved. Please try again later.',
 
 
     //Unicode

@@ -31,25 +31,180 @@ if (file_exists($langFile)) {
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        .hidden { display: none; }
-        .contact-form input, .contact-form select, .contact-form textarea, .contact-form button {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f9ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .contact-section {
+            padding: 70px 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .contact-section h2 {
+            text-align: center;
+            color: #004080;
+            font-size: 36px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .contact-section h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #ff6600;
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        .contact-content {
+            display: flex;
+            gap: 40px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        /* Info Box */
+        .contact-info {
+            flex: 1 1 40%;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-info:hover {
+            transform: translateY(-5px);
+        }
+
+        .contact-info h3 {
+            color: #004080;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .contact-info p {
+            margin: 12px 0;
             font-size: 16px;
+            color: #555;
         }
-        .contact-form button {
-            background-color: #0056d6;
-            color: #fff;
+
+        .contact-info p i {
+            color: #ff6600;
+            margin-right: 10px;
+        }
+
+        .map iframe {
+            margin-top: 20px;
+            width: 100%;
+            height: 280px;
+            border-radius: 10px;
             border: none;
-            cursor: pointer;
         }
+
+        /* Contact Form */
+        .contact-form {
+            flex: 1 1 55%;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+
+        .contact-form h3 {
+            color: #004080;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .contact-form form select,
+        .contact-form form input,
+        .contact-form form textarea {
+            width: 100%;
+            padding: 14px 15px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 15px;
+            outline: none;
+            background: #fafafa;
+            transition: 0.3s;
+        }
+
+        .contact-form form select:focus,
+        .contact-form form input:focus,
+        .contact-form form textarea:focus {
+            border-color: #004080;
+            box-shadow: 0 0 6px rgba(0,64,128,0.3);
+            background: #fff;
+        }
+
+        .contact-form button {
+            background: linear-gradient(135deg, #004080, #0056d6);
+            color: #fff;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
         .contact-form button:hover {
-            background-color: #003d99;
+            background: linear-gradient(135deg, #ff6600, #e65c00);
+            transform: translateY(-2px);
+        }
+
+        .hidden{
+            display: none;
+        }
+
+        .flash-message {
+            padding: 15px 20px;
+            margin: 20px auto;
+            max-width: 900px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .flash-message.success {
+            background: #e6f9f0;
+            color: #0a8a4d;
+            border: 1px solid #0a8a4d;
+        }
+
+        .flash-message.error {
+            background: #ffecec;
+            color: #d93025;
+            border: 1px solid #d93025;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+
+        /* Responsive */
+        @media screen and (max-width: 992px) {
+            .contact-content {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -57,18 +212,24 @@ if (file_exists($langFile)) {
 
 <?php include 'components/header.php'; ?>
 
-<section class="contact-section container">
+<?php if (isset($_SESSION['flash_message'])): ?>
+    <div class="flash-message <?= $_SESSION['flash_message']['type'] ?>">
+        <?= $_SESSION['flash_message']['text'] ?>
+    </div>
+    <?php unset($_SESSION['flash_message']); ?>
+<?php endif; ?>
+
+<section class="contact-section">
     <h2><?= $lang['user_contact_us'] ?></h2>
     <div class="contact-content">
         <!-- Contact Info -->
         <div class="contact-info">
             <h3><?= $lang['contact_details'] ?></h3>
-            <p>📞 +977 1 4117356, 4117358</p>
-            <p>✉ info@salakpurkhanepani.com</p>
+            <p><i class="fa fa-phone"></i> +977 1 4117356, 4117358</p>
+            <p><i class="fa fa-envelope"></i> info@salakpurkhanepani.com</p>
             <div class="map">
                 <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3565.5095854783654!2d87.36577937488643!3d26.664180170728024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef6f34daba5585%3A0x243be79d3c22c683!2sSalakpur%20khanepani!5e0!3m2!1sen!2snp!4v1758365945264!5m2!1sen!2snp"
-                        width="100%" height="300" style="border:0; border-radius:10px;"
                         allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                 </iframe>
             </div>

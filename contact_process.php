@@ -1,10 +1,27 @@
 <?php
 include 'config/db.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Language handling (same as in contact.php)
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en';
+}
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','np'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+$langFile = __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
+if (file_exists($langFile)) {
+    include $langFile;
+} else {
+    include __DIR__ . '/lang/en.php';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize inputs
     $type = htmlspecialchars(strip_tags(trim($_POST['type'])));
-    $subject = htmlspecialchars(strip_tags(trim($_POST['subject'] ?? 'New Message')));
+    $subject = htmlspecialchars(strip_tags(trim($_POST['subject'] ?? $lang['default_subject'])));
     $name = htmlspecialchars(strip_tags(trim($_POST['name'])));
     $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
     $message = htmlspecialchars(strip_tags(trim($_POST['message'])));
@@ -13,7 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate required fields
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($name) || empty($message) || empty($type)) {
-        echo "<script>alert('Please fill all required fields correctly.'); window.location='contact.php';</script>";
+        $_SESSION['flash_message'] = [
+            'type' => 'error',
+            'text' => "⚠️ " . $lang['fill_required_fields']
+        ];
+        header("Location: contact.php");
         exit;
     }
 
@@ -26,9 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("sssssss", $type, $subject, $name, $email, $message, $complaint_ref, $complaint_details);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Thank you! Your message has been saved successfully.'); window.location='contact.php';</script>";
+        $_SESSION['flash_message'] = [
+            'type' => 'success',
+            'text' => "✅ " . $lang['message_saved']
+        ];
     } else {
-        echo "<script>alert('Sorry, your message could not be saved. Please try again later.'); window.location='contact.php';</script>";
+        $_SESSION['flash_message'] = [
+            'type' => 'error',
+            'text' => "❌ " . $lang['message_failed']
+        ];
     }
+
+    header("Location: contact.php");
+    exit;
 }
 ?>
