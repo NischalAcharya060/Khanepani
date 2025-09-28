@@ -30,6 +30,7 @@ $lang = [
     "last_login" => "Last Login",
     "no_admins" => "No admins available.",
     "subtitle_admin" => "Ban/unban admin accounts (Master Admin excluded).",
+    "admins" => "Admins",
 
     // Notices
     "notices" => "Notices",
@@ -158,6 +159,7 @@ $lang = [
     "resources" => "Resources",
     "user_gallery" => "Gallery",
     "contact" => "Contact",
+    "employee_portal" => "Employee Portal",
     "search_placeholder" => "Search notices...",
     "newest_first" => "Newest First",
     "oldest_first" => "Oldest First",
@@ -229,4 +231,12 @@ $lang = [
     'social_media' => 'SOCIAL MEDIA',
     'our_location' => 'OUR LOCATION',
     'all_rights' => 'All rights reserved.',
+
+    // Recent Activity Page
+    'recent_activity' => 'Recent Activity',
+    'activity_subtitle' => 'Here are the latest activities in the system.',
+    'activity_desc' => 'Activity',
+    'time' => 'Time',
+    'no_activity' => 'No activities found.',
+    'view_all' => 'View All',
 ];
