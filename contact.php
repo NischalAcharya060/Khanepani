@@ -31,6 +31,7 @@ if (file_exists($langFile)) {
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -199,6 +200,29 @@ if (file_exists($langFile)) {
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .contact-form button.loading {
+            background: linear-gradient(135deg, #0056d6, #004080);
+            position: relative;
+            pointer-events: none;
+        }
+
+        .contact-form button.loading i {
+            display: none;
+        }
+
+        .contact-form button.loading::after {
+            content: "";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            width: 18px;
+            height: 18px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            transform: translateY(-50%);
+        }
 
         /* Responsive */
         @media screen and (max-width: 992px) {
@@ -258,7 +282,13 @@ if (file_exists($langFile)) {
 
                 <textarea name="message" id="message" rows="6" placeholder="<?= $lang['your_message'] ?>" required></textarea>
 
-                <button type="submit"><?= $lang['send_message'] ?></button>
+                <div class="g-recaptcha" data-sitekey="6Lex7dcrAAAAAPeIL3aTKqVvlaWewWRnUcF03IX4"></div>
+
+                <br>
+
+                <button type="submit">
+                    <i class="fa fa-paper-plane"></i> <?= $lang['send_message'] ?>
+                </button>
             </form>
         </div>
     </div>
@@ -270,6 +300,9 @@ if (file_exists($langFile)) {
     const typeSelect = document.getElementById('type');
     const complaintFields = document.getElementById('complaintFields');
     const messageField = document.getElementById('message');
+    const contactForm = document.getElementById('contactForm');
+    const submitBtn = contactForm.querySelector("button[type='submit']");
+    const submitIcon = submitBtn.querySelector("i");
 
     typeSelect.addEventListener('change', function() {
         if (this.value === 'complaint') {
@@ -282,6 +315,12 @@ if (file_exists($langFile)) {
             complaintFields.classList.add('hidden');
             messageField.placeholder = "<?= $lang['your_message'] ?>";
         }
+    });
+
+    contactForm.addEventListener('submit', function() {
+        submitBtn.classList.add("loading");
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "<?= $lang['sending'] ?? 'Sending...' ?>";
     });
 </script>
 

@@ -91,7 +91,7 @@
         Our website is designed for larger screens.<br>
         For the best experience, please use a desktop or laptop device.
     </p>
-    <a href="../index.php" class="btn">🔄 Refresh</a>
+    <a href="admin/dashboard.php" class="btn">🔄 Refresh</a>
     <div class="info">
         💡 Tip: Accessing from desktop will provide better navigation,
         easier document viewing, and faster browsing.

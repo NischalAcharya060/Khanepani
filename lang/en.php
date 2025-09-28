@@ -119,7 +119,7 @@ $lang = [
     "cancel" => "Cancel",
     "view" => "View",
     "back" => "Back",
-
+    "clear_all" => "Clear All",
     // Pagination
     "previous" => "« Previous",
     "next" => "Next »",
@@ -202,7 +202,11 @@ $lang = [
     'fill_required_fields' => 'Please fill all required fields correctly.',
     'message_saved' => 'Thank you! Your message has been saved successfully.',
     'message_failed' => 'Sorry, your message could not be saved. Please try again later.',
+    'sending' => 'Sending...',
 
+    // Captcha messages
+    'captcha_required' => 'Please complete the captcha.',
+    'captcha_failed' => 'Captcha verification failed. Try again.',
 
     //Unicode
     'nepali_unicode' => 'Nepali Unicode',

@@ -32,6 +32,16 @@ $username = $_SESSION['username'] ?? 'Admin';
 // Sidebar state from session (default collapsed)
 $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
 ?>
+<?php
+function isMobile() {
+    return preg_match('/(android|iphone|ipad|ipod|blackberry|windows phone|opera mini|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
+}
+
+if (isMobile()) {
+    header("Location: ../mobile-block.php");
+    exit();
+}
+?>
 
 <!-- Admin Header -->
 <header class="admin-header">
@@ -70,20 +80,30 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
 <!-- Notification Modal -->
 <div id="notifModal" class="notif-modal">
     <div class="notif-modal-content">
-        <span class="close-btn" id="closeNotif">&times;</span>
-        <h3><?= $lang['unread_messages'] ?? 'Unread Messages' ?></h3>
+        <div class="notif-header">
+            <h3><?= $lang['unread_messages'] ?? 'Unread Messages' ?></h3>
+            <button class="close-btn" id="closeNotif">&times;</button>
+        </div>
+
         <?php if ($unread_count > 0): ?>
+            <button class="clear-btn" id="clearUnread">
+                <i class="fa fa-check-double"></i> <?= $lang['clear_all'] ?? 'Clear All' ?>
+            </button>
             <ul>
                 <?php foreach ($unread_messages as $msg): ?>
                     <li onclick="window.location.href='view_message.php?id=<?= $msg['id'] ?>'">
-                        <strong><?= htmlspecialchars($msg['name']) ?></strong>:
-                        <?= htmlspecialchars(substr($msg['message'], 0, 50)) ?>...
-                        <span class="time"><?= date("d M, h:i A", strtotime($msg['created_at'])) ?></span>
+                        <div class="msg-left">
+                            <strong><?= htmlspecialchars($msg['name']) ?></strong>
+                            <span class="time"><?= date("d M, h:i A", strtotime($msg['created_at'])) ?></span>
+                        </div>
+                        <div class="msg-right">
+                            <?= htmlspecialchars(substr($msg['message'], 0, 50)) ?>...
+                        </div>
                     </li>
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p><?= $lang['no_unread'] ?? 'No unread messages.' ?></p>
+            <p class="no-messages"><?= $lang['no_unread'] ?? 'No unread messages.' ?></p>
         <?php endif; ?>
     </div>
 </div>
@@ -333,6 +353,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
     /* ================================
     NOTIFICATION MODAL (Modern Style)
  ================================ */
+    /* Modal Overlay */
     .notif-modal {
         display: none;
         position: fixed;
@@ -341,75 +362,161 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
         top: 0;
         width: 100%;
         height: 100%;
-        background: rgba(15, 15, 15, 0.6);
+        background: rgba(20, 20, 20, 0.6);
         backdrop-filter: blur(6px);
-        animation: fadeIn 0.3s ease;
+        transition: all 0.3s ease-in-out;
     }
 
     /* Modal Content */
     .notif-modal-content {
-        background: rgba(255, 255, 255, 0.95);
-        margin: 100px auto;
-        padding: 20px 25px;
-        border-radius: 16px;
-        width: 380px;
+        background: #fff;
+        margin: 80px auto;
+        padding: 0;
+        border-radius: 20px;
+        width: 400px;
         max-height: 75%;
         overflow-y: auto;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        font-family: 'Poppins', sans-serif;
         animation: slideDown 0.35s ease;
-        font-family: "Segoe UI", Roboto, sans-serif;
+        border-top: 6px solid #004080;
     }
 
-    /* Header inside modal */
-    .notif-modal-content h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 20px;
+    /* Header */
+    .notif-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 24px;
+        background: linear-gradient(90deg, #004080, #0066cc);
+        border-radius: 16px 16px 0 0;
+        color: white;
+    }
+
+    .notif-header h3 {
+        font-size: 18px;
         font-weight: 600;
-        color: #003366;
-        border-bottom: 2px solid #eee;
-        padding-bottom: 8px;
     }
 
-    /* Close button */
     .close-btn {
-        color: #555;
-        float: right;
+        background: transparent;
+        border: none;
+        color: white;
         font-size: 22px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: transform 0.3s ease, color 0.3s ease;
     }
+
     .close-btn:hover {
-        color: #e60000;
+        color: #ff4d4d;
         transform: rotate(90deg);
     }
 
-    /* List styling */
-    .notif-modal-content ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .notif-modal-content li {
-        padding: 12px 14px;
-        border-bottom: 1px solid #f0f0f0;
-        cursor: pointer;
-        transition: all 0.25s ease;
+    /* Clear Button */
+    .clear-btn {
+        background: #ff6600;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        margin: 12px 24px 8px 24px;
         border-radius: 8px;
-    }
-    .notif-modal-content li:hover {
-        background: #f7f9fc;
-        transform: translateX(4px);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+        transition: all 0.3s ease;
     }
 
-    /* Time text */
-    .notif-modal-content .time {
-        display: block;
+    .clear-btn:hover {
+        background: #e65c00;
+        transform: translateY(-2px);
+    }
+
+    /* List Items */
+    .notif-modal-content ul {
+        list-style: none;
+        padding: 0 24px 18px 24px;
+        margin: 0;
+    }
+
+    .notif-modal-content li {
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        background: #f7f9fc;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        transition: all 0.25s ease;
+    }
+
+    .notif-modal-content li:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Message layout */
+    .msg-left {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .msg-left strong {
+        font-weight: 600;
+        color: #004080;
+    }
+
+    .msg-left .time {
         font-size: 12px;
         color: #888;
         margin-top: 4px;
         font-style: italic;
+    }
+
+    .msg-right {
+        max-width: 60%;
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* No messages text */
+    .no-messages {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #666;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from { transform: translateY(-40px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Scrollbar styling */
+    .notif-modal-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .notif-modal-content::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 3px;
+    }
+
+    .notif-modal-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 500px) {
+        .notif-modal-content {
+            width: 90%;
+            margin: 60px auto;
+        }
     }
 
     /* Animations */
@@ -491,6 +598,23 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
     window.addEventListener('click', (e) => {
         if (e.target === notifModal) {
             notifModal.style.display = 'none';
+        }
+    });
+</script>
+
+<script>
+    document.getElementById("clearUnread")?.addEventListener("click", function() {
+        if (confirm("Are you sure you want to clear all unread messages?")) {
+            fetch("../admin/clear_unread.php", { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("✅ All unread messages cleared!");
+                        location.reload(); // reload to update modal
+                    } else {
+                        alert("❌ Failed to clear messages.");
+                    }
+                });
         }
     });
 </script>
