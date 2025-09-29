@@ -34,14 +34,6 @@ if (file_exists($langFile)) {
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f5f9ff;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-
         .contact-section {
             padding: 70px 20px;
             max-width: 1200px;

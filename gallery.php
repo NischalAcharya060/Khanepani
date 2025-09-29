@@ -30,8 +30,8 @@ if (file_exists($langFile)) {
     <title><?= $lang['photo_gallery'] ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -40,6 +40,7 @@ if (file_exists($langFile)) {
             padding: 0;
         }
 
+        /* Gallery Section */
         .gallery {
             max-width: 1200px;
             margin: 50px auto;
@@ -73,7 +74,7 @@ if (file_exists($langFile)) {
             transform: translateY(-8px) scale(1.02);
         }
 
-        /* Pile layers (only when .pile class exists) */
+        /* Pile effect for multiple images */
         .album-card.pile::before,
         .album-card.pile::after {
             content: "";
@@ -97,11 +98,11 @@ if (file_exists($langFile)) {
             opacity: 0.9;
         }
 
-        /* Album Pile (main card stays above pile) */
+        /* Album Pile */
         .album-pile {
             position: relative;
             border-radius: 10px;
-            overflow: hidden; /* Keep only the image clean inside */
+            overflow: hidden;
             box-shadow: 0 8px 18px rgba(0,0,0,0.15);
             background: #fff;
             z-index: 1;

@@ -146,6 +146,16 @@ include 'config/lang.php';
         .notice-separator {
             display: none;
         }
+
+        .read-more {
+            font-size: 13px;
+            text-align: right;
+            display: block;
+        }
+
+        .see-all {
+            text-align: center;
+        }
     }
 </style>
 <body>
