@@ -120,6 +120,7 @@ $lang = [
     "view" => "View",
     "back" => "Back",
     "clear_all" => "Clear All",
+
     // Pagination
     "previous" => "« Previous",
     "next" => "Next »",
@@ -181,6 +182,7 @@ $lang = [
     'back_to_albums' => 'Back to Albums',
     'no_images_in_album' => 'No images found in this album',
     'user_album' => 'Album',
+    'no_albums_found' => "No albums available at the moment.",
 
     // Contact Us
     'user_contact_us' => 'Contact Us',

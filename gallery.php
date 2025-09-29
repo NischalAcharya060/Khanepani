@@ -146,6 +146,34 @@ if (file_exists($langFile)) {
             font-size: 13px;
             opacity: 0.85;
         }
+
+        .no-data {
+            grid-column: 1/-1; /* span full width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .no-data:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
     </style>
 </head>
 <body>
@@ -160,34 +188,47 @@ if (file_exists($langFile)) {
         $albums_sql = "SELECT id, name FROM albums ORDER BY id DESC";
         $albums_result = mysqli_query($conn, $albums_sql);
 
-        while($album = mysqli_fetch_assoc($albums_result)) {
-            $album_id = $album['id'];
-            $album_name = $album['name'];
+        $hasAlbums = false; // flag to check if any album has images
 
-            // Get images in this album
-            $images_sql = "SELECT image FROM gallery WHERE album_id = $album_id ORDER BY created_at DESC";
-            $images_result = mysqli_query($conn, $images_sql);
-            $images = [];
-            while($img = mysqli_fetch_assoc($images_result)) {
-                $images[] = $img['image'];
+        if(mysqli_num_rows($albums_result) > 0) {
+            while($album = mysqli_fetch_assoc($albums_result)) {
+                $album_id = $album['id'];
+                $album_name = $album['name'];
+
+                // Get images in this album
+                $images_sql = "SELECT image FROM gallery WHERE album_id = $album_id ORDER BY created_at DESC";
+                $images_result = mysqli_query($conn, $images_sql);
+                $images = [];
+                while($img = mysqli_fetch_assoc($images_result)) {
+                    $images[] = $img['image'];
+                }
+
+                if(count($images) > 0) {
+                    $hasAlbums = true;
+                    $coverImage = "assets/uploads/".$images[0];
+                    $pileClass = (count($images) > 1) ? "pile" : "";
+
+                    echo "<div class='album-card $pileClass' onclick=\"location.href='album.php?id=$album_id'\">";
+                    echo "  <div class='album-pile'>";
+                    echo "      <div class='album-image'>";
+                    echo "          <img src='$coverImage' alt='$album_name'>";
+                    echo "      </div>";
+                    echo "      <div class='overlay'>";
+                    echo "          <div class='title'>$album_name</div>";
+                    echo "          <div class='count'>".count($images)." images</div>";
+                    echo "      </div>";
+                    echo "  </div>";
+                    echo "</div>";
+                }
             }
+        }
 
-            if(count($images) > 0) {
-                $coverImage = "assets/uploads/".$images[0];
-                $pileClass = (count($images) > 1) ? "pile" : ""; // add pile effect only if more than 1 image
-
-                echo "<div class='album-card $pileClass' onclick=\"location.href='album.php?id=$album_id'\">";
-                echo "  <div class='album-pile'>";
-                echo "      <div class='album-image'>";
-                echo "          <img src='$coverImage' alt='$album_name'>";
-                echo "      </div>";
-                echo "      <div class='overlay'>";
-                echo "          <div class='title'>$album_name</div>";
-                echo "          <div class='count'>".count($images)." images</div>";
-                echo "      </div>";
-                echo "  </div>";
-                echo "</div>";
-            }
+        // Show message if no albums with images
+        if(!$hasAlbums) {
+            echo "<div class='no-data'>
+                <i class='fa-regular fa-images'></i>
+                {$lang['no_albums_found']}
+              </div>";
         }
         ?>
     </div>

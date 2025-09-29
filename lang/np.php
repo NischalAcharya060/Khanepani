@@ -195,6 +195,7 @@ $lang = [
     'back_to_albums' => 'एल्बमहरूमा फर्कनुहोस्',
     'no_images_in_album' => 'यस एल्बममा कुनै तस्बिरहरू फेला परेनन्',
     'user_album' => 'एल्बम',
+    'no_albums_found' => "हाल कुनै एल्बम उपलब्ध छैन।",
 
     // Contact Us User
     'user_contact_us' => 'हामीलाई सम्पर्क गर्नुहोस्',

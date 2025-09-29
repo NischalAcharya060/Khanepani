@@ -1,9 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+if (session_status() === PHP_SESSION_NONE) session_start();
 
-// Include database
+// Include database and language
 include 'config/db.php';
 include 'config/lang.php';
 ?>
@@ -39,7 +37,7 @@ include 'config/lang.php';
             color: #222;
         }
 
-        /* Search + Filter */
+        /* Controls */
         .notice-controls {
             display: flex;
             justify-content: center;
@@ -73,9 +71,7 @@ include 'config/lang.php';
             transition: 0.2s;
         }
 
-        .search-box .clear-btn:hover {
-            color: #333;
-        }
+        .search-box .clear-btn:hover { color: #333; }
 
         .notice-controls select {
             padding: 10px;
@@ -136,12 +132,33 @@ include 'config/lang.php';
             color: #999;
         }
 
-        /* No result */
+        /* No Notices */
         .no-notices {
+            grid-column: 1/-1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: 500;
             text-align: center;
-            font-size: 16px;
-            color: #777;
-            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .no-notices:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+
+        .no-notices i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #bdc3c7;
         }
 
         /* Lightbox */
@@ -185,25 +202,18 @@ include 'config/lang.php';
             transition: color 0.3s;
         }
 
-        .lightbox .close:hover {
-            color: #ff6600;
-        }
+        .lightbox .close:hover { color: #ff6600; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <?php include 'components/header.php'; ?>
 
-<!-- Notices Section -->
 <section class="latest-notices">
     <h2>📢 <?= $lang['all_notices'] ?></h2>
 
-    <!-- Controls -->
     <div class="notice-controls">
         <div class="search-box">
             <input type="text" id="noticeSearch" placeholder="<?= $lang['search_placeholder'] ?>">
@@ -220,8 +230,11 @@ include 'config/lang.php';
         $sql = "SELECT * FROM notices ORDER BY created_at DESC";
         $result = mysqli_query($conn, $sql);
 
+        $hasNotices = false;
+
         if(mysqli_num_rows($result) > 0){
-            while ($row = mysqli_fetch_assoc($result)) {
+            while($row = mysqli_fetch_assoc($result)){
+                $hasNotices = true;
                 ?>
                 <a href="notice.php?id=<?= $row['id'] ?>" class="notice-card" data-date="<?= $row['created_at'] ?>">
                     <?php if(!empty($row['image'])): ?>
@@ -229,19 +242,24 @@ include 'config/lang.php';
                     <?php endif; ?>
                     <div class="notice-content">
                         <h3><?= $row['title'] ?></h3>
-                        <p><?= substr($row['content'], 0, 200) ?>...</p>
+                        <p><?= substr($row['content'],0,200) ?>...</p>
                         <span class="notice-date"><?= date("F j, Y, h:i A", strtotime($row['created_at'])) ?></span>
                     </div>
                 </a>
                 <?php
             }
-        } else {
-            echo "<p class='no-notices'>{$lang['no_notices']}</p>";
+        }
+
+        if(!$hasNotices){
+            echo "<div class='no-notices'><i class='fa-regular fa-bell'></i>{$lang['no_notices']}</div>";
         }
         ?>
     </div>
 
-    <p id="noSearchResult" class="no-notices" style="display:none;"><?= $lang['no_search_results'] ?></p>
+    <div id="noSearchResult" class="no-notices" style="display:none;">
+        <i class='fa-regular fa-magnifying-glass'></i>
+        <?= $lang['no_search_results'] ?>
+    </div>
 </section>
 
 <?php include 'components/footer.php'; ?>
@@ -254,6 +272,7 @@ include 'config/lang.php';
 </div>
 
 <script>
+    // Search and Filter
     const searchInput = document.getElementById('noticeSearch');
     const clearSearchBtn = document.getElementById('clearSearch');
     const noticeWrapper = document.getElementById('noticeWrapper');
@@ -268,7 +287,7 @@ include 'config/lang.php';
         notices.forEach(notice => {
             let title = notice.querySelector('h3').innerText.toLowerCase();
             let content = notice.querySelector('p').innerText.toLowerCase();
-            if (title.includes(filter) || content.includes(filter)) {
+            if(title.includes(filter) || content.includes(filter)){
                 notice.style.display = '';
                 found = true;
             } else {
@@ -277,11 +296,10 @@ include 'config/lang.php';
         });
 
         clearSearchBtn.style.display = searchInput.value ? 'block' : 'none';
-        noSearchResult.style.display = found ? 'none' : 'block';
+        noSearchResult.style.display = found ? 'none' : 'flex';
     }
 
     searchInput.addEventListener('keyup', filterNotices);
-
     clearSearchBtn.addEventListener('click', () => {
         searchInput.value = '';
         filterNotices();
@@ -289,12 +307,12 @@ include 'config/lang.php';
 
     filterSelect.addEventListener('change', () => {
         const notices = Array.from(noticeWrapper.getElementsByClassName('notice-card'));
-        notices.sort((a, b) => {
+        notices.sort((a,b)=>{
             const dateA = new Date(a.dataset.date);
             const dateB = new Date(b.dataset.date);
-            return filterSelect.value === 'newest' ? dateB - dateA : dateA - dateB;
+            return filterSelect.value==='newest' ? dateB-dateA : dateA-dateB;
         });
-        notices.forEach(notice => noticeWrapper.appendChild(notice));
+        notices.forEach(n=>noticeWrapper.appendChild(n));
     });
 
     // Lightbox
@@ -303,18 +321,16 @@ include 'config/lang.php';
     const lightboxCaption = document.getElementById('lightbox-caption');
     const closeBtn = document.querySelector('.lightbox .close');
 
-    document.querySelectorAll('.clickable').forEach(img => {
-        img.addEventListener('click', () => {
-            lightbox.style.display = 'flex';
-            lightboxImg.src = img.src;
-            lightboxCaption.innerText = img.alt;
+    document.querySelectorAll('.clickable').forEach(img=>{
+        img.addEventListener('click',()=>{
+            lightbox.style.display='flex';
+            lightboxImg.src=img.src;
+            lightboxCaption.innerText=img.alt;
         });
     });
 
-    closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
-    lightbox.addEventListener('click', e => {
-        if (e.target === lightbox) lightbox.style.display = 'none';
-    });
+    closeBtn.addEventListener('click',()=>lightbox.style.display='none');
+    lightbox.addEventListener('click',e=>{ if(e.target===lightbox) lightbox.style.display='none'; });
 </script>
 </body>
 </html>
