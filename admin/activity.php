@@ -56,6 +56,37 @@ $total_row = $total_result->fetch_assoc();
 $total_pages = ceil($total_row['total'] / $limit);
 
 $username = $_SESSION['username'];
+
+include '../config/Nepali_Calendar.php';
+$cal = new Nepali_Calendar();
+
+function format_nepali_date($date_str, $cal) {
+    if (!$date_str) return '—'; // handle empty dates
+
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $yearNep  = strtr($nepDate['year'], $np_numbers);
+        $monthNep = strtr($nepDate['month'], $np_numbers);
+        $dayNep   = strtr($nepDate['date'], $np_numbers);
+        $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
+        $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
+
+        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm;
+    } else {
+        return date("M d, Y h:i A", $timestamp);
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= $_SESSION['lang'] ?>">
@@ -190,8 +221,9 @@ $username = $_SESSION['username'];
                     <tr>
                         <td data-label="<?= $lang['sn'] ?? 'S.N.' ?>"><?= $sn++ ?></td>
                         <td data-label="<?= $lang['activity_desc'] ?? 'Activity' ?>"><?= htmlspecialchars($act['type_desc']) ?></td>
-                        <td data-label="<?= $lang['time'] ?? 'Time' ?>"><?= date("d M Y, h:i A", strtotime($act['time'])) ?></td>
-                    </tr>
+                        <td data-label="<?= $lang['time'] ?? 'Time' ?>">
+                            <?= format_nepali_date($act['time'], $cal) ?>
+                        </td>                    </tr>
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>

@@ -2,6 +2,34 @@
 session_start();
 include '../config/db.php';
 
+include '../config/Nepali_Calendar.php';
+$cal = new Nepali_Calendar();
+
+function format_nepali_date($date_str, $cal) {
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour format
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $yearNep  = strtr($nepDate['year'], $np_numbers);
+        $monthNep = strtr($nepDate['month'], $np_numbers);
+        $dayNep   = strtr($nepDate['date'], $np_numbers);
+        $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
+        $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
+
+        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm;
+    } else {
+        return date("d M Y, h:i A", $timestamp);
+    }
+}
+
 // Redirect if not logged in
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
@@ -88,7 +116,7 @@ $username = $_SESSION['username'];
                 <tr>
                     <td><?= $sn++ ?></td>
                     <td><?= htmlspecialchars($notice['title']) ?></td>
-                    <td><?= date("d M Y", strtotime($notice['created_at'])) ?></td>
+                    <td><?= format_nepali_date($notice['created_at'], $cal) ?></td>
                     <td>
                         <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ <?= $lang['edit'] ?? 'Edit' ?></a>
                         <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger" onclick="return confirm('<?= $lang['delete_confirm'] ?? 'Are you sure you want to delete this notice?' ?>');">🗑 <?= $lang['delete'] ?? 'Delete' ?></a>

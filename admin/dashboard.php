@@ -79,6 +79,28 @@ while($row = $res->fetch_assoc()){
     $messages_count[$row['type']] = $row['c'];
 }
 ?>
+<?php
+// Include Nepali Date
+include '../config/Nepali_Calendar.php';
+
+$cal = new Nepali_Calendar();
+?>
+<?php
+$months_labels = [];
+for($m=1; $m<=12; $m++){
+    $eng_year = date('Y');
+    $eng_month = $m;
+    $eng_day = 1;
+
+    $nep_date = $cal->eng_to_nep($eng_year, $eng_month, $eng_day);
+
+    if($_SESSION['lang']=='np'){
+        $months_labels[] = $nep_date['nmonth']; // Nepali month name
+    } else {
+        $months_labels[] = date('F', mktime(0,0,0,$m,1,$eng_year)); // English month name
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="<?= $lang_code ?>">
 <head>
@@ -159,27 +181,52 @@ while($row = $res->fetch_assoc()){
 
 <script>
     // Notices Chart
-    new Chart(document.getElementById('noticesChart'),{
-        type:'bar',
-        data:{
-            labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-            datasets:[{label:'<?= $lang['notices'] ?>',data:[
-                    <?= implode(',', $notices_per_month) ?>
-                ],backgroundColor:'#4e73df',borderRadius:6}]
+    new Chart(document.getElementById('noticesChart'), {
+        type: 'bar',
+        data: {
+            labels: <?= json_encode($months_labels, JSON_UNESCAPED_UNICODE) ?>,
+            datasets: [{
+                label: '<?= $lang['notices'] ?>',
+                data: [<?= implode(',', $notices_per_month) ?>],
+                backgroundColor: '#4e73df',
+                borderRadius: 6
+            }]
         },
-        options:{responsive:true,plugins:{legend:{display:false}}}
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    ticks: { font: { family: 'Noto Sans Devanagari, Inter' } }
+                },
+                y: { beginAtZero: true }
+            }
+        }
     });
 
     // Messages Chart
-    new Chart(document.getElementById('messagesChart'),{
-        type:'doughnut',
-        data:{
-            labels:['General','Complaint','Suggestion'],
-            datasets:[{data:[
-                    <?= $messages_count['general'] ?>,<?= $messages_count['complaint'] ?>,<?= $messages_count['suggestion'] ?>
-                ],backgroundColor:['#1cc88a','#e74a3b','#f6c23e'],borderWidth:2}]
+    new Chart(document.getElementById('messagesChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['General','Complaint','Suggestion'],
+            datasets: [{
+                data: [
+                    <?= $messages_count['general'] ?>,
+                    <?= $messages_count['complaint'] ?>,
+                    <?= $messages_count['suggestion'] ?>
+                ],
+                backgroundColor: ['#1cc88a','#e74a3b','#f6c23e'],
+                borderWidth: 2
+            }]
         },
-        options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
     });
 </script>
 

@@ -28,6 +28,34 @@ if (isset($_GET['delete'])) {
     exit();
 }
 
+include '../config/Nepali_Calendar.php';
+$cal = new Nepali_Calendar();
+
+function nepali_date_time($datetime, $cal) {
+    $timestamp = strtotime($datetime);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour format
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if(($_SESSION['lang'] ?? 'en') === 'np') {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $dayNep   = strtr($nepDate['date'], $np_numbers);
+        $monthNep = strtr($nepDate['month'], $np_numbers);
+        $yearNep  = strtr($nepDate['year'], $np_numbers);
+        $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
+        $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
+
+        return "$dayNep-$monthNep-$yearNep, $hourNep:$minNep $ampm";
+    } else {
+        return date("M d, Y h:i A", $timestamp);
+    }
+}
+
 // ✅ Pagination settings
 $limit = 5;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
@@ -189,7 +217,7 @@ $hasImages = mysqli_num_rows($result) > 0;
                     <td><img src="../assets/uploads/<?= htmlspecialchars($row['image']) ?>" class="gallery-img"></td>
                     <td><?= $row['title'] ? htmlspecialchars($row['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
                     <td><?= $row['album_name'] ? htmlspecialchars($row['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
-                    <td><?= date("M d, Y h:i A", strtotime($row['created_at'])) ?></td>
+                    <td><?= nepali_date_time($row['created_at'], $cal) ?></td>
                     <td>
                         <a href="gallery_edit.php?id=<?= $row['id'] ?>" class="btn btn-edit">✏ <?= $lang['edit'] ?? "Edit" ?></a>
                         <a href="manage_gallery.php?delete=<?= $row['id'] ?>" class="btn btn-delete"

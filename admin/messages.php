@@ -32,6 +32,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_id'], $_POST['
     }
 }
 
+//Nepali date
+include '../config/Nepali_Calendar.php';
+$cal = new Nepali_Calendar();
+
+function format_nepali_date($date_str, $cal) {
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $yearNep  = strtr($nepDate['year'], $np_numbers);
+        $monthNep = strtr($nepDate['month'], $np_numbers);
+        $dayNep   = strtr($nepDate['date'], $np_numbers);
+        $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
+        $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
+
+        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm;
+    } else {
+        return date("d M Y, h:i A", $timestamp);
+    }
+}
 
 // Pagination settings
 $limit = 5;
@@ -140,7 +168,7 @@ $username = $_SESSION['username'];
                             </form>
                         <?php endif; ?>
                     </td>
-                    <td><?= date("d M Y, h:i A", strtotime($msg['created_at'])) ?></td>
+                    <td><?= format_nepali_date($msg['created_at'], $cal) ?></td>
                     <td>
                         <a href="view_message.php?id=<?= $msg['id'] ?>" class="btn small"><?= $lang['view'] ?? "👁 View" ?></a>
                         <form method="POST" style="display:inline;" onsubmit="return confirm('<?= $lang['delete_confirm_message'] ?? "Delete this message?" ?>');">

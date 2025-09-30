@@ -31,6 +31,34 @@ if (!$message) {
     exit();
 }
 
+include '../config/Nepali_Calendar.php';
+$cal = new Nepali_Calendar();
+
+function format_nepali_date($date_str, $cal) {
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $yearNep  = strtr($nepDate['year'], $np_numbers);
+        $monthNep = strtr($nepDate['month'], $np_numbers);
+        $dayNep   = strtr($nepDate['date'], $np_numbers);
+        $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
+        $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
+
+        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm;
+    } else {
+        return date("d M Y, h:i A", $timestamp);
+    }
+}
+
 // Mark as read
 $update = $conn->prepare("UPDATE contact_messages SET is_read = 1 WHERE id = ?");
 $update->bind_param("i", $id);
@@ -151,7 +179,7 @@ $unread = $countResult->fetch_assoc()['unread_count'];
 
         <div class="message-field">
             <span class="message-label"><?= $lang['date'] ?></span>
-            <div class="message-value"><?= date("d M Y, h:i A", strtotime($message['created_at'])) ?></div>
+            <div class="message-value"><?= format_nepali_date($message['created_at'], $cal) ?></div>
         </div>
     </div>
 </main>

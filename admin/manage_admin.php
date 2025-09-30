@@ -30,6 +30,36 @@ if (isset($_GET['ban'])) {
     exit();
 }
 
+include '../config/Nepali_Calendar.php';
+$cal = new Nepali_Calendar();
+
+function format_nepali_date($date_str, $cal) {
+    if (!$date_str) return '—'; // handle empty dates
+
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $yearNep  = strtr($nepDate['year'], $np_numbers);
+        $monthNep = strtr($nepDate['month'], $np_numbers);
+        $dayNep   = strtr($nepDate['date'], $np_numbers);
+        $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
+        $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
+
+        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm;
+    } else {
+        return date("M d, Y h:i A", $timestamp);
+    }
+}
+
 // Fetch all admins except masteradmin
 $result = mysqli_query($conn, "SELECT * FROM admins WHERE username!='masteradmin' ORDER BY created_at DESC");
 $hasAdmins = mysqli_num_rows($result) > 0;
@@ -173,7 +203,7 @@ if (isset($_GET['unban'])) {
                     <td><?= $sn++ ?></td>
                     <td><?= htmlspecialchars($row['username']) ?></td>
                     <td><?= htmlspecialchars($row['email']) ?></td>
-                    <td><?= date("M d, Y h:i A", strtotime($row['created_at'])) ?></td>
+                    <td><?= format_nepali_date($row['created_at'], $cal) ?></td>
                     <td>
                         <?php if($row['status'] === 'active'): ?>
                             <span class="badge badge-success">✅ <?= $lang['active'] ?? 'Active' ?></span>
@@ -182,7 +212,7 @@ if (isset($_GET['unban'])) {
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?= $row['last_login'] ? date("M d, Y h:i A", strtotime($row['last_login'])) : 'Never' ?>
+                        <?= $row['last_login'] ? format_nepali_date($row['last_login'], $cal) : '—' ?>
                     </td>
                     <td>
                         <?php if($row['status'] === 'active'): ?>
