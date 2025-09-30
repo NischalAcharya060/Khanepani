@@ -1,9 +1,34 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-// Include database and language
+// Include database, language, and Nepali calendar
 include 'config/db.php';
 include 'config/lang.php';
+include 'config/nepali_calendar.php';
+$cal = new Nepali_Calendar();
+
+// Function to format date with time
+function format_date($date_str, $cal) {
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour format
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $dateNep = strtr($nepDate['year'].'-'.$nepDate['month'].'-'.$nepDate['date'], $np_numbers);
+        $timeNep = strtr(sprintf("%02d:%02d", $hour, $minute), $np_numbers) . " " . $ampm;
+
+        return $dateNep . ', ' . $timeNep;
+    } else {
+        return date("F j, Y, h:i A", $timestamp);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,21 +47,18 @@ include 'config/lang.php';
             margin: 0;
             line-height: 1.6;
         }
-
         /* Section */
         .latest-notices {
             padding: 40px 20px;
             max-width: 1200px;
             margin: auto;
         }
-
         .latest-notices h2 {
             text-align: center;
             margin-bottom: 25px;
             font-size: 28px;
             color: #222;
         }
-
         /* Controls */
         .notice-controls {
             display: flex;
@@ -46,13 +68,11 @@ include 'config/lang.php';
             margin-bottom: 30px;
             flex-wrap: wrap;
         }
-
         .search-box {
             position: relative;
             display: flex;
             align-items: center;
         }
-
         .search-box input {
             padding: 10px 40px 10px 15px;
             width: 280px;
@@ -60,7 +80,6 @@ include 'config/lang.php';
             border-radius: 8px;
             font-size: 14px;
         }
-
         .search-box .clear-btn {
             position: absolute;
             right: 10px;
@@ -70,9 +89,7 @@ include 'config/lang.php';
             display: none;
             transition: 0.2s;
         }
-
         .search-box .clear-btn:hover { color: #333; }
-
         .notice-controls select {
             padding: 10px;
             border-radius: 8px;
@@ -81,14 +98,12 @@ include 'config/lang.php';
             background: #fff;
             cursor: pointer;
         }
-
         /* Grid layout */
         .notice-wrapper {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
-
         .notice-card {
             background: #fff;
             border: 1px solid #eee;
@@ -98,40 +113,33 @@ include 'config/lang.php';
             color: #333;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .notice-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 6px 18px rgba(0,0,0,0.1);
         }
-
         .notice-card img {
             width: 100%;
             height: 180px;
             object-fit: cover;
         }
-
         .notice-content {
             padding: 15px;
         }
-
         .notice-content h3 {
             font-size: 18px;
             margin: 0 0 10px;
             color: #0056d6;
         }
-
         .notice-content p {
             font-size: 14px;
             color: #555;
             margin-bottom: 10px;
         }
-
         .notice-date {
             display: block;
             font-size: 12px;
             color: #999;
         }
-
         /* No Notices */
         .no-notices {
             grid-column: 1/-1;
@@ -149,18 +157,15 @@ include 'config/lang.php';
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .no-notices:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 24px rgba(0,0,0,0.12);
         }
-
         .no-notices i {
             font-size: 48px;
             margin-bottom: 20px;
             color: #bdc3c7;
         }
-
         /* Lightbox */
         .lightbox {
             display: none;
@@ -176,21 +181,18 @@ include 'config/lang.php';
             flex-direction: column;
             animation: fadeIn 0.3s;
         }
-
         .lightbox img {
             max-width: 90%;
             max-height: 80%;
             border-radius: 8px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
-
         .lightbox-caption {
             margin-top: 15px;
             text-align: center;
             color: #fff;
             font-size: 16px;
         }
-
         .lightbox .close {
             position: absolute;
             top: 20px;
@@ -201,9 +203,7 @@ include 'config/lang.php';
             cursor: pointer;
             transition: color 0.3s;
         }
-
         .lightbox .close:hover { color: #ff6600; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -235,6 +235,7 @@ include 'config/lang.php';
         if(mysqli_num_rows($result) > 0){
             while($row = mysqli_fetch_assoc($result)){
                 $hasNotices = true;
+                $displayDate = format_date($row['created_at'], $cal);
                 ?>
                 <a href="notice.php?id=<?= $row['id'] ?>" class="notice-card" data-date="<?= $row['created_at'] ?>">
                     <?php if(!empty($row['image'])): ?>
@@ -243,7 +244,7 @@ include 'config/lang.php';
                     <div class="notice-content">
                         <h3><?= $row['title'] ?></h3>
                         <p><?= substr($row['content'],0,200) ?>...</p>
-                        <span class="notice-date"><?= date("F j, Y, h:i A", strtotime($row['created_at'])) ?></span>
+                        <span class="notice-date"><?= $displayDate ?></span>
                     </div>
                 </a>
                 <?php

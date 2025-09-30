@@ -3,10 +3,36 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include database
+// Include database, language, Nepali calendar
 include 'config/db.php';
 include 'config/lang.php';
+include 'config/nepali_calendar.php';
+$cal = new Nepali_Calendar();
+
+// Function to format date with time
+function format_date($date_str, $cal) {
+    $timestamp = strtotime($date_str);
+    $year  = (int)date('Y', $timestamp);
+    $month = (int)date('m', $timestamp);
+    $day   = (int)date('d', $timestamp);
+    $hour  = (int)date('h', $timestamp); // 12-hour format
+    $minute = (int)date('i', $timestamp);
+    $ampm  = date('A', $timestamp);
+
+    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+        $nepDate = $cal->eng_to_nep($year, $month, $day);
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+        $dateNep = strtr($nepDate['year'].'-'.$nepDate['month'].'-'.$nepDate['date'], $np_numbers);
+        $timeNep = strtr(sprintf("%02d:%02d", $hour, $minute), $np_numbers) . " " . $ampm;
+
+        return $dateNep . ', ' . $timeNep;
+    } else {
+        return date("F d, Y, h:i A", $timestamp);
+    }
+}
 ?>
+
 <?php
 if(!isset($_GET['id'])) {
     header("Location: index.php");
@@ -23,8 +49,8 @@ if(mysqli_num_rows($result) === 0){
 }
 
 $notice = mysqli_fetch_assoc($result);
+$displayDate = format_date($notice['created_at'], $cal);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,7 +212,7 @@ $notice = mysqli_fetch_assoc($result);
 
     <h2><?= htmlspecialchars($notice['title']) ?></h2>
     <div class="notice-meta">
-        <i class="fa-regular fa-calendar"></i> <?= date("F d, Y, h:i A", strtotime($notice['created_at'])) ?>
+        <i class="fa-regular fa-calendar"></i> <?= $displayDate ?>
     </div>
 
     <?php if(!empty($notice['image'])): ?>
@@ -201,9 +227,7 @@ $notice = mysqli_fetch_assoc($result);
         ?>
         <div>
             <a href="<?= $filePath ?>" download class="action-btn download-btn">⬇ <?= $lang['download'] ?></a>
-            <button type="button"
-                    class="action-btn preview-btn"
-                    onclick="openPreview('<?= $filePath ?>', '<?= $fileExt ?>')">
+            <button type="button" class="action-btn preview-btn" onclick="openPreview('<?= $filePath ?>', '<?= $fileExt ?>')">
                 👁 <?= $lang['view_file'] ?>
             </button>
         </div>

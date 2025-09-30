@@ -1,6 +1,8 @@
 <?php
 include 'config/db.php';
 include 'config/lang.php';
+include 'config/nepali_calendar.php';
+$cal = new Nepali_Calendar();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -202,18 +204,40 @@ include 'config/lang.php';
         $notices[] = $row;
     }
 
+    function format_date($date_str, $cal) {
+        $timestamp = strtotime($date_str);
+        $year  = (int)date('Y', $timestamp);
+        $month = (int)date('m', $timestamp);
+        $day   = (int)date('d', $timestamp);
+        $hour  = (int)date('h', $timestamp); // 12-hour format
+        $minute = (int)date('i', $timestamp);
+        $ampm  = date('A', $timestamp);
+
+        // Check language
+        if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+            $nepDate = $cal->eng_to_nep($year, $month, $day);
+            $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
+
+            $dateNep = strtr($nepDate['year'].'-'.$nepDate['month'].'-'.$nepDate['date'], $np_numbers);
+            $timeNep = strtr(sprintf("%02d:%02d", $hour, $minute), $np_numbers) . " " . $ampm;
+
+            return $dateNep . ', ' . $timeNep;
+        } else {
+            return date("F j, Y, h:i A", $timestamp);
+        }
+    }
+
     if (count($notices) > 0) {
         $leftNotices = array_slice($notices, 0, 3);
         $rightNotices = array_slice($notices, 3, 3);
         ?>
         <div class="notice-grid">
             <div class="notice-column">
-                <?php foreach ($leftNotices as $row):
-                    $date = date("d M Y", strtotime($row['created_at'])); ?>
+                <?php foreach ($leftNotices as $row): ?>
                     <div class="notice-item">
                         <div class="notice-meta">
                             <span class="notice-source"><?= $lang['notice_label'] ?? 'Notice' ?></span>
-                            <span class="notice-date"><?= $date ?></span>
+                            <span class="notice-date"><?= format_date($row['created_at'], $cal) ?></span>
                         </div>
                         <h3 class="notice-title">
                             <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
@@ -224,12 +248,11 @@ include 'config/lang.php';
             </div>
             <div class="notice-separator"></div>
             <div class="notice-column">
-                <?php foreach ($rightNotices as $row):
-                    $date = date("d M Y", strtotime($row['created_at'])); ?>
+                <?php foreach ($rightNotices as $row): ?>
                     <div class="notice-item">
                         <div class="notice-meta">
                             <span class="notice-source"><?= $lang['notice_label'] ?? 'Notice' ?></span>
-                            <span class="notice-date"><?= $date ?></span>
+                            <span class="notice-date"><?= format_date($row['created_at'], $cal) ?></span>
                         </div>
                         <h3 class="notice-title">
                             <a href="notice.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['title']) ?></a>
