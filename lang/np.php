@@ -156,6 +156,8 @@ $lang = [
 
     // User Side
     "home" => "गृहपृष्ठ",
+    "about" => "बारेमा",
+    "about_us" => "हाम्रो बारेमा",
     "user_notices" => "सूचनाहरू",
     "resources" => "स्रोतहरू",
     "user_gallery" => "ग्यालरी",

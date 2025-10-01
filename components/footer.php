@@ -11,7 +11,7 @@
         <div class="footer-section">
             <h4><?= $lang['quick_links'] ?? 'QUICK LINKS' ?></h4>
             <ul>
-                <li><a href="#"><?= $lang['our_services'] ?? 'Our Services' ?></a></li>
+                <li><a href="../our_services.php"><?= $lang['our_services'] ?? 'Our Services' ?></a></li>
             </ul>
         </div>
 

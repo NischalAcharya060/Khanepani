@@ -7,6 +7,18 @@ $master_username = "masteradmin";
 $master_email = "master@admin.com";
 $master_password = "admin@123";
 
+// Insert master admin into database if not exists
+$hashed_password = password_hash($master_password, PASSWORD_DEFAULT);
+$stmt_check = $conn->prepare("SELECT id FROM admins WHERE username=?");
+$stmt_check->bind_param("s", $master_username);
+$stmt_check->execute();
+$result_check = $stmt_check->get_result();
+if ($result_check->num_rows === 0) {
+    $stmt_insert = $conn->prepare("INSERT INTO admins (username, email, password, status, created_at, last_login) VALUES (?, ?, ?, 'active', NOW(), NOW())");
+    $stmt_insert->bind_param("sss", $master_username, $master_email, $hashed_password);
+    $stmt_insert->execute();
+}
+
 // If already logged in, redirect to dashboard
 if (isset($_SESSION['admin'])) {
     header("Location: dashboard.php");
@@ -56,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

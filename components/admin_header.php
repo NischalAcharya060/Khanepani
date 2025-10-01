@@ -33,6 +33,37 @@ $username = $_SESSION['username'] ?? 'Admin';
 $sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
 ?>
 <?php
+include '../config/lang.php';
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$admin_id = $_SESSION['admin'];
+
+// Fetch profile info
+if ($admin_id === 'master') {
+    $profile_pic = 'default.png';
+    $username = 'masteradmin';
+} else {
+    $stmt = $conn->prepare("SELECT username, profile_pic FROM admins WHERE id = ?");
+    $stmt->bind_param("i", $admin_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $admin = $result->fetch_assoc();
+
+    if ($admin) {
+        $profile_pic = $admin['profile_pic'] ?: 'default.png';
+        $username = $admin['username'] ?: 'Admin';
+    } else {
+        // Fallback if something went wrong
+        $profile_pic = 'default.png';
+        $username = 'Admin';
+    }
+}
+?>
+<?php
 function isMobile() {
     return preg_match('/(android|iphone|ipad|ipod|blackberry|windows phone|opera mini|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
 }
@@ -71,8 +102,22 @@ if (isMobile()) {
             <?php endif; ?>
         </div>
 
-        <span>👤 <?= htmlspecialchars($username) ?></span>
-        <a href="../admin/logout.php" class="logout-btn"><?= $lang['logout'] ?></a>
+        <!-- User Profile Dropdown -->
+        <div class="profile-menu">
+            <div class="profile-trigger" onclick="toggleProfileMenu()">
+                <img src="../assets/uploads/profile/<?= htmlspecialchars($profile_pic, ENT_QUOTES, 'UTF-8') ?>"
+                     alt="Profile" class="profile-pic">
+                <span><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></span>
+                <i class="arrow">&#9662;</i>
+            </div>
+
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="../admin/profile.php">👤 <?= htmlspecialchars($lang['my_profile'] ?? 'My Profile', ENT_QUOTES, 'UTF-8') ?></a>
+                <a href="../admin/logout.php" class="logout-link">🚪 <?= htmlspecialchars($lang['logout'] ?? 'Logout', ENT_QUOTES, 'UTF-8') ?></a>
+            </div>
+        </div>
+
+        <!-- Mobile menu button -->
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     </div>
 </header>
@@ -255,6 +300,72 @@ if (isMobile()) {
     @keyframes pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.2); }
+    }
+
+    /* ================================
+       Profile Menu
+    ================================ */
+    .profile-menu {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-trigger {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 6px;
+        transition: background 0.3s ease;
+    }
+
+    .profile-trigger:hover {
+        background: rgba(255,255,255,0.15);
+    }
+
+    .profile-pic {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #fff;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        display: none;
+        flex-direction: column;
+        min-width: 180px;
+        z-index: 999;
+        overflow: hidden;
+        animation: fadeIn 0.25s ease;
+    }
+
+    .profile-dropdown a {
+        padding: 12px 16px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .profile-dropdown a:hover {
+        background: #f5f5f5;
+    }
+
+    .logout-link {
+        color: #d9534f !important;
+        font-weight: bold;
     }
 
     /* ================================
@@ -615,6 +726,22 @@ if (isMobile()) {
                         alert("❌ Failed to clear messages.");
                     }
                 });
+        }
+    });
+</script>
+
+<script>
+    function toggleProfileMenu() {
+        const dropdown = document.getElementById("profileDropdown");
+        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener("click", function(e) {
+        const trigger = document.querySelector(".profile-trigger");
+        const dropdown = document.getElementById("profileDropdown");
+        if (!trigger.contains(e.target)) {
+            dropdown.style.display = "none";
         }
     });
 </script>

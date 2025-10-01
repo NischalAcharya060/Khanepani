@@ -156,6 +156,8 @@ $lang = [
 
     // User side
     "home" => "Home",
+    "about" => "About",
+    "about_us" => "About us",
     "user_notices" => "Notices",
     "resources" => "Resources",
     "user_gallery" => "Gallery",
