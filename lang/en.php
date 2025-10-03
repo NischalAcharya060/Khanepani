@@ -151,16 +151,44 @@ $lang = [
     // Add admin
     'username' => 'Username',
     'password' => 'Password',
-    'password_mismatch' => 'Passwords do not match.',
     'username_exists' => 'Username already exists.',
     'new_admin_added' => 'New admin added successfully!',
     'subtitle_add_admin' => 'Create a new admin account to manage the dashboard.',
     'username_placeholder' => 'Enter username',
     'email_placeholder' => 'Enter email',
     'password_placeholder' => 'Enter password',
-    'confirm_password' => 'Confirm Password',
     'confirm_password_placeholder' => 'Confirm password',
     'optional' => 'optional',
+
+    // Profile
+    'profile_overview' => 'Profile Overview',
+    'edit_account_details' => 'Edit Account Details',
+    'update_security_credentials' => 'Update Security Credentials',
+    'account_created' => 'Account Created',
+    'last_activity' => 'Last Activity',
+    'change_profile_picture' => 'Change Profile Picture',
+    'save_changes' => 'Save Profile Changes',
+
+    // Password
+    'current_password' => 'Current Password',
+    'new_password' => 'New Password (min 8 chars)',
+    'confirm_password' => 'Confirm New Password',
+    'change_password' => 'Change Password',
+
+    // Messages
+    'master_admin_locked' => 'Master Admin: Profile settings are locked for security.',
+    'profile_updated' => '✅ Profile updated successfully! Changes will reflect after refresh.',
+    'no_changes_detected' => '⚠️ No changes detected. Nothing updated.',
+    'password_changed' => '✅ Password changed successfully!',
+    'password_mismatch' => '⚠️ New password and confirm password do not match or new password is too short (min 8 chars).',
+    'wrong_current_password' => '❌ Current password is incorrect.',
+    'username_empty' => '⚠️ Username cannot be empty.',
+    'upload_failed' => '❌ Failed to upload profile picture.',
+    'invalid_file_type' => '❌ Invalid file type. Only JPG, PNG, and GIF are allowed.',
+
+    // Buttons
+    'save_profile' => 'Save Profile',
+    'update_password' => 'Update Password',
 
     // User side
     "home" => "Home",

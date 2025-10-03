@@ -17,11 +17,11 @@ $admin_id = $_SESSION['admin'];
 $is_master = false;
 $error = null;
 $success = $_SESSION['success'] ?? null;
-unset($_SESSION['success']); // Clear success message after displaying
+unset($_SESSION['success']);
 
+// --- Admin Data Fetch ---
 if ($admin_id === "master") {
     $is_master = true;
-    // Master admin info (hardcoded)
     $admin = [
             'id' => 0,
             'username' => 'masteradmin',
@@ -30,125 +30,102 @@ if ($admin_id === "master") {
             'profile_pic' => 'default.png',
             'created_at' => date('Y-m-d H:i:s'),
             'last_login' => date('Y-m-d H:i:s'),
-            'password' => '', // Not needed
+            'password' => '',
     ];
 } else {
-    // Normal admin fetch
     $admin_id = intval($_SESSION['admin']);
-
     $stmt = $conn->prepare("SELECT id, username, email, status, profile_pic, created_at, last_login, password FROM admins WHERE id = ?");
-
-    if ($stmt === false) {
-        // Prepare statement failed. This is often a SQL syntax error or connection issue.
-        die("❌ SQL Prepare failed: " . htmlspecialchars($conn->error));
-    }
+    if ($stmt === false) die("❌ SQL Prepare failed: " . htmlspecialchars($conn->error));
 
     $stmt->bind_param("i", $admin_id);
-
-    if (!$stmt->execute()) {
-        // Execute failed
-        die("❌ SQL Execute failed: " . htmlspecialchars($stmt->error));
-    }
+    if (!$stmt->execute()) die("❌ SQL Execute failed: " . htmlspecialchars($stmt->error));
 
     $result = $stmt->get_result();
     $admin = $result->fetch_assoc();
     $stmt->close();
 
     if (!$admin) {
-        die("❌ Admin with ID $admin_id not found in database. Check the 'admins' table and your session data.");
-    }
-}
-
-// Handle profile update (only for normal admin)
-if (!$is_master && $_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['change_password'])) {
-    $new_username = trim($_POST['username']);
-    $profile_pic = $admin['profile_pic'] ?? 'default.png';
-
-    if (empty($new_username)) {
-        $error = "⚠️ Username cannot be empty.";
+        die("❌ Admin with ID $admin_id not found.");
     }
 
-    // Handle File Upload
-    if (empty($error) && !empty($_FILES['profile_pic']['name']) && $_FILES['profile_pic']['error'] === 0) {
-        $upload_dir = '../assets/uploads/profile/';
-        if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+    // --- Handle Form Submissions (Update Profile) ---
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['change_password'])) {
+        $new_username = trim($_POST['username']);
+        $profile_pic = $admin['profile_pic'] ?? 'default.png';
 
-        // FIX 2: Security check - Verify MIME type
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-        $file_tmp = $_FILES['profile_pic']['tmp_name'];
-        $file_type = @mime_content_type($file_tmp);
+        if (empty($new_username)) {
+            $error = "⚠️ Username cannot be empty.";
+        }
 
-        if (!in_array($file_type, $allowed_types)) {
-            $error = "❌ Invalid file type. Only JPG, PNG, and GIF are allowed.";
-        } else {
-            $ext = pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION);
-            // Generate secure, unique filename
-            $file_name = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
-            $target_file = $upload_dir . $file_name;
+        // Handle File Upload
+        if (empty($error) && !empty($_FILES['profile_pic']['name']) && $_FILES['profile_pic']['error'] === 0) {
+            $upload_dir = '../assets/uploads/profile/';
+            if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
-            if (move_uploaded_file($file_tmp, $target_file)) {
-                // Delete old pic if it exists and is not default
-                if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png' && file_exists($upload_dir . $admin['profile_pic'])) {
-                    unlink($upload_dir . $admin['profile_pic']);
-                }
-                $profile_pic = $file_name;
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $file_tmp = $_FILES['profile_pic']['tmp_name'];
+            $file_type = @mime_content_type($file_tmp);
+
+            if (!in_array($file_type, $allowed_types)) {
+                $error = "❌ Invalid file type. Only JPG, PNG, and GIF are allowed.";
             } else {
-                $error = "❌ Failed to upload profile picture.";
+                $ext = pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION);
+                $file_name = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                $target_file = $upload_dir . $file_name;
+
+                if (move_uploaded_file($file_tmp, $target_file)) {
+                    if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png' && file_exists($upload_dir . $admin['profile_pic'])) {
+                        unlink($upload_dir . $admin['profile_pic']);
+                    }
+                    $profile_pic = $file_name;
+                } else {
+                    $error = "❌ Failed to upload profile picture.";
+                }
+            }
+        }
+
+        if (empty($error)) {
+            if ($new_username !== $admin['username'] || $profile_pic !== $admin['profile_pic']) {
+                $stmt = $conn->prepare("UPDATE admins SET username = ?, profile_pic = ? WHERE id = ?");
+                if ($stmt === false) die("❌ SQL Prepare (Update) failed: " . htmlspecialchars($conn->error));
+                $stmt->bind_param("ssi", $new_username, $profile_pic, $admin['id']);
+                if (!$stmt->execute()) die("❌ SQL Execute (Update) failed: " . htmlspecialchars($stmt->error));
+                $stmt->close();
+
+                $_SESSION['username'] = $new_username;
+                $_SESSION['success'] = "✅ Profile updated successfully! Changes will reflect after refresh.";
+                header("Location: profile.php");
+                exit();
+            } else {
+                $error = "⚠️ No changes detected. Nothing updated.";
             }
         }
     }
 
-    // FIX 3: Perform the update if valid username and no upload error
-    if (empty($error)) {
-        // Only update if username or profile picture has actually changed
-        if ($new_username !== $admin['username'] || $profile_pic !== $admin['profile_pic']) {
-            $stmt = $conn->prepare("UPDATE admins SET username = ?, profile_pic = ? WHERE id = ?");
-            if ($stmt === false) {
-                die("❌ SQL Prepare (Update) failed: " . htmlspecialchars($conn->error));
-            }
-            $stmt->bind_param("ssi", $new_username, $profile_pic, $admin['id']);
-            if (!$stmt->execute()) {
-                die("❌ SQL Execute (Update) failed: " . htmlspecialchars($stmt->error));
-            }
-            $stmt->close();
+    // --- Handle Form Submissions (Password Change) ---
+    if (isset($_POST['change_password'])) {
+        $current_pass = $_POST['current_password'];
+        $new_pass = $_POST['new_password'];
+        $confirm_pass = $_POST['confirm_password'];
 
-            $_SESSION['username'] = $new_username;
-            $_SESSION['success'] = "✅ Profile updated successfully! Changes will reflect after refresh.";
-            header("Location: profile.php");
-            exit();
+        if (password_verify($current_pass, $admin['password'])) {
+            if ($new_pass === $confirm_pass && strlen($new_pass) >= 8) {
+                $hashed = password_hash($new_pass, PASSWORD_DEFAULT);
+                $stmt = $conn->prepare("UPDATE admins SET password = ? WHERE id = ?");
+                if ($stmt === false) die("❌ SQL Prepare (Password) failed: " . htmlspecialchars($conn->error));
+                $stmt->bind_param("si", $hashed, $admin['id']);
+                if (!$stmt->execute()) die("❌ SQL Execute (Password) failed: " . htmlspecialchars($stmt->error));
+                $stmt->close();
+
+                $_SESSION['success'] = "✅ Password changed successfully!";
+                header("Location: profile.php");
+                exit();
+            } else {
+                $error = "⚠️ New password and confirm password do not match or new password is too short (min 8 chars).";
+            }
         } else {
-            $error = "⚠️ No changes detected. Nothing updated.";
+            $error = "❌ Current password is incorrect.";
         }
-    }
-}
-
-// Handle password change (only for normal admin)
-if (!$is_master && isset($_POST['change_password'])) {
-    $current_pass = $_POST['current_password'];
-    $new_pass = $_POST['new_password'];
-    $confirm_pass = $_POST['confirm_password'];
-
-    if (password_verify($current_pass, $admin['password'])) {
-        if ($new_pass === $confirm_pass && strlen($new_pass) >= 8) { // Added minimum length check
-            $hashed = password_hash($new_pass, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("UPDATE admins SET password = ? WHERE id = ?");
-            if ($stmt === false) {
-                die("❌ SQL Prepare (Password) failed: " . htmlspecialchars($conn->error));
-            }
-            $stmt->bind_param("si", $hashed, $admin['id']);
-            if (!$stmt->execute()) {
-                die("❌ SQL Execute (Password) failed: " . htmlspecialchars($stmt->error));
-            }
-            $stmt->close();
-
-            $_SESSION['success'] = "✅ Password changed successfully!";
-            header("Location: profile.php");
-            exit();
-        } else {
-            $error = "⚠️ New password and confirm password do not match or new password is too short (min 8 chars).";
-        }
-    } else {
-        $error = "❌ Current password is incorrect.";
     }
 }
 ?>
@@ -157,262 +134,358 @@ if (!$is_master && isset($_POST['change_password'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Admin</title>
+    <title>Admin Profile - <?= htmlspecialchars($admin['username']) ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* Modern Reset and Typography */
+        /* ====================================================
+           MODERN AESTHETIC CSS (HIGHLY REFINED)
+           ==================================================== */
+        :root {
+            /* Color Palette */
+            --color-primary: #1e88e5; /* Deep Blue - Action */
+            --color-secondary: #00bcd4; /* Cyan - Accent */
+            --color-text: #212529; /* Near Black */
+            --color-text-light: #6c757d; /* Subtle Grey */
+            --color-bg: #f5f8fa; /* Very Light Background */
+            --color-card-bg: #ffffff;
+            --color-hover-bg: #e6f3ff; /* Very Light Blue for Hover */
+
+            /* Shadows and Borders */
+            --shadow-card: 0 0.5rem 1rem rgba(0, 0, 0, 0.08); /* Smoother shadow */
+            --shadow-hover: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12); /* Deeper shadow on hover */
+            --border-radius: 12px;
+            --input-border: #dee2e6;
+        }
+
+        /* General Styling */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: #e9ecef; color: #343a40; min-height: 100vh; }
+        body {
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+        }
+
+        /* Utility */
+        .icon { width: 20px; height: 20px; margin-right: 12px; stroke-width: 2; color: var(--color-primary); }
 
         /* Layout Container */
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 60px auto;
-            padding: 20px;
+            padding: 30px;
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 40px;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
         }
 
         /* Card Styling */
         .card {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        .card:hover {
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+            background: var(--color-card-bg);
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.04);
         }
 
-        /* Profile Info */
-        .profile-info {
+        /* Top Bar Accent (Used for form cards) */
+        .card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px; /* Slightly thinner */
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+        }
+
+        /* Profile Info Card Overrides */
+        .card.profile-info {
             text-align: center;
-            align-items: center;
-            justify-content: center;
-            grid-column: 1 / 2; /* Forces it to the left column */
+            border: none; /* Remove subtle inner border */
+            /* Use linear-gradient for a richer background */
+            background: linear-gradient(135deg, var(--color-card-bg) 95%, #f1f2f6 100%);
+            border-bottom: 5px solid var(--color-secondary);
+            padding-top: 50px; /* More space above picture */
         }
-        .profile-info img {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 6px solid #4e73df;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+        /* Hover Effect */
+        .card:hover {
+            transform: translateY(-5px); /* Stronger lift effect */
+            box-shadow: var(--shadow-hover);
         }
-        .profile-info img:hover { transform: scale(1.08); }
-        .profile-info p {
-            margin: 10px 0;
-            font-size: 15px;
-            color: #6c757d;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px dashed #f1f1f1;
-        }
-        .profile-info strong {
-            color: #343a40;
-            font-weight: 600;
-            font-size: 16px;
+        .card.profile-info:hover {
+            transform: none;
+            box-shadow: var(--shadow-card);
         }
 
         /* Headings */
         h2 {
-            font-size: 32px;
-            color: #4e73df;
-            margin-bottom: 30px;
+            font-size: 32px; /* Larger main title */
+            color: var(--color-primary); /* Primary color for main title */
+            margin-bottom: 20px;
             font-weight: 800;
+            letter-spacing: -0.5px;
         }
-        h3 {
-            font-size: 22px;
-            margin: 30px 0 20px;
-            color: #343a40;
-            padding-bottom: 5px;
+        .card-title {
+            font-size: 20px;
+            margin: 0 0 25px 0;
+            color: var(--color-text);
             font-weight: 700;
-            border-bottom: 2px solid #f1f1f1;
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--input-border); /* Lighter divider */
+        }
+        .card-title .icon {
+            color: var(--color-secondary);
         }
 
-        /* Forms */
-        form { display: flex; flex-direction: column; gap: 15px; }
-        label { font-weight: 600; font-size: 14px; color: #495057; }
+        /* Profile Picture */
+        .profile-info img {
+            width: 160px; /* Larger image */
+            height: 160px;
+            border: 6px solid var(--color-primary); /* Thicker border */
+            margin-bottom: 30px;
+            box-shadow: 0 0 0 10px rgba(30, 136, 229, 0.15); /* Stronger ring effect */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .profile-info img:hover {
+            transform: scale(1.03) rotate(1deg);
+        }
+
+        /* Profile Detail List */
+        .profile-detail-list {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0 0 0;
+            text-align: left;
+        }
+        .profile-detail-list li {
+            padding: 15px 10px; /* More vertical padding */
+            font-size: 15px;
+            border-bottom: 1px dashed var(--input-border); /* Dashed divider for subtlety */
+            border-radius: 4px;
+        }
+        .profile-detail-list li:hover {
+            background-color: var(--color-hover-bg);
+        }
+        .profile-detail-list li:last-child {
+            border-bottom: none;
+        }
+        .profile-detail-list strong {
+            font-weight: 700; /* Bolder label */
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            /* Custom color for icons inside the list */
+        }
+        .profile-detail-list strong .icon {
+            color: var(--color-primary);
+            margin-right: 8px;
+        }
+        .profile-detail-list span {
+            color: var(--color-text-light);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+
+        /* Forms Styling */
+        form { gap: 25px; } /* Increased gap between form sections */
+        .form-group { gap: 8px; }
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.2px;
+        }
+        label .icon { color: var(--color-text-light); }
 
         input[type="text"], input[type="password"], input[type="file"] {
-            padding: 12px 18px;
-            border-radius: 10px;
-            border: 1px solid #ced4da;
-            font-size: 15px;
-            width: 100%;
-            background: #f8f9fa;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            padding: 12px 16px; /* Optimized padding */
+            border-radius: 8px;
+            border: 1px solid var(--input-border); /* Thinner, lighter default border */
+            font-size: 16px;
+            background: var(--color-card-bg);
         }
-        input[type="text"]:focus, input[type="password"]:focus, input[type="file"]:focus {
-            border-color: #4e73df;
-            box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.2);
-            background: #fff;
-            outline: none;
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.1); /* Lighter shadow on focus */
+        }
+        input[type="file"] {
+            padding: 12px 16px;
+            cursor: pointer;
         }
 
         /* Button Styling */
         button {
-            background: linear-gradient(45deg, #4e73df, #6610f2);
-            color: #fff;
+            background: linear-gradient(45deg, var(--color-primary), #0077b6); /* Subtle gradient for depth */
             padding: 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
+            letter-spacing: 1px; /* Clearer button text */
+            box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+            margin-top: 20px;
         }
         button:hover {
-            background: linear-gradient(45deg, #6610f2, #4e73df);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(78, 115, 223, 0.6);
+            background: linear-gradient(45deg, var(--color-secondary), #00a4b6);
+            transform: translateY(-3px); /* Stronger hover effect */
+            box-shadow: 0 8px 18px rgba(0, 188, 212, 0.5);
         }
+        button .icon { margin-right: 8px; color: white; } /* Ensure icons are white */
 
-        /* Message Styles */
+
+        /* Message Styles (More distinct) */
+        .message-box {
+            padding: 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
         .error {
-            background: #fef2f2;
-            color: #b91c1c;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #fca5a5;
-            margin-bottom: 25px;
-            text-align: center;
-            font-weight: 500;
+            background: #fef0f0;
+            color: #c0392b;
+            border-left: 5px solid #c0392b; /* Strong left bar */
         }
         .success {
-            background: #ecfdf5;
-            color: #065f46;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #34d399;
-            margin-bottom: 25px;
-            text-align: center;
-            font-weight: 500;
+            background: #e6f7ed;
+            color: #27ae60;
+            border-left: 5px solid #27ae60;
         }
+        .message-box i { width: 20px; height: 20px; stroke-width: 2.5; margin-right: 10px; }
 
         /* Master Admin Warning */
         .master-warning {
-            margin-top: 25px;
+            margin-top: 40px;
             font-weight: 700;
-            color: #ff4d4f;
-            padding: 10px;
-            border: 1px dashed #ff4d4f;
-            border-radius: 8px;
-            background-color: #fffafa;
+            color: #e67e22; /* Darker amber for contrast */
+            padding: 20px;
+            border: 3px dashed #f39c12;
+            background-color: #fff9e6;
+            border-radius: 10px;
         }
+        .master-warning .icon { color: #f39c12; margin-right: 15px; }
 
         /* Responsive adjustments */
         @media(max-width:992px){
             .container {
-                grid-template-columns: 1fr; /* Stack columns */
+                grid-template-columns: 1fr;
                 gap: 30px;
                 margin: 30px auto;
             }
             .profile-info {
-                grid-column: 1 / 2;
+                order: -1;
+                padding-top: 35px;
             }
-        }
-        @media(max-width:576px){
             .card {
-                padding: 30px 20px;
-                border-radius: 12px;
+                padding: 25px;
             }
-            h2 { font-size: 28px; }
-            h3 { font-size: 20px; margin-top: 20px; }
-            .profile-info img { width: 120px; height: 120px; }
-            .profile-info p { font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
-<?php include '../components/admin_header.php'; // Assuming this provides the main navigation/header ?>
+<?php include '../components/admin_header.php'; // Ensure your header is included ?>
 
 <div class="container">
 
-    <!-- Profile Info Card -->
     <div class="card profile-info">
-        <h2><span style="color:#6610f2;">👤</span> Profile Overview</h2>
+        <h2><?= $lang['profile_overview'] ?></h2>
 
         <img src="../assets/uploads/profile/<?= htmlspecialchars($admin['profile_pic'] ?? 'default.png', ENT_QUOTES, 'UTF-8') ?>" alt="Profile Picture">
 
-        <p>
-            <strong>Username</strong>
-            <span><?= htmlspecialchars($admin['username'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
-        <p>
-            <strong>Email</strong>
-            <span><?= htmlspecialchars($admin['email'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
-        <p>
-            <strong>Status</strong>
-            <span><?= htmlspecialchars(ucfirst($admin['status'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
-        <p>
-            <strong>Account Created</strong>
-            <span><?= htmlspecialchars(date('M d, Y', strtotime($admin['created_at'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
-        <p style="border-bottom: none;">
-            <strong>Last Activity</strong>
-            <span><?= htmlspecialchars(date('H:i A, M d', strtotime($admin['last_login'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
-        </p>
+        <ul class="profile-detail-list">
+            <li>
+                <strong><i data-feather="user" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['username'] ?> :-</strong>
+                <span><?= htmlspecialchars($admin['username'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
+            </li>
+            <li>
+                <strong><i data-feather="mail" class="icon" style="color: var(--color-text-light);"></i> Email :-</strong>
+                <span><?= htmlspecialchars($admin['email'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
+            </li>
+            <li>
+                <strong><i data-feather="activity" class="icon" style="color: var(--color-text-light);"></i> Status :-</strong>
+                <span><?= htmlspecialchars(ucfirst($admin['status'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></span>
+            </li>
+            <li>
+                <strong><i data-feather="calendar" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['account_created'] ?> :-</strong>
+                <span><?= htmlspecialchars(date('M d, Y', strtotime($admin['created_at'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
+            </li>
+            <li>
+                <strong><i data-feather="clock" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['last_activity'] ?> :-</strong>
+                <span><?= htmlspecialchars(date('H:i A, M d', strtotime($admin['last_login'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
+            </li>
+        </ul>
 
         <?php if($is_master): ?>
             <p class="master-warning">
-                ⚠️ Master Admin: Profile settings are locked for security.
+                <i data-feather="lock" class="icon" style="color: #ff9800;"></i>
+                <?= $lang['master_admin_locked'] ?>
             </p>
         <?php endif; ?>
     </div>
 
-    <!-- Update / Password Card for non-master only -->
     <?php if(!$is_master): ?>
         <div class="card">
             <?php if($error): ?>
-                <p class="error"><?= htmlspecialchars($error) ?></p>
+                <p class="message-box error">
+                    <i data-feather="alert-triangle"></i> <?= htmlspecialchars($error) ?>
+                </p>
             <?php endif; ?>
             <?php if($success): ?>
-                <p class="success"><?= htmlspecialchars($success) ?></p>
+                <p class="message-box success">
+                    <i data-feather="check-circle"></i> <?= htmlspecialchars($success) ?>
+                </p>
             <?php endif; ?>
 
-            <h3 style="margin-top: 0;">✏️ Edit Account Details</h3>
+            <h3 class="card-title"><i data-feather="settings" class="icon"></i> <?= $lang['edit_account_details'] ?></h3>
             <form method="POST" enctype="multipart/form-data">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="<?= htmlspecialchars($admin['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                <div class="form-group">
+                    <label for="username"><i data-feather="user-check" class="icon"></i> <?= $lang['username'] ?>:</label>
+                    <input type="text" id="username" name="username" value="<?= htmlspecialchars($admin['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                </div>
 
-                <label for="profile_pic">Change Profile Picture:</label>
-                <input type="file" id="profile_pic" name="profile_pic" accept=".jpg,.jpeg,.png,.gif">
+                <div class="form-group">
+                    <label for="profile_pic"><i data-feather="camera" class="icon"></i> <?= $lang['change_profile_picture'] ?>:</label>
+                    <input type="file" id="profile_pic" name="profile_pic" accept=".jpg,.jpeg,.png,.gif">
+                </div>
 
-                <button type="submit" style="margin-top: 10px;">Save Profile Changes</button>
+                <button type="submit"><i data-feather="save"></i> <?= $lang['save_changes'] ?></button>
             </form>
 
-            <h3>🔑 Update Security Credentials</h3>
+            <h3 class="card-title" style="margin-top: 40px;"><i data-feather="key" class="icon"></i> <?= $lang['update_security_credentials'] ?></h3>
             <form method="POST">
                 <input type="hidden" name="change_password" value="1">
 
-                <label>Current Password:</label>
-                <input type="password" name="current_password" required placeholder="Enter your current password">
+                <div class="form-group">
+                    <label><i data-feather="lock" class="icon"></i> <?= $lang['current_password'] ?>:</label>
+                    <input type="password" name="current_password" required placeholder="••••••••">
+                </div>
 
-                <label>New Password (min 8 chars):</label>
-                <input type="password" name="new_password" required placeholder="New password">
+                <div class="form-group">
+                    <label><i data-feather="unlock" class="icon"></i> <?= $lang['new_password'] ?>:</label>
+                    <input type="password" name="new_password" required placeholder="••••••••">
+                </div>
 
-                <label>Confirm New Password:</label>
-                <input type="password" name="confirm_password" required placeholder="Confirm new password">
+                <div class="form-group">
+                    <label><i data-feather="repeat" class="icon"></i> <?= $lang['confirm_password'] ?>:</label>
+                    <input type="password" name="confirm_password" required placeholder="••••••••">
+                </div>
 
-                <button type="submit">Change Password</button>
+                <button type="submit"><i data-feather="rotate-ccw"></i> <?= $lang['change_password'] ?></button>
             </form>
         </div>
     <?php endif; ?>
 
 </div>
+
+<script>
+    feather.replace();
+</script>
 
 </body>
 </html>

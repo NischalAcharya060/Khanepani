@@ -149,18 +149,46 @@ $lang = [
     "allowed_types" => "केवल JPG, JPEG, PNG, GIF अनुमति छ।",
 
     // Add admin
-    'username' => 'प्रयोगकर्ता नाम',
     'password' => 'पासवर्ड',
-    'password_mismatch' => 'पासवर्डहरू मेल खाँदैनन्।',
     'username_exists' => 'प्रयोगकर्ता नाम पहिले नै अवस्थित छ।',
     'new_admin_added' => 'नयाँ प्रशासक सफलतापूर्वक थपियो!',
     'subtitle_add_admin' => 'ड्यासबोर्ड व्यवस्थापन गर्न नयाँ प्रशासक खाता सिर्जना गर्नुहोस्।',
     'username_placeholder' => 'प्रयोगकर्ता नाम प्रविष्ट गर्नुहोस्',
     'email_placeholder' => 'इमेल प्रविष्ट गर्नुहोस्',
     'password_placeholder' => 'पासवर्ड प्रविष्ट गर्नुहोस्',
-    'confirm_password' => 'पासवर्ड पुष्टि गर्नुहोस्',
     'confirm_password_placeholder' => 'पासवर्ड पुष्टि गर्नुहोस्',
     'optional' => 'ऐच्छिक',
+
+    // Profile
+    'profile_overview' => 'प्रोफाइल अवलोकन',
+    'edit_account_details' => 'खाता विवरण सम्पादन',
+    'update_security_credentials' => 'सुरक्षा विवरण अद्यावधिक गर्नुहोस्',
+    'username' => 'प्रयोगकर्ता नाम',
+    'account_created' => 'खाता सिर्जना गरिएको मिति',
+    'last_activity' => 'अन्तिम गतिविधि',
+    'change_profile_picture' => 'प्रोफाइल तस्वीर परिवर्तन',
+    'save_changes' => 'परिवर्तनहरू सुरक्षित गर्नुहोस्',
+
+    // Password
+    'current_password' => 'हालको पासवर्ड',
+    'new_password' => 'नयाँ पासवर्ड (कम्तिमा ८ अक्षर)',
+    'confirm_password' => 'नयाँ पासवर्ड पुष्टि गर्नुहोस्',
+    'change_password' => 'पासवर्ड परिवर्तन गर्नुहोस्',
+
+    // Messages
+    'master_admin_locked' => 'मास्टर एडमिन: सुरक्षाका लागि प्रोफाइल सेटिङहरू लक गरिएको छ।',
+    'profile_updated' => '✅ प्रोफाइल सफलतापूर्वक अद्यावधिक गरियो! परिवर्तनहरू रिफ्रेस पछि देखिनेछन्।',
+    'no_changes_detected' => '⚠️ कुनै परिवर्तन पाइएको छैन। केही पनि अद्यावधिक गरिएको छैन।',
+    'password_changed' => '✅ पासवर्ड सफलतापूर्वक परिवर्तन गरियो!',
+    'password_mismatch' => '⚠️ नयाँ पासवर्ड र पुष्टि पासवर्ड मिलेन वा पासवर्ड धेरै छोटो छ (कम्तिमा ८ अक्षर)।',
+    'wrong_current_password' => '❌ हालको पासवर्ड गलत छ।',
+    'username_empty' => '⚠️ प्रयोगकर्ता नाम खाली हुन सक्दैन।',
+    'upload_failed' => '❌ प्रोफाइल तस्वीर अपलोड गर्न असफल।',
+    'invalid_file_type' => '❌ अमान्य फाइल प्रकार। JPG, PNG, र GIF मात्र अनुमति छ।',
+
+    // Buttons
+    'save_profile' => 'प्रोफाइल सुरक्षित गर्नुहोस्',
+    'update_password' => 'पासवर्ड अद्यावधिक गर्नुहोस्',
 
     // User side
     "home" => "गृहपृष्ठ",

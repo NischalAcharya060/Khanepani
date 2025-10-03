@@ -44,8 +44,8 @@ $recent_messages = fetchRecent($conn, 'contact_messages', ['name','created_at'])
 $activities = [];
 foreach($recent_notices as $n) $activities[] = ['type'=>'Notice','desc'=>$n['title'],'time'=>$n['created_at']];
 foreach($recent_gallery as $g) $activities[] = ['type'=>'Gallery','desc'=>$g['title'],'time'=>$g['created_at']];
-foreach($recent_admins as $a) $activities[] = ['type'=>'Admin','desc'=>$a['username'].' registered','time'=>$a['created_at']];
-foreach($recent_messages as $m) $activities[] = ['type'=>'Message','desc'=>'Message from '.$m['name'],'time'=>$m['created_at']];
+foreach($recent_admins as $a) $activities[] = ['type'=>'Admin','desc'=>htmlspecialchars($a['username']).' registered','time'=>$a['created_at']];
+foreach($recent_messages as $m) $activities[] = ['type'=>'Message','desc'=>'Message from '.htmlspecialchars($m['name']),'time'=>$m['created_at']];
 
 // Sort by latest
 usort($activities, fn($a,$b) => strtotime($b['time']) - strtotime($a['time']));
@@ -67,8 +67,9 @@ function timeAgo($datetime){
 
 // --- Notices per month ---
 $notices_per_month = [];
+$current_year = date('Y');
 for($i=1;$i<=12;$i++){
-    $res = $conn->query("SELECT COUNT(*) AS c FROM notices WHERE MONTH(created_at)={$i}");
+    $res = $conn->query("SELECT COUNT(*) AS c FROM notices WHERE MONTH(created_at)={$i} AND YEAR(created_at)={$current_year}");
     $notices_per_month[$i] = $res ? $res->fetch_assoc()['c'] : 0;
 }
 
@@ -78,14 +79,12 @@ $res = $conn->query("SELECT type, COUNT(*) AS c FROM contact_messages GROUP BY t
 while($row = $res->fetch_assoc()){
     $messages_count[$row['type']] = $row['c'];
 }
-?>
-<?php
+
 // Include Nepali Date
 include '../config/Nepali_Calendar.php';
 
 $cal = new Nepali_Calendar();
-?>
-<?php
+
 $months_labels = [];
 for($m=1; $m<=12; $m++){
     $eng_year = date('Y');
@@ -95,9 +94,9 @@ for($m=1; $m<=12; $m++){
     $nep_date = $cal->eng_to_nep($eng_year, $eng_month, $eng_day);
 
     if($_SESSION['lang']=='np'){
-        $months_labels[] = $nep_date['nmonth']; // Nepali month name
+        $months_labels[] = $nep_date['nmonth'];
     } else {
-        $months_labels[] = date('F', mktime(0,0,0,$m,1,$eng_year)); // English month name
+        $months_labels[] = date('F', mktime(0,0,0,$m,1,$eng_year));
     }
 }
 ?>
@@ -110,9 +109,11 @@ for($m=1; $m<=12; $m++){
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root{
+            --sidebar-mobile-width: 240px;
+            --sidebar-expanded-width: 240px;
             --primary-color: #007bff;
             --primary-dark: #0056b3;
             --success-color: #28a745;
@@ -123,6 +124,7 @@ for($m=1; $m<=12; $m++){
             --text-dark:#212529;
             --card-background:#ffffff;
             --background-light:#f4f6f9;
+            --border-color: #e9ecef;
             --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
             --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
@@ -131,7 +133,36 @@ for($m=1; $m<=12; $m++){
             background:var(--background-light);
             color:var(--text-dark);
             margin:0;
+            overflow-x: hidden;
         }
+
+        /* --- SLIDING EFFECT FOR MAIN CONTENT --- */
+        .dashboard-wrapper {
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 10;
+            padding-left: 240px; /* Default offset for desktop expanded sidebar */
+            min-height: 100vh;
+        }
+
+        /* Desktop Collapse State: Shift content left */
+        .sidebar-collapsed-state .dashboard-wrapper {
+            padding-left: 70px; /* Offset for collapsed sidebar */
+        }
+
+        /* Mobile Slide State: Shift content right by sidebar width (only on mobile screens) */
+        body.mobile-sidebar-open .dashboard-wrapper {
+            transform: translateX(var(--sidebar-mobile-width));
+            padding-left: 0; /* Clear desktop offset when sidebar is active/sliding */
+        }
+
+        /* Responsive: Disable desktop offset on mobile */
+        @media (max-width: 900px) {
+            .dashboard-wrapper {
+                padding-left: 0;
+            }
+        }
+
         .dashboard{
             padding:30px;
             max-width:1200px;
@@ -325,9 +356,51 @@ for($m=1; $m<=12; $m++){
             margin-left: 8px;
         }
 
+        /* --- Quick Actions Card styling --- */
+        .quick-actions-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+        }
+        .quick-actions-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .action-list{list-style: none; padding: 0; margin: 0;}
+        .action-list a{
+            display:flex;
+            align-items:center;
+            padding:12px;
+            margin-bottom: 8px;
+            background:var(--background-light);
+            border-radius:8px;
+            text-decoration:none;
+            color:var(--text-dark);
+            font-weight:500;
+            transition:background 0.3s,transform 0.1s;
+            border: 1px solid var(--border-color);
+        }
+        .action-list a:hover{
+            background:rgba(0, 123, 255, 0.1);
+            color:var(--primary-color);
+            transform:translateX(5px);
+            border-color: var(--primary-color);
+        }
+        .action-list a svg{margin-right:12px;width:18px;height:18px;}
+
+
         /* Responsive */
-        @media (max-width: 992px) {
+        @media (max-width: 900px) {
             .charts-and-activity{grid-template-columns:1fr;}
+            .dashboard{max-width: 95%;}
+            .charts-and-activity:last-of-type {
+                grid-template-columns: 1fr;
+            }
         }
         @media (max-width: 768px) {
             .dashboard{padding:20px;}
@@ -339,71 +412,73 @@ for($m=1; $m<=12; $m++){
         }
     </style>
 </head>
-<body>
+<body <?php echo 'class="sidebar-expanded-state"' ?>>
 
 <?php include '../components/admin_header.php'; ?>
 
-<div class="dashboard">
-    <h2><?= $lang['welcome_back'] ?? 'Welcome back' ?>, <span class="username-highlight"><?= htmlspecialchars($username) ?></span> 👋</h2>
-    <p class="subtitle"><?= $lang['dashboard_subtitle'] ?? 'Here are your system stats and insights.' ?></p>
+<div class="dashboard-wrapper">
+    <div class="dashboard">
+        <h2><?= $lang['welcome_back'] ?? 'Welcome back' ?>, <span class="username-highlight"><?= htmlspecialchars($username) ?></span> 👋</h2>
+        <p class="subtitle"><?= $lang['dashboard_subtitle'] ?? 'Here are your system stats and insights.' ?></p>
 
-    <div class="stats">
-        <div class="stat-card notices">
-            <div><h3><?= $lang['notices'] ?></h3><p><?= $total_notices ?></p></div>
-            <div class="icon-box"><i data-feather="bell"></i></div>
-        </div>
-        <div class="stat-card gallery">
-            <div><h3><?= $lang['gallery'] ?? 'Gallery' ?></h3><p><?= $total_gallery ?></p></div>
-            <div class="icon-box"><i data-feather="image"></i></div>
-        </div>
-        <div class="stat-card messages">
-            <div><h3><?= $lang['messages'] ?></h3><p><?= $total_messages ?></p></div>
-            <div class="icon-box"><i data-feather="inbox"></i></div>
-        </div>
-        <div class="stat-card admins">
-            <div><h3><?= $lang['admins'] ?? 'Admins' ?></h3><p><?= $total_admins ?></p></div>
-            <div class="icon-box"><i data-feather="users"></i></div>
-        </div>
-    </div>
-
-    <div class="charts-and-activity">
-
-        <div class="chart-card">
-            <h3><i data-feather="bar-chart-2"></i> <?= $lang['notices'] ?> (<?= $lang['per_month'] ?? 'Per Month' ?>)</h3>
-            <canvas id="noticesChart"></canvas>
-        </div>
-
-        <div class="activity-card">
-            <h3><i data-feather="clock"></i> <?= $lang['recent_activity'] ?></h3>
-            <ul class="activity-feed">
-                <?php foreach(array_slice($activities,0,5) as $act): ?>
-                    <li>
-                        <span><?= htmlspecialchars($act['desc']) ?></span>
-                        <span><?= timeAgo($act['time']) ?></span>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-            <div class="view-all-btn-container">
-                <a href="activity.php" class="view-all-btn">
-                    <?= $lang['view_all'] ?> <i data-feather="arrow-right"></i>
-                </a>
+        <div class="stats">
+            <div class="stat-card notices">
+                <div><h3><?= $lang['notices'] ?></h3><p><?= $total_notices ?></p></div>
+                <div class="icon-box"><i data-feather="bell"></i></div>
+            </div>
+            <div class="stat-card gallery">
+                <div><h3><?= $lang['gallery'] ?? 'Gallery' ?></h3><p><?= $total_gallery ?></p></div>
+                <div class="icon-box"><i data-feather="image"></i></div>
+            </div>
+            <div class="stat-card messages">
+                <div><h3><?= $lang['messages'] ?></h3><p><?= $total_messages ?></p></div>
+                <div class="icon-box"><i data-feather="inbox"></i></div>
+            </div>
+            <div class="stat-card admins">
+                <div><h3><?= $lang['admins'] ?? 'Admins' ?></h3><p><?= $total_admins ?></p></div>
+                <div class="icon-box"><i data-feather="users"></i></div>
             </div>
         </div>
-    </div>
 
-    <div class="charts-and-activity" style="grid-template-columns: 2fr 1fr; max-width: 100%;">
-        <div class="chart-card" style="min-height: 350px;">
-            <h3><i data-feather="pie-chart"></i> <?= $lang['messages'] ?> (<?= $lang['by_type'] ?? 'By Type' ?>)</h3>
-            <canvas id="messagesChart" style="max-height: 300px;"></canvas>
-        </div>
-        <div class="chart-card" style="min-height: 350px;">
-            <h3><i data-feather="zap"></i> <?= $lang['quick_actions'] ?? 'Quick Actions' ?></h3>
-            <div style="padding-top: 10px; font-size: 15px; color: var(--secondary-color);">
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><a href="add_notice.php" style="text-decoration: none; color: var(--primary-color); font-weight: 500;"><i data-feather="plus-circle" style="width: 16px; height: 16px; margin-right: 5px;"></i> <?= $lang['add_notice'] ?? 'Add Notice' ?></a></li>
-                    <li style="margin-bottom: 10px;"><a href="manage_gallery.php" style="text-decoration: none; color: var(--primary-color); font-weight: 500;"><i data-feather="image" style="width: 16px; height: 16px; margin-right: 5px;"></i> <?= $lang['manage_gallery'] ?? 'Manage Gallery' ?></a></li>
-                    <li style="margin-bottom: 10px;"><a href="messages.php" style="text-decoration: none; color: var(--primary-color); font-weight: 500;"><i data-feather="mail" style="width: 16px; height: 16px; margin-right: 5px;"></i> <?= $lang['view_messages'] ?? 'View Messages' ?></a></li>
+        <div class="charts-and-activity">
+            <div class="chart-card">
+                <h3><i data-feather="bar-chart-2"></i> <?= $lang['notices'] ?> (<?= $lang['per_month'] ?? 'Per Month' ?>)</h3>
+                <canvas id="noticesChart"></canvas>
+            </div>
+
+            <div class="activity-card">
+                <h3><i data-feather="clock"></i> <?= $lang['recent_activity'] ?></h3>
+                <ul class="activity-feed">
+                    <?php foreach(array_slice($activities,0,5) as $act): ?>
+                        <li>
+                            <span><?= htmlspecialchars($act['desc']) ?></span>
+                            <span><?= timeAgo($act['time']) ?></span>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
+                <div class="view-all-btn-container">
+                    <a href="activity.php" class="view-all-btn">
+                        <?= $lang['view_all'] ?> <i data-feather="arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-and-activity" style="grid-template-columns: 2fr 1fr; max-width: 100%;">
+            <div class="chart-card" style="min-height: 350px;">
+                <h3><i data-feather="pie-chart"></i> <?= $lang['messages'] ?> (<?= $lang['by_type'] ?? 'By Type' ?>)</h3>
+                <canvas id="messagesChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <div class="quick-actions-card" style="min-height: 350px;">
+                <h3><i data-feather="zap"></i> <?= $lang['quick_actions'] ?? 'Quick Actions' ?></h3>
+                <div class="action-list">
+                    <a href="add_notice.php"><i data-feather="plus-circle"></i> <?= $lang['add_notice'] ?? 'Add New Notice' ?></a>
+                    <a href="manage_notices.php"><i data-feather="file-text"></i> <?= $lang['manage_notices'] ?? 'Manage Notices' ?></a>
+                    <a href="add_gallery_image.php"><i data-feather="camera"></i> <?= $lang['add_image'] ?? 'Upload Image' ?></a>
+                    <a href="messages.php"><i data-feather="mail"></i> <?= $lang['view_messages'] ?? 'View Messages' ?></a>
+                    <a href="add_admin.php"><i data-feather="user-plus"></i> <?= $lang['add_new_admin'] ?? 'Add New Admin' ?></a>
+                </div>
             </div>
         </div>
     </div>
@@ -412,8 +487,7 @@ for($m=1; $m<=12; $m++){
 <script>
     feather.replace();
 
-    // Notices Chart
-    new Chart(document.getElementById('noticesChart'), {
+    const noticesChart = new Chart(document.getElementById('noticesChart'), {
         type: 'bar',
         data: {
             labels: <?= json_encode($months_labels, JSON_UNESCAPED_UNICODE) ?>,
@@ -433,39 +507,20 @@ for($m=1; $m<=12; $m++){
                 legend: { display: false }
             },
             scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { family: 'Roboto' } }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'var(--border-color)' }
-                }
+                x: { grid: { display: false }, ticks: { font: { family: 'Roboto' } } },
+                y: { beginAtZero: true, grid: { color: 'var(--border-color)' } }
             }
         }
     });
 
-    // Messages Chart
-    new Chart(document.getElementById('messagesChart'), {
+    const messagesChart = new Chart(document.getElementById('messagesChart'), {
         type: 'doughnut',
         data: {
             labels: ['General','Complaint','Suggestion'],
             datasets: [{
-                data: [
-                    <?= $messages_count['general'] ?>,
-                    <?= $messages_count['complaint'] ?>,
-                    <?= $messages_count['suggestion'] ?>
-                ],
-                backgroundColor: [
-                    'var(--success-color)',
-                    'var(--danger-color)',
-                    'var(--warning-color)'
-                ],
-                hoverBackgroundColor: [
-                    '#157347',
-                    '#bb2124',
-                    '#d39e00'
-                ],
+                data: [<?= $messages_count['general'] ?>, <?= $messages_count['complaint'] ?>, <?= $messages_count['suggestion'] ?>],
+                backgroundColor: ['var(--success-color)','var(--danger-color)','var(--warning-color)'],
+                hoverBackgroundColor: ['#157347','#bb2124','#d39e00'],
                 borderWidth: 2
             }]
         },
@@ -473,27 +528,8 @@ for($m=1; $m<=12; $m++){
             responsive: true,
             aspectRatio: 1.2,
             plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 15,
-                        font: { family: 'Roboto' }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed !== null) {
-                                label += context.parsed;
-                            }
-                            return label;
-                        }
-                    }
-                }
+                legend: { position: 'right', labels: { boxWidth: 15, font: { family: 'Roboto' } } },
+                tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } if (context.parsed !== null) { label += context.parsed; } return label; } } }
             }
         }
     });
