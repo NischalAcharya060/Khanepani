@@ -18,22 +18,24 @@ if (isset($_GET['lang'])) {
         $_SESSION['lang'] = $_GET['lang'];
     }
 }
-include '../lang/' . $_SESSION['lang'] . '.php';
+// Ensure lang file is included after session is set
+include '../lang/' . ($_SESSION['lang'] ?? 'en') . '.php';
 
 // Pagination settings
-$limit = 5;
+$limit = 10; // Increased limit for a better view
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $limit;
 
 // Fetch recent activities from multiple tables
+// Note: We use the Nepali description key for "New notice" in the SQL as the type_desc field should be easily parsable/readable regardless of language context here.
 $activities_query = "
-    SELECT 'New notice: ' AS type_desc, title AS title, created_at AS time FROM notices
+    SELECT CONCAT('".$lang['notice_label'].": ', title) AS type_desc, created_at AS time, 'notice' AS source_type FROM notices
     UNION ALL
-    SELECT CONCAT('New message (', type, '): ', message) AS type_desc, '' AS title, created_at AS time FROM contact_messages
+    SELECT CONCAT('".$lang['message'].": ', SUBSTRING(message, 1, 50), '...') AS type_desc, created_at AS time, 'message' AS source_type FROM contact_messages
     UNION ALL
-    SELECT CONCAT('New gallery item: ', title) AS type_desc, '' AS title, created_at AS time FROM gallery
+    SELECT CONCAT('".$lang['image'].": ', title) AS type_desc, created_at AS time, 'gallery' AS source_type FROM gallery
     UNION ALL
-    SELECT CONCAT('New admin: ', username) AS type_desc, '' AS title, created_at AS time FROM admins
+    SELECT CONCAT('".$lang['add_new_admin'].": ', username) AS type_desc, created_at AS time, 'admin' AS source_type FROM admins
     ORDER BY time DESC
     LIMIT $offset, $limit
 ";
@@ -61,7 +63,7 @@ include '../config/Nepali_Calendar.php';
 $cal = new Nepali_Calendar();
 
 function format_nepali_date($date_str, $cal) {
-    if (!$date_str) return '—'; // handle empty dates
+    if (!$date_str) return '—';
 
     $timestamp = strtotime($date_str);
     $year  = (int)date('Y', $timestamp);
@@ -87,37 +89,82 @@ function format_nepali_date($date_str, $cal) {
     }
 }
 
+// Function to get a relevant icon for the activity type
+function getActivityIcon($source_type) {
+    switch ($source_type) {
+        case 'notice': return 'file-text';
+        case 'message': return 'inbox';
+        case 'gallery': return 'image';
+        case 'admin': return 'user-plus';
+        default: return 'activity';
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= $_SESSION['lang'] ?>">
 <head>
     <meta charset="UTF-8">
     <title><?= $lang['recent_activity'] ?? 'Recent Activity' ?> - <?= $lang['logo'] ?></title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
+        /* --- Aesthetic Variables (Consistent with other files) --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --background-light: #f4f6f9;
+            --card-background: #ffffff;
+            --border-color: #e9ecef;
+            --text-dark: #343a40;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        /* --- Main Layout --- */
         main {
             padding: 30px;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
         h2 {
             font-size: 28px;
+            font-weight: 700;
             margin-bottom: 5px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+        h2 svg {
+            margin-right: 10px;
+            width: 28px;
+            height: 28px;
         }
 
         .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 15px;
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+            font-size: 16px;
         }
 
+        /* --- Card and Table Styling --- */
         .card {
-            background: #fff;
-            padding: 20px;
+            background: var(--card-background);
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-light);
+            overflow-x: auto; /* Handle responsive table */
         }
 
         table {
@@ -125,74 +172,135 @@ function format_nepali_date($date_str, $cal) {
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden; /* For rounded corners on the table */
         }
 
         th, td {
-            padding: 12px 10px;
+            padding: 15px;
             text-align: left;
+            font-size: 15px;
         }
 
+        /* Table Header */
         th {
-            background: #f5f5f5;
+            background: var(--primary-color);
             font-weight: 600;
-            font-size: 14px;
-            color: #333;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 13px;
         }
 
-        tbody tr:nth-child(odd) {
-            background: #fafafa;
+        /* Table Body */
+        tbody tr {
+            transition: background 0.3s ease;
         }
-
+        tbody tr:nth-child(even) {
+            background: #fcfcfc;
+        }
         tbody tr:hover {
-            background: #f1f7ff;
+            background: #e9f0ff; /* Light primary hover color */
         }
 
+        /* Activity column style */
+        .activity-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .activity-cell svg {
+            color: var(--secondary-color);
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Time column style */
+        .time-cell {
+            color: #555;
+            font-size: 14px;
+        }
+
+        /* --- Pagination --- */
         .pagination {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .pagination a {
-            display: inline-block;
-            padding: 6px 12px;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
             margin: 0 4px;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            color: #007bff;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
             text-decoration: none;
+            font-weight: 500;
             transition: all 0.2s ease;
         }
 
-        .pagination a:hover {
-            background: #007bff;
-            color: #fff;
+        .pagination a:hover:not(.active) {
+            background: #e9ecef;
         }
 
         .pagination a.active {
-            background: #007bff;
+            background: var(--primary-color);
             color: #fff;
-            border-color: #0056b3;
+            border-color: var(--primary-dark);
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
         }
 
-        /* Responsive table scroll */
-        @media (max-width: 600px) {
+        /* Responsive table transformation */
+        @media (max-width: 768px) {
+            main {
+                padding: 20px 15px;
+            }
+            .card {
+                padding: 15px;
+            }
             table, thead, tbody, th, td, tr {
                 display: block;
             }
-            th {
-                display: none;
+            thead {
+                display: none; /* Hide original header */
             }
             td {
-                padding: 10px;
-                border-bottom: 1px solid #eee;
+                padding: 12px;
+                border: none;
+                border-bottom: 1px dashed var(--border-color);
                 position: relative;
+                text-align: right;
+            }
+            td:last-child {
+                border-bottom: 0;
             }
             td::before {
                 content: attr(data-label);
                 font-weight: 600;
-                display: inline-block;
-                width: 100px;
-                color: #555;
+                display: block;
+                float: left;
+                text-transform: uppercase;
+                font-size: 12px;
+                color: var(--secondary-color);
+            }
+            .activity-cell {
+                justify-content: flex-end;
+            }
+            .activity-cell svg {
+                float: left;
+                margin-right: 0;
+            }
+            /* Adjust S.N. to be left-aligned for clarity */
+            td[data-label="<?= $lang['sn'] ?? 'S.N.' ?>"] {
+                text-align: left;
+                font-weight: bold;
+                color: var(--primary-dark);
+            }
+            td[data-label="<?= $lang['sn'] ?? 'S.N.' ?>"]::before {
+                display: none;
             }
         }
     </style>
@@ -202,16 +310,16 @@ function format_nepali_date($date_str, $cal) {
 <?php include '../components/admin_header.php'; ?>
 
 <main>
-    <h2>🕒 <?= $lang['recent_activity'] ?? 'Recent Activity' ?></h2>
+    <h2><i data-feather="activity"></i> <?= $lang['recent_activity'] ?? 'Recent Activity' ?></h2>
     <p class="subtitle"><?= $lang['activity_subtitle'] ?? 'Here are the latest activities in the system.' ?></p>
 
     <div class="card">
         <table>
             <thead>
             <tr>
-                <th><?= $lang['sn'] ?? 'S.N.' ?></th>
-                <th><?= $lang['activity_desc'] ?? 'Activity' ?></th>
-                <th><?= $lang['time'] ?? 'Time' ?></th>
+                <th style="width: 5%;"><?= $lang['sn'] ?? 'S.N.' ?></th>
+                <th style="width: 60%;"><?= $lang['activity_desc'] ?? 'Activity' ?></th>
+                <th style="width: 35%;"><?= $lang['time'] ?? 'Time' ?></th>
             </tr>
             </thead>
             <tbody>
@@ -220,20 +328,26 @@ function format_nepali_date($date_str, $cal) {
                 <?php while ($act = $activities->fetch_assoc()): ?>
                     <tr>
                         <td data-label="<?= $lang['sn'] ?? 'S.N.' ?>"><?= $sn++ ?></td>
-                        <td data-label="<?= $lang['activity_desc'] ?? 'Activity' ?>"><?= htmlspecialchars($act['type_desc']) ?></td>
-                        <td data-label="<?= $lang['time'] ?? 'Time' ?>">
+                        <td data-label="<?= $lang['activity_desc'] ?? 'Activity' ?>" class="activity-cell">
+                            <i data-feather="<?= getActivityIcon($act['source_type']) ?>"></i>
+                            <span><?= htmlspecialchars($act['type_desc']) ?></span>
+                        </td>
+                        <td data-label="<?= $lang['time'] ?? 'Time' ?>" class="time-cell">
                             <?= format_nepali_date($act['time'], $cal) ?>
-                        </td>                    </tr>
+                        </td>
+                    </tr>
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="3" style="text-align:center; padding:20px;"><?= $lang['no_activity'] ?? 'No activities found.' ?></td>
+                    <td colspan="3" style="text-align:center; padding:30px; color:var(--secondary-color);">
+                        <i data-feather="info" style="width:20px; height:20px;"></i>
+                        <?= $lang['no_activity'] ?? 'No activities found.' ?>
+                    </td>
                 </tr>
             <?php endif; ?>
             </tbody>
         </table>
 
-        <!-- Pagination -->
         <div class="pagination">
             <?php if($page>1): ?>
                 <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?? '« Previous' ?></a>
@@ -242,9 +356,30 @@ function format_nepali_date($date_str, $cal) {
             <?php
             $start = max(1, $page-2);
             $end = min($total_pages, $page+2);
+            if ($total_pages > 5) {
+                // Logic to show first page, dots, current page range, dots, last page
+                if ($start > 1) {
+                    echo '<a href="?page=1">1</a>';
+                    if ($start > 2) {
+                        echo '<span style="padding: 6px 12px; color: var(--secondary-color);">...</span>';
+                    }
+                }
+            }
+
             for($p=$start;$p<=$end;$p++): ?>
                 <a href="?page=<?= $p ?>" class="<?= ($p==$page)?'active':'' ?>"><?= $p ?></a>
             <?php endfor; ?>
+
+            <?php
+            if ($total_pages > 5) {
+                if ($end < $total_pages) {
+                    if ($end < $total_pages - 1) {
+                        echo '<span style="padding: 6px 12px; color: var(--secondary-color);">...</span>';
+                    }
+                    echo '<a href="?page='.$total_pages.'">'.$total_pages.'</a>';
+                }
+            }
+            ?>
 
             <?php if($page<$total_pages): ?>
                 <a href="?page=<?= $page+1 ?>"><?= $lang['next'] ?? 'Next »' ?></a>
@@ -253,6 +388,11 @@ function format_nepali_date($date_str, $cal) {
 
     </div>
 </main>
+
+<script>
+    // Initialize Feather Icons
+    feather.replace();
+</script>
 
 </body>
 </html>

@@ -9,6 +9,7 @@ $lang = [
     "manage_gallery" => "Manage Gallery",
     "messages" => "Messages",
     "manage_admin" => "Manage Admin",
+    "add_new_admin" => "Add New Admin",
     "settings" => "Settings",
     "logout" => "Logout",
     "unread_messages" => "Unread Messages",
@@ -31,6 +32,13 @@ $lang = [
     "no_admins" => "No admins available.",
     "subtitle_admin" => "Ban/unban admin accounts (Master Admin excluded).",
     "admins" => "Admins",
+    'role' => 'Role',
+    'roles' => 'Roles',
+    'select_role' => 'Select Role',
+    'role_assigned' => 'Role assigned successfully.',
+    'role_not_found' => 'Role not found.',
+    'no_roles' => 'No roles available.',
+    'role_description' => 'Select a role for this admin.',
 
     // Notices
     "notices" => "Notices",
@@ -177,6 +185,16 @@ $lang = [
     'pdf_preview' => 'PDF Preview',
     'doc_preview' => 'Document Preview',
     'preview_not_supported' => 'Preview not supported for this file type. Please download.',
+
+    // --- NEW KEYS ADDED FOR AESTHETICS/FILE HANDLING ---
+    'attachments' => 'Attachments',
+    'file_preview' => 'File Preview',
+    'click_to_view' => 'Click to view/download the file',
+    'click_to_zoom' => 'Click to zoom in',
+    'preview_not_supported_download' => 'Preview not available for this file type. Would you like to download it?',
+    'important_documents' => 'Important Documents',
+    'document_type' => 'Document Type',
+    // --- END NEW KEYS ---
 
     //User Gallery
     'photo_gallery' => 'Photo Gallery',

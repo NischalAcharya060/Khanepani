@@ -43,7 +43,10 @@ function format_nepali_date($date_str, $cal) {
     $minute = (int)date('i', $timestamp);
     $ampm  = date('A', $timestamp);
 
-    if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
+    // Get current language from session or default to English
+    $current_lang = $_SESSION['lang'] ?? 'en';
+
+    if ( $current_lang === 'np' ) {
         $nepDate = $cal->eng_to_nep($year, $month, $day);
         $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
 
@@ -72,77 +75,154 @@ $unread = $countResult->fetch_assoc()['unread_count'];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= $lang['view'] ?> - <?= $lang['logo'] ?></title>
+    <title><?= $lang['view'] ?> <?= $lang['message'] ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        body { font-family: 'Roboto', sans-serif; background: #f4f6f9; margin: 0; }
-        .main-content { padding: 40px 20px; max-width: 900px; margin: auto; }
+        /* --- General Styling and Layout --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --background-light: #f4f6f9;
+            --card-background: #ffffff;
+            --border-color: #e9ecef;
+            --text-dark: #343a40;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--background-light);
+            margin: 0;
+        }
+
+        .main-content {
+            padding: 30px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* --- Back Button Styling --- */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 25px;
+            background: var(--secondary-color);
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        .back-btn svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+        }
+
+        /* --- Message Card --- */
         .message-card {
-            background: #fff;
+            background: var(--card-background);
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            padding: 30px 35px;
-            animation: fadeInUp 0.4s ease;
+            box-shadow: var(--shadow-light);
+            padding: 30px 40px;
         }
 
         .message-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
         }
-        .message-header h2 { color: #007bff; margin: 0; font-size: 28px; }
-        .message-header a {
-            text-decoration: none;
-            color: #fff;
-            background: #007bff;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+        .message-header h2 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
         }
-        .message-header a:hover { background: #0056b3; }
+        .message-header h2 svg {
+            margin-right: 10px;
+            width: 28px;
+            height: 28px;
+        }
 
-        .message-field { margin-bottom: 18px; }
-        .message-label { font-weight: 600; color: #555; display: block; margin-bottom: 6px; font-size: 14px; }
-        .message-value {
-            background: #f4f6f9;
-            padding: 12px 14px;
+        /* --- Metadata Grid --- */
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .message-field {
+            background: var(--background-light);
+            padding: 15px;
             border-radius: 8px;
+        }
+
+        .message-label {
+            font-weight: 500;
+            color: var(--secondary-color);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .message-value {
+            font-size: 16px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        .message-value.email { color: var(--primary-color); }
+
+        /* --- Main Message Body --- */
+        .message-body {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            background: #fff;
+        }
+        .message-body-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            font-size: 18px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .message-body-content {
             white-space: pre-wrap;
             word-wrap: break-word;
             font-size: 15px;
-            color: #333;
-        }
-        .message-value.email { color: #007bff; font-weight: 500; }
-
-        /* Notification */
-        .notification {
-            position: relative;
-            margin-right: 20px;
-            cursor: pointer;
-        }
-        .notification i {
-            font-size: 22px;
-            color: #333;
-        }
-        .notification .badge {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background: red;
-            color: white;
-            font-size: 12px;
-            padding: 3px 6px;
-            border-radius: 50%;
+            line-height: 1.6;
+            color: #495057;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content { padding: 20px 15px; }
+            .message-card { padding: 25px 20px; }
+            .metadata-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -151,38 +231,52 @@ $unread = $countResult->fetch_assoc()['unread_count'];
 <?php include '../components/admin_header.php'; ?>
 
 <main class="main-content">
+
+    <a href="messages.php" class="back-btn">
+        <i data-feather="arrow-left"></i>
+        <?= $lang['back'] ?? 'Back to Messages' ?>
+    </a>
+
     <div class="message-card">
         <div class="message-header">
-            <h2>📬 <?= $lang['view'] ?> <?= $lang['message'] ?></h2>
-            <a href="messages.php">« <?= $lang['back'] ?></a>
+            <h2><i data-feather="mail"></i> <?= $lang['view'] ?> <?= $lang['message'] ?></h2>
         </div>
 
-        <div class="message-field">
-            <span class="message-label"><?= $lang['name'] ?></span>
-            <div class="message-value"><?= htmlspecialchars($message['name']) ?></div>
+        <div class="metadata-grid">
+
+            <div class="message-field">
+                <span class="message-label"><i data-feather="user" style="width:14px; height:14px;"></i> <?= $lang['name'] ?></span>
+                <div class="message-value"><?= htmlspecialchars($message['name']) ?></div>
+            </div>
+
+            <div class="message-field">
+                <span class="message-label"><i data-feather="mail" style="width:14px; height:14px;"></i> <?= $lang['email'] ?></span>
+                <div class="message-value email"><?= htmlspecialchars($message['email']) ?></div>
+            </div>
+
+            <div class="message-field">
+                <span class="message-label"><i data-feather="clock" style="width:14px; height:14px;"></i> <?= $lang['date'] ?></span>
+                <div class="message-value"><?= format_nepali_date($message['created_at'], $cal) ?></div>
+            </div>
+
+            <div class="message-field">
+                <span class="message-label"><i data-feather="tag" style="width:14px; height:14px;"></i> <?= $lang['subject'] ?></span>
+                <div class="message-value"><?= htmlspecialchars($message['subject']) ?></div>
+            </div>
+
         </div>
 
-        <div class="message-field">
-            <span class="message-label"><?= $lang['email'] ?></span>
-            <div class="message-value email"><?= htmlspecialchars($message['email']) ?></div>
-        </div>
-
-        <div class="message-field">
-            <span class="message-label"><?= $lang['subject'] ?></span>
-            <div class="message-value"><?= htmlspecialchars($message['subject']) ?></div>
-        </div>
-
-        <div class="message-field">
-            <span class="message-label"><?= $lang['message'] ?></span>
-            <div class="message-value"><?= nl2br(htmlspecialchars($message['message'])) ?></div>
-        </div>
-
-        <div class="message-field">
-            <span class="message-label"><?= $lang['date'] ?></span>
-            <div class="message-value"><?= format_nepali_date($message['created_at'], $cal) ?></div>
+        <div class="message-body">
+            <div class="message-body-label"><i data-feather="message-square"></i> <?= $lang['message'] ?>:</div>
+            <div class="message-body-content"><?= nl2br(htmlspecialchars($message['message'])) ?></div>
         </div>
     </div>
 </main>
+
+<script>
+    // Initialize Feather Icons
+    feather.replace();
+</script>
 
 </body>
 </html>

@@ -109,38 +109,234 @@ for($m=1; $m<=12; $m++){
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root{
-            --primary:#4e73df;--success:#1cc88a;--warning:#f6c23e;--danger:#e74a3b;--info:#36b9cc;
-            --text-dark:#212529;--text-light:#f8f9fa;
-            --card-bg:rgba(255,255,255,0.85);--background:#f4f6f9;
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --secondary-color: #6c757d;
+            --text-dark:#212529;
+            --card-background:#ffffff;
+            --background-light:#f4f6f9;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
-        body{font-family:'Inter',sans-serif;background:var(--background);color:var(--text-dark);margin:0;transition:background 0.3s,color 0.3s;}
-        .dashboard{padding:30px;max-width:1000px;margin:auto;}
-        .dashboard h2{font-size:26px;font-weight:700;margin-bottom:8px;background:linear-gradient(90deg,var(--primary),var(--info));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-        .subtitle{color:#6c757d;margin-bottom:30px;}
-        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-bottom:40px;}
-        .stat-card{backdrop-filter:blur(10px);background:var(--card-bg);padding:22px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);transition:transform 0.25s ease,box-shadow 0.25s ease;}
-        .stat-card:hover{transform:translateY(-6px);box-shadow:0 10px 28px rgba(0,0,0,0.15);}
-        .stat-card h3{font-size:15px;margin-bottom:8px;color:#888;font-weight:600;}
-        .stat-card p{font-size:32px;font-weight:700;margin:0;}
-        .notices{border-left:6px solid var(--info);}
-        .gallery{border-left:6px solid var(--success);}
-        .messages{border-left:6px solid var(--warning);}
-        .admins{border-left:6px solid var(--danger);}
-        .charts{display:grid;grid-template-columns:2fr 1fr;gap:28px;margin-bottom:40px;}
-        .chart-card{background:var(--card-bg);border-radius:16px;padding:22px;box-shadow:0 4px 14px rgba(0,0,0,0.08);transition:transform 0.2s ease;}
-        .chart-card:hover{transform:translateY(-4px);}
-        .chart-card h3{font-size:17px;font-weight:600;margin-bottom:18px;border-bottom:1px solid rgba(0,0,0,0.05);padding-bottom:8px;color:var(--primary);}
-        .chart-card canvas{height:300px !important;}
-        .activity-card{background:var(--card-bg);border-radius:16px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.08);}
-        .activity-card h3{font-size:17px;margin-bottom:15px;font-weight:600;color:var(--primary);}
-        .activity-feed{list-style:none;padding:0;margin:0;}
-        .activity-feed li{padding:10px 0;border-bottom:1px dashed rgba(0,0,0,0.08);font-size:15px;}
-        .activity-feed li span{float:right;font-size:12px;color:#999;}
-        .view-all-btn{display:inline-block;padding:8px 16px;background:var(--primary);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;transition:background 0.3s;}
-        .view-all-btn:hover{background:#2e59d9;}
+        body{
+            font-family:'Roboto',sans-serif;
+            background:var(--background-light);
+            color:var(--text-dark);
+            margin:0;
+        }
+        .dashboard{
+            padding:30px;
+            max-width:1200px;
+            margin:auto;
+        }
+        .dashboard h2{
+            font-size:32px;
+            font-weight:900;
+            margin-bottom:8px;
+            color:var(--text-dark);
+        }
+        .dashboard h2 .username-highlight {
+            color:var(--primary-color);
+            margin-left: 5px;
+        }
+        .subtitle{
+            color:var(--secondary-color);
+            margin-bottom:30px;
+            font-size:16px;
+        }
+
+        /* --- Stat Cards --- */
+        .stats{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            gap:20px;
+            margin-bottom:40px;
+        }
+        .stat-card{
+            background:var(--card-background);
+            padding:25px;
+            border-radius:12px;
+            box-shadow:var(--shadow-light);
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            transition:transform 0.3s ease,box-shadow 0.3s ease;
+            position:relative;
+            overflow:hidden;
+        }
+        .stat-card:hover{
+            transform:translateY(-5px);
+            box-shadow:var(--shadow-hover);
+        }
+        .stat-card::before{
+            content:'';
+            position:absolute;
+            top:0;bottom:0;left:0;
+            width:8px;
+            transition: width 0.3s ease;
+        }
+        .stat-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        .stat-card .icon-box{
+            background:rgba(0,0,0,0.05);
+            padding:12px;
+            border-radius:50%;
+            height:50px;width:50px;
+            display:flex;align-items:center;justify-content:center;
+            margin-left:15px;
+        }
+        .stat-card .icon-box svg{width:24px;height:24px;stroke-width:2;}
+
+        .stat-card.notices::before{background:var(--info-color);}
+        .stat-card.notices .icon-box{color:var(--info-color);}
+
+        .stat-card.gallery::before{background:var(--success-color);}
+        .stat-card.gallery .icon-box{color:var(--success-color);}
+
+        .stat-card.messages::before{background:var(--warning-color);}
+        .stat-card.messages .icon-box{color:var(--warning-color);}
+
+        .stat-card.admins::before{background:var(--danger-color);}
+        .stat-card.admins .icon-box{color:var(--danger-color);}
+
+        .stat-card h3{font-size:14px;margin-bottom:5px;color:var(--secondary-color);font-weight:600;text-transform:uppercase;}
+        .stat-card p{font-size:36px;font-weight:900;margin:0;color:var(--text-dark);}
+
+        /* --- Layout Grid (Charts & Activity) --- */
+        .charts-and-activity{
+            display:grid;
+            grid-template-columns:3fr 1fr;
+            gap:30px;
+            margin-bottom:40px;
+        }
+
+        /* --- Chart Card --- */
+        .chart-card{
+            background:var(--card-background);
+            border-radius:12px;
+            padding:25px;
+            box-shadow:var(--shadow-light);
+            transition:box-shadow 0.3s ease;
+        }
+        .chart-card:hover{box-shadow:var(--shadow-hover);}
+        .chart-card h3{
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:20px;
+            border-bottom:1px solid var(--border-color);
+            padding-bottom:10px;
+            color:var(--primary-color);
+            display:flex;
+            align-items:center;
+        }
+        .chart-card h3 svg {
+            margin-right: 8px;
+        }
+        .chart-card canvas{
+            height:300px !important;
+        }
+
+        /* --- Activity Feed --- */
+        .activity-card{
+            background:var(--card-background);
+            border-radius:12px;
+            padding:25px;
+            box-shadow:var(--shadow-light);
+            display:flex;
+            flex-direction:column;
+        }
+        .activity-card h3{
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:20px;
+            color:var(--primary-color);
+            display:flex;
+            align-items:center;
+            border-bottom:none;
+        }
+        .activity-card h3 svg {
+            margin-right: 8px;
+        }
+
+        .activity-feed{list-style:none;padding:0;margin:0; flex-grow: 1;}
+        .activity-feed li{
+            padding:12px 0;
+            border-bottom:1px dashed var(--border-color);
+            font-size:15px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            transition: background 0.1s;
+        }
+        .activity-feed li:last-child{border-bottom:none;}
+        .activity-feed li:hover{
+            background: rgba(0, 123, 255, 0.05);
+            padding-left: 5px;
+        }
+        .activity-feed li span:first-child{
+            font-weight:500;
+            color:var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+        }
+        .activity-feed li span:last-child{
+            font-size:13px;
+            color:var(--secondary-color);
+            flex-shrink: 0;
+        }
+
+        .view-all-btn-container {
+            text-align:center;
+            margin-top:20px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+        .view-all-btn{
+            display:inline-flex;
+            align-items:center;
+            padding:10px 20px;
+            background:var(--primary-color);
+            color:#fff;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:600;
+            transition:background 0.3s;
+        }
+        .view-all-btn:hover{
+            background:var(--primary-dark);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+        }
+        .view-all-btn svg {
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .charts-and-activity{grid-template-columns:1fr;}
+        }
+        @media (max-width: 768px) {
+            .dashboard{padding:20px;}
+            .stats{grid-template-columns:1fr;}
+            .stat-card p{font-size:32px;}
+            .activity-feed li span:first-child {
+                max-width: 60%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -148,38 +344,74 @@ for($m=1; $m<=12; $m++){
 <?php include '../components/admin_header.php'; ?>
 
 <div class="dashboard">
-    <h2><?= $lang['welcome_back'] ?? 'Welcome back' ?>, <?= htmlspecialchars($username) ?> 👋</h2>
+    <h2><?= $lang['welcome_back'] ?? 'Welcome back' ?>, <span class="username-highlight"><?= htmlspecialchars($username) ?></span> 👋</h2>
     <p class="subtitle"><?= $lang['dashboard_subtitle'] ?? 'Here are your system stats and insights.' ?></p>
 
-    <!-- Stats -->
     <div class="stats">
-        <div class="stat-card notices"><h3>📢 <?= $lang['notices'] ?></h3><p><?= $total_notices ?></p></div>
-        <div class="stat-card gallery"><h3>🖼 <?= $lang['gallery'] ?? 'Gallery' ?></h3><p><?= $total_gallery ?></p></div>
-        <div class="stat-card messages"><h3>📬 <?= $lang['messages'] ?></h3><p><?= $total_messages ?></p></div>
-        <div class="stat-card admins"><h3>👤 <?= $lang['admins'] ?? 'Admins' ?></h3><p><?= $total_admins ?></p></div>
+        <div class="stat-card notices">
+            <div><h3><?= $lang['notices'] ?></h3><p><?= $total_notices ?></p></div>
+            <div class="icon-box"><i data-feather="bell"></i></div>
+        </div>
+        <div class="stat-card gallery">
+            <div><h3><?= $lang['gallery'] ?? 'Gallery' ?></h3><p><?= $total_gallery ?></p></div>
+            <div class="icon-box"><i data-feather="image"></i></div>
+        </div>
+        <div class="stat-card messages">
+            <div><h3><?= $lang['messages'] ?></h3><p><?= $total_messages ?></p></div>
+            <div class="icon-box"><i data-feather="inbox"></i></div>
+        </div>
+        <div class="stat-card admins">
+            <div><h3><?= $lang['admins'] ?? 'Admins' ?></h3><p><?= $total_admins ?></p></div>
+            <div class="icon-box"><i data-feather="users"></i></div>
+        </div>
     </div>
 
-    <!-- Charts -->
-    <div class="charts">
-        <div class="chart-card"><h3>📈 <?= $lang['notices'] ?> (<?= $lang['per_month'] ?? 'Per Month' ?>)</h3><canvas id="noticesChart"></canvas></div>
-        <div class="chart-card"><h3>📊 <?= $lang['messages'] ?> (<?= $lang['by_type'] ?? 'By Type' ?>)</h3><canvas id="messagesChart"></canvas></div>
+    <div class="charts-and-activity">
+
+        <div class="chart-card">
+            <h3><i data-feather="bar-chart-2"></i> <?= $lang['notices'] ?> (<?= $lang['per_month'] ?? 'Per Month' ?>)</h3>
+            <canvas id="noticesChart"></canvas>
+        </div>
+
+        <div class="activity-card">
+            <h3><i data-feather="clock"></i> <?= $lang['recent_activity'] ?></h3>
+            <ul class="activity-feed">
+                <?php foreach(array_slice($activities,0,5) as $act): ?>
+                    <li>
+                        <span><?= htmlspecialchars($act['desc']) ?></span>
+                        <span><?= timeAgo($act['time']) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <div class="view-all-btn-container">
+                <a href="activity.php" class="view-all-btn">
+                    <?= $lang['view_all'] ?> <i data-feather="arrow-right"></i>
+                </a>
+            </div>
+        </div>
     </div>
 
-    <!-- Activity Feed -->
-    <div class="activity-card">
-        <h3>🕒 <?= $lang['recent_activity'] ?></h3>
-        <ul class="activity-feed">
-            <?php foreach(array_slice($activities,0,5) as $act): ?>
-                <li><?= htmlspecialchars($act['desc']) ?><span><?= timeAgo($act['time']) ?></span></li>
-            <?php endforeach; ?>
-        </ul>
-        <div style="text-align:center;margin-top:10px;">
-            <a href="../admin/activity.php" class="view-all-btn"><?= $lang['view_all'] ?></a>
+    <div class="charts-and-activity" style="grid-template-columns: 2fr 1fr; max-width: 100%;">
+        <div class="chart-card" style="min-height: 350px;">
+            <h3><i data-feather="pie-chart"></i> <?= $lang['messages'] ?> (<?= $lang['by_type'] ?? 'By Type' ?>)</h3>
+            <canvas id="messagesChart" style="max-height: 300px;"></canvas>
+        </div>
+        <div class="chart-card" style="min-height: 350px;">
+            <h3><i data-feather="zap"></i> <?= $lang['quick_actions'] ?? 'Quick Actions' ?></h3>
+            <div style="padding-top: 10px; font-size: 15px; color: var(--secondary-color);">
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;"><a href="add_notice.php" style="text-decoration: none; color: var(--primary-color); font-weight: 500;"><i data-feather="plus-circle" style="width: 16px; height: 16px; margin-right: 5px;"></i> <?= $lang['add_notice'] ?? 'Add Notice' ?></a></li>
+                    <li style="margin-bottom: 10px;"><a href="manage_gallery.php" style="text-decoration: none; color: var(--primary-color); font-weight: 500;"><i data-feather="image" style="width: 16px; height: 16px; margin-right: 5px;"></i> <?= $lang['manage_gallery'] ?? 'Manage Gallery' ?></a></li>
+                    <li style="margin-bottom: 10px;"><a href="messages.php" style="text-decoration: none; color: var(--primary-color); font-weight: 500;"><i data-feather="mail" style="width: 16px; height: 16px; margin-right: 5px;"></i> <?= $lang['view_messages'] ?? 'View Messages' ?></a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    feather.replace();
+
     // Notices Chart
     new Chart(document.getElementById('noticesChart'), {
         type: 'bar',
@@ -188,20 +420,27 @@ for($m=1; $m<=12; $m++){
             datasets: [{
                 label: '<?= $lang['notices'] ?>',
                 data: [<?= implode(',', $notices_per_month) ?>],
-                backgroundColor: '#4e73df',
+                backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                borderColor: 'var(--primary-color)',
+                borderWidth: 1,
                 borderRadius: 6
             }]
         },
         options: {
             responsive: true,
+            aspectRatio: 2.5,
             plugins: {
                 legend: { display: false }
             },
             scales: {
                 x: {
-                    ticks: { font: { family: 'Noto Sans Devanagari, Inter' } }
+                    grid: { display: false },
+                    ticks: { font: { family: 'Roboto' } }
                 },
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'var(--border-color)' }
+                }
             }
         }
     });
@@ -217,14 +456,44 @@ for($m=1; $m<=12; $m++){
                     <?= $messages_count['complaint'] ?>,
                     <?= $messages_count['suggestion'] ?>
                 ],
-                backgroundColor: ['#1cc88a','#e74a3b','#f6c23e'],
+                backgroundColor: [
+                    'var(--success-color)',
+                    'var(--danger-color)',
+                    'var(--warning-color)'
+                ],
+                hoverBackgroundColor: [
+                    '#157347',
+                    '#bb2124',
+                    '#d39e00'
+                ],
                 borderWidth: 2
             }]
         },
         options: {
             responsive: true,
+            aspectRatio: 1.2,
             plugins: {
-                legend: { position: 'bottom' }
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 15,
+                        font: { family: 'Roboto' }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += context.parsed;
+                            }
+                            return label;
+                        }
+                    }
+                }
             }
         }
     });

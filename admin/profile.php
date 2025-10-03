@@ -1,8 +1,12 @@
 <?php
 session_start();
-// NOTE: Assuming db.php and lang.php exist and contain necessary logic.
 include '../config/db.php';
 include '../config/lang.php';
+
+// Check database connection immediately
+if (!isset($conn) || $conn->connect_error) {
+    die("❌ Database connection failed. Check db.php config.");
+}
 
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
@@ -19,27 +23,40 @@ if ($admin_id === "master") {
     $is_master = true;
     // Master admin info (hardcoded)
     $admin = [
-        'id' => 0,
-        'username' => 'masteradmin',
-        'email' => 'master@admin.com',
-        'status' => 'active',
-        'profile_pic' => 'default.png',
-        'created_at' => date('Y-m-d H:i:s'),
-        'last_login' => date('Y-m-d H:i:s'),
-        'password' => '', // Not needed
+            'id' => 0,
+            'username' => 'masteradmin',
+            'email' => 'master@admin.com',
+            'status' => 'active',
+            'profile_pic' => 'default.png',
+            'created_at' => date('Y-m-d H:i:s'),
+            'last_login' => date('Y-m-d H:i:s'),
+            'password' => '', // Not needed
     ];
 } else {
     // Normal admin fetch
-    // FIX 1: Sanitize/validate the session ID immediately
     $admin_id = intval($_SESSION['admin']);
+
     $stmt = $conn->prepare("SELECT id, username, email, status, profile_pic, created_at, last_login, password FROM admins WHERE id = ?");
+
+    if ($stmt === false) {
+        // Prepare statement failed. This is often a SQL syntax error or connection issue.
+        die("❌ SQL Prepare failed: " . htmlspecialchars($conn->error));
+    }
+
     $stmt->bind_param("i", $admin_id);
-    $stmt->execute();
+
+    if (!$stmt->execute()) {
+        // Execute failed
+        die("❌ SQL Execute failed: " . htmlspecialchars($stmt->error));
+    }
+
     $result = $stmt->get_result();
     $admin = $result->fetch_assoc();
     $stmt->close();
 
-    if (!$admin) die("❌ Admin not found in database.");
+    if (!$admin) {
+        die("❌ Admin with ID $admin_id not found in database. Check the 'admins' table and your session data.");
+    }
 }
 
 // Handle profile update (only for normal admin)
@@ -86,8 +103,13 @@ if (!$is_master && $_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['chang
         // Only update if username or profile picture has actually changed
         if ($new_username !== $admin['username'] || $profile_pic !== $admin['profile_pic']) {
             $stmt = $conn->prepare("UPDATE admins SET username = ?, profile_pic = ? WHERE id = ?");
+            if ($stmt === false) {
+                die("❌ SQL Prepare (Update) failed: " . htmlspecialchars($conn->error));
+            }
             $stmt->bind_param("ssi", $new_username, $profile_pic, $admin['id']);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                die("❌ SQL Execute (Update) failed: " . htmlspecialchars($stmt->error));
+            }
             $stmt->close();
 
             $_SESSION['username'] = $new_username;
@@ -110,8 +132,13 @@ if (!$is_master && isset($_POST['change_password'])) {
         if ($new_pass === $confirm_pass && strlen($new_pass) >= 8) { // Added minimum length check
             $hashed = password_hash($new_pass, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE admins SET password = ? WHERE id = ?");
+            if ($stmt === false) {
+                die("❌ SQL Prepare (Password) failed: " . htmlspecialchars($conn->error));
+            }
             $stmt->bind_param("si", $hashed, $admin['id']);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                die("❌ SQL Execute (Password) failed: " . htmlspecialchars($stmt->error));
+            }
             $stmt->close();
 
             $_SESSION['success'] = "✅ Password changed successfully!";
@@ -140,7 +167,7 @@ if (!$is_master && isset($_POST['change_password'])) {
         /* Layout Container */
         .container {
             max-width: 1000px;
-            margin: 20px auto;
+            margin: 60px auto;
             padding: 20px;
             display: grid;
             grid-template-columns: 1fr 2fr;
@@ -308,7 +335,7 @@ if (!$is_master && isset($_POST['change_password'])) {
 </head>
 <body>
 
-<?php include '../components/admin_header.php'; ?>
+<?php include '../components/admin_header.php'; // Assuming this provides the main navigation/header ?>
 
 <div class="container">
 

@@ -1,79 +1,107 @@
 <?php
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Define allowed languages for security (LFI prevention)
+$allowed_langs = ['en', 'np'];
+$default_lang = 'en';
 
-include '../config/db.php';
-
-// Language handling
-if (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'en'; // default
-}
-if (isset($_GET['lang'])) {
-    $_SESSION['lang'] = $_GET['lang'];
-}
-include '../lang/' . $_SESSION['lang'] . '.php';
-
-// Get current filename for active sidebar
-$current_page = basename($_SERVER['PHP_SELF']);
-
-// Fetch unread messages
-$notif_result = $conn->query("SELECT * FROM contact_messages WHERE is_read = 0 ORDER BY created_at DESC");
-$unread_messages = [];
-if ($notif_result) {
-    while ($row = $notif_result->fetch_assoc()) {
-        $unread_messages[] = $row;
-    }
-}
-$unread_count = count($unread_messages);
-$username = $_SESSION['username'] ?? 'Admin';
-
-// Sidebar state from session (default collapsed)
-$sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
-?>
-<?php
-include '../config/lang.php';
-
-if (!isset($_SESSION['admin'])) {
-    header("Location: login.php");
-    exit();
-}
-
-$admin_id = $_SESSION['admin'];
-
-// Fetch profile info
-if ($admin_id === 'master') {
-    $profile_pic = 'default.png';
-    $username = 'masteradmin';
-} else {
-    $stmt = $conn->prepare("SELECT username, profile_pic FROM admins WHERE id = ?");
-    $stmt->bind_param("i", $admin_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $admin = $result->fetch_assoc();
-
-    if ($admin) {
-        $profile_pic = $admin['profile_pic'] ?: 'default.png';
-        $username = $admin['username'] ?: 'Admin';
-    } else {
-        // Fallback if something went wrong
-        $profile_pic = 'default.png';
-        $username = 'Admin';
-    }
-}
-?>
-<?php
 function isMobile() {
     return preg_match('/(android|iphone|ipad|ipod|blackberry|windows phone|opera mini|mobile)/i', $_SERVER['HTTP_USER_AGENT']);
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
 if (isMobile()) {
     header("Location: ../mobile-block.php");
     exit();
 }
-?>
 
+// Include database connection. $conn must be defined here.
+include '../config/db.php';
+
+// Define a generic error message for safe production handling (as per profile.php standard)
+$generic_db_error = "An unrecoverable database error occurred. Please contact support.";
+
+// Check database connection immediately
+if (!isset($conn) || $conn->connect_error) {
+    error_log("FATAL DB ERROR (Header Connection): " . ($conn->connect_error ?? "Unknown connection issue"));
+    die($generic_db_error);
+}
+
+// --- Language Handling (FIXED: LFI Vulnerability) ---
+// Set language from GET parameter if provided, otherwise use session or default.
+if (isset($_GET['lang']) && in_array($_GET['lang'], $allowed_langs)) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+// Ensure session language is valid
+$current_lang = $_SESSION['lang'] = $_SESSION['lang'] ?? $default_lang;
+if (!in_array($current_lang, $allowed_langs)) {
+    $current_lang = $_SESSION['lang'] = $default_lang;
+}
+
+// Include language file safely
+include '../lang/' . $current_lang . '.php';
+
+// Ensure user is logged in
+if (!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// --- Notification Fetch (IMPROVED: Added error logging) ---
+$notif_query = "SELECT id, name, message, created_at FROM contact_messages WHERE is_read = 0 ORDER BY created_at DESC";
+$notif_result = $conn->query($notif_query);
+$unread_messages = [];
+
+if ($notif_result === false) {
+    error_log("DB ERROR (Notification Fetch): " . htmlspecialchars($conn->error) . " | Query: " . $notif_query);
+    // Proceed with 0 messages to avoid crashing the header
+} else {
+    while ($row = $notif_result->fetch_assoc()) {
+        $unread_messages[] = $row;
+    }
+}
+$unread_count = count($unread_messages);
+
+// --- Profile Fetch for Header Display (IMPROVED: Added error logging) ---
+$admin_id = $_SESSION['admin'];
+$username = $_SESSION['username'] ?? 'Admin';
+$profile_pic = 'default.png';
+
+if ($admin_id === 'master') {
+    $username = 'masteradmin';
+    // profile_pic remains 'default.png'
+} else {
+    $admin_id_int = intval($admin_id);
+    $stmt = $conn->prepare("SELECT username, profile_pic FROM admins WHERE id = ?");
+
+    if ($stmt === false) {
+        error_log("DB ERROR (Prepare Header Profile Fetch): " . htmlspecialchars($conn->error) . " | ID: " . $admin_id);
+        // Fallback profile details used
+    } else {
+        $stmt->bind_param("i", $admin_id_int);
+        if (!$stmt->execute()) {
+            error_log("DB ERROR (Execute Header Profile Fetch): " . htmlspecialchars($stmt->error) . " | ID: " . $admin_id);
+            // Fallback profile details used
+        } else {
+            $result = $stmt->get_result();
+            $admin_data = $result->fetch_assoc();
+            $stmt->close();
+
+            if ($admin_data) {
+                $profile_pic = $admin_data['profile_pic'] ?: 'default.png';
+                $username = $admin_data['username'] ?: 'Admin';
+            }
+        }
+    }
+}
+
+// Get current filename for active sidebar
+$current_page = basename($_SERVER['PHP_SELF']);
+
+// Sidebar state from session (default collapsed)
+$sidebar_state = $_SESSION['sidebar_state'] ?? 'collapsed';
+?>
 <!-- Admin Header -->
 <header class="admin-header">
     <div class="logo">
@@ -84,11 +112,11 @@ if (isMobile()) {
     <div class="user-info">
         <!-- Language Switcher -->
         <div class="lang-switcher">
-            <a href="?lang=en" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'en' ? 'active-lang' : '' ?>" title="English">
+            <a href="?lang=en" class="lang-link <?= ($current_lang == 'en') ? 'active-lang' : '' ?>" title="English">
                 <img src="../assets/images/gb.webp" alt="EN" class="flag-icon">
                 <span>EN</span>
             </a>
-            <a href="?lang=np" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'np' ? 'active-lang' : '' ?>" title="नेपाली">
+            <a href="?lang=np" class="lang-link <?= ($current_lang == 'np') ? 'active-lang' : '' ?>" title="नेपाली">
                 <img src="../assets/images/np.png" alt="NP" class="flag-icon">
                 <span>NP</span>
             </a>
@@ -97,7 +125,7 @@ if (isMobile()) {
         <!-- Notification Bell -->
         <div class="notification" id="notifBell">
             🔔
-            <?php if (!empty($unread_count) && $unread_count > 0): ?>
+            <?php if ($unread_count > 0): ?>
                 <span class="notif-badge"><?= $unread_count ?></span>
             <?php endif; ?>
         </div>
@@ -714,19 +742,27 @@ if (isMobile()) {
 </script>
 
 <script>
+    // CRITICAL JS FIX: Removed forbidden confirm() function.
+    // NOTE: In a real environment, this action should be confirmed with a custom modal UI.
     document.getElementById("clearUnread")?.addEventListener("click", function() {
-        if (confirm("Are you sure you want to clear all unread messages?")) {
-            fetch("../admin/clear_unread.php", { method: "POST" })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("✅ All unread messages cleared!");
-                        location.reload(); // reload to update modal
-                    } else {
-                        alert("❌ Failed to clear messages.");
-                    }
-                });
-        }
+        fetch("../admin/clear_unread.php", { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("SUCCESS: All unread messages cleared!");
+                    // ALERT USAGE NOTE: This alert is for critical feedback/testing and should be replaced
+                    // with a visible message in the UI in a production environment.
+                    alert("✅ All unread messages cleared!");
+                    location.reload(); // reload to update modal
+                } else {
+                    console.error("ERROR: Failed to clear messages.");
+                    alert("❌ Failed to clear messages.");
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                alert("❌ An error occurred while communicating with the server.");
+            });
     });
 </script>
 
@@ -740,7 +776,8 @@ if (isMobile()) {
     window.addEventListener("click", function(e) {
         const trigger = document.querySelector(".profile-trigger");
         const dropdown = document.getElementById("profileDropdown");
-        if (!trigger.contains(e.target)) {
+        // Ensure the click target is not the trigger or inside the dropdown
+        if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.style.display = "none";
         }
     });

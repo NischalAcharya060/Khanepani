@@ -34,7 +34,7 @@ include '../config/Nepali_Calendar.php';
 $cal = new Nepali_Calendar();
 
 function format_nepali_date($date_str, $cal) {
-    if (!$date_str) return '—'; // handle empty dates
+    if (!$date_str || !strtotime($date_str)) return '—'; // handle empty/invalid dates
 
     $timestamp = strtotime($date_str);
     $year  = (int)date('Y', $timestamp);
@@ -60,25 +60,15 @@ function format_nepali_date($date_str, $cal) {
     }
 }
 
-// Fetch all admins except masteradmin
-$result = mysqli_query($conn, "SELECT * FROM admins WHERE username!='masteradmin' ORDER BY created_at DESC");
+// Fetch all admins except masteradmin + JOIN roles table
+$result = mysqli_query($conn, "
+    SELECT a.*, r.role_name 
+    FROM admins a
+    LEFT JOIN roles r ON a.role_id = r.id
+    WHERE a.username!='masteradmin'
+    ORDER BY a.created_at DESC
+");
 $hasAdmins = mysqli_num_rows($result) > 0;
-
-// Handle ban / unban
-if (isset($_GET['ban'])) {
-    $id = intval($_GET['ban']);
-    mysqli_query($conn, "UPDATE admins SET status='banned' WHERE id=$id AND username!='masteradmin'");
-    $_SESSION['msg'] = "🚫 Admin banned successfully.";
-    header("Location: manage_admin.php"); exit();
-}
-
-if (isset($_GET['unban'])) {
-    $id = intval($_GET['unban']);
-    mysqli_query($conn, "UPDATE admins SET status='active' WHERE id=$id AND username!='masteradmin'");
-    $_SESSION['msg'] = "✅ Admin unbanned successfully.";
-    header("Location: manage_admin.php"); exit();
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -175,7 +165,7 @@ if (isset($_GET['unban'])) {
 
 <main class="main-content">
     <h2>👥 <?= $lang['manage_admin'] ?></h2>
-    <a href="add_admin.php" class="add-btn">➕ <?= $lang['add'] ?> <?= $lang['manage_admin'] ?></a>
+    <a href="add_admin.php" class="add-btn">➕ <?= $lang['add'] ?> <?= $lang['add_new_admin'] ?></a>
     <div style="clear: both;"></div>
     <p class="subtitle"><?= $lang['subtitle'] ?? 'Ban/unban admin accounts (Master Admin excluded).' ?></p>
 
@@ -193,6 +183,7 @@ if (isset($_GET['unban'])) {
                 <th>📅 <?= $lang['date'] ?? 'Created At' ?></th>
                 <th><?= $lang['status'] ?></th>
                 <th>🕒 <?= $lang['last_login'] ?? 'Last Login' ?></th>
+                <th>🏷️ <?= $lang['role'] ?? 'Role' ?></th>
                 <th>⚡ <?= $lang['actions'] ?></th>
             </tr>
             </thead>
@@ -214,6 +205,7 @@ if (isset($_GET['unban'])) {
                     <td>
                         <?= $row['last_login'] ? format_nepali_date($row['last_login'], $cal) : '—' ?>
                     </td>
+                    <td><?= htmlspecialchars($row['role_name'] ?? '—') ?></td>
                     <td>
                         <?php if($row['status'] === 'active'): ?>
                             <a href="manage_admin.php?ban=<?= $row['id'] ?>" class="btn-ban"
