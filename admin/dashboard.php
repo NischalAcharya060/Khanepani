@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin'])) {
 }
 $username = $_SESSION['username'];
 
-// Include DB connection
+// Include DB connection (Assuming this path is correct)
 include '../config/db.php';
 
 // --- Language handling ---
@@ -14,11 +14,13 @@ $allowed_langs = ['en','np'];
 $lang_code = in_array($_GET['lang'] ?? '', $allowed_langs) ? $_GET['lang'] : ($_SESSION['lang'] ?? 'en');
 $_SESSION['lang'] = $lang_code;
 
-// Load language file
+// Load language file (Assuming this path is correct)
 include "../lang/{$lang_code}.php";
 
 // --- Fetch stats safely ---
 function fetchCount($conn, $table) {
+    // Check if connection is valid before querying
+    if (!$conn) return 0;
     $res = $conn->query("SELECT COUNT(*) AS c FROM {$table}");
     return $res ? $res->fetch_assoc()['c'] : 0;
 }
@@ -27,10 +29,14 @@ $total_notices = fetchCount($conn, 'notices');
 $total_gallery = fetchCount($conn, 'gallery');
 $total_messages = fetchCount($conn, 'contact_messages');
 $total_admins = fetchCount($conn, 'admins');
+$total_active_admins = $conn->query("SELECT COUNT(*) AS c FROM admins WHERE status='active'")->fetch_assoc()['c'] ?? 0;
+
 
 // --- Fetch recent records ---
 function fetchRecent($conn, $table, $columns=['*'], $limit=5){
+    if (!$conn) return [];
     $cols = implode(',', $columns);
+    // Note: Assuming 'created_at' column exists for sorting
     $res = $conn->query("SELECT {$cols} FROM {$table} ORDER BY created_at DESC LIMIT {$limit}");
     return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }
@@ -65,7 +71,7 @@ function timeAgo($datetime){
     return date('d M Y', $time);
 }
 
-// --- Notices per month ---
+// --- Notices per month (Bar Chart Data) ---
 $notices_per_month = [];
 $current_year = date('Y');
 for($i=1;$i<=12;$i++){
@@ -73,14 +79,27 @@ for($i=1;$i<=12;$i++){
     $notices_per_month[$i] = $res ? $res->fetch_assoc()['c'] : 0;
 }
 
-// --- Messages count by type (single query) ---
-$messages_count = ['general'=>0,'complaint'=>0,'suggestion'=>0];
-$res = $conn->query("SELECT type, COUNT(*) AS c FROM contact_messages GROUP BY type");
-while($row = $res->fetch_assoc()){
-    $messages_count[$row['type']] = $row['c'];
+// --- NEW CHART DATA: Gallery Uploads per month (Line Chart Data) ---
+$gallery_per_month = [];
+for($i=1;$i<=12;$i++){
+    $res = $conn->query("SELECT COUNT(*) AS c FROM gallery WHERE MONTH(created_at)={$i} AND YEAR(created_at)={$current_year}");
+    $gallery_per_month[$i] = $res ? $res->fetch_assoc()['c'] : 0;
 }
 
-// Include Nepali Date
+// --- Messages count by type (Doughnut Chart Data) ---
+$messages_count = ['general'=>0,'complaint'=>0,'suggestion'=>0];
+$res = $conn->query("SELECT type, COUNT(*) AS c FROM contact_messages GROUP BY type");
+if ($res) {
+    while($row = $res->fetch_assoc()){
+        // Ensure the type is one of the expected keys
+        if (isset($messages_count[$row['type']])) {
+            $messages_count[$row['type']] = $row['c'];
+        }
+    }
+}
+
+
+// Include Nepali Date (Assuming this path is correct)
 include '../config/Nepali_Calendar.php';
 
 $cal = new Nepali_Calendar();
@@ -104,7 +123,7 @@ for($m=1; $m<=12; $m++){
 <html lang="<?= $lang_code ?>">
 <head>
     <meta charset="UTF-8">
-    <title><?= $lang['dashboard'] ?> - <?= $lang['logo'] ?></title>
+    <title><?= $lang['dashboard'] ?? 'Dashboard' ?> - <?= $lang['logo'] ?? 'CMS' ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -127,6 +146,9 @@ for($m=1; $m<=12; $m++){
             --border-color: #e9ecef;
             --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
             --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
+            /* NEW COLORS */
+            --active-admin-color: #6f42c1; /* Purple */
+            --chart-gallery-color: #17a2b8; /* Info/Teal */
         }
         body{
             font-family:'Roboto',sans-serif;
@@ -136,32 +158,39 @@ for($m=1; $m<=12; $m++){
             overflow-x: hidden;
         }
 
-        /* --- SLIDING EFFECT FOR MAIN CONTENT --- */
+        /* --- SLIDING EFFECT FIX FOR MOBILE --- */
         .dashboard-wrapper {
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, padding-left 0.3s ease;
             position: relative;
             z-index: 10;
-            padding-left: 240px; /* Default offset for desktop expanded sidebar */
+            padding-left: var(--sidebar-expanded-width); /* Default desktop offset */
             min-height: 100vh;
         }
 
-        /* Desktop Collapse State: Shift content left */
+        /* Desktop: Collapsed State */
         .sidebar-collapsed-state .dashboard-wrapper {
             padding-left: 70px; /* Offset for collapsed sidebar */
         }
 
-        /* Mobile Slide State: Shift content right by sidebar width (only on mobile screens) */
-        body.mobile-sidebar-open .dashboard-wrapper {
-            transform: translateX(var(--sidebar-mobile-width));
-            padding-left: 0; /* Clear desktop offset when sidebar is active/sliding */
-        }
-
-        /* Responsive: Disable desktop offset on mobile */
+        /* Mobile View (max-width: 900px) */
         @media (max-width: 900px) {
             .dashboard-wrapper {
-                padding-left: 0;
+                padding-left: 0; /* Important: Clear desktop offset on mobile */
+                width: 100%; /* Ensure it spans full width */
+            }
+            body.mobile-sidebar-open .dashboard-wrapper {
+                /* Shifts the entire content wrapper to the right */
+                transform: translateX(var(--sidebar-mobile-width));
             }
         }
+        /* Desktop View (min-width: 901px) */
+        @media (min-width: 901px) {
+            body.mobile-sidebar-open .dashboard-wrapper {
+                /* Prevents accidental transform on desktop */
+                transform: translateX(0);
+            }
+        }
+        /* --- END SLIDING FIX --- */
 
         .dashboard{
             padding:30px;
@@ -187,7 +216,8 @@ for($m=1; $m<=12; $m++){
         /* --- Stat Cards --- */
         .stats{
             display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            /* Adjust grid to fit 5 items elegantly, responsive minimum 200px */
+            grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
             gap:20px;
             margin-bottom:40px;
         }
@@ -241,6 +271,10 @@ for($m=1; $m<=12; $m++){
         .stat-card.admins::before{background:var(--danger-color);}
         .stat-card.admins .icon-box{color:var(--danger-color);}
 
+        /* New Stat Card */
+        .stat-card.active-admins::before{background:var(--active-admin-color);}
+        .stat-card.active-admins .icon-box{color:var(--active-admin-color);}
+
         .stat-card h3{font-size:14px;margin-bottom:5px;color:var(--secondary-color);font-weight:600;text-transform:uppercase;}
         .stat-card p{font-size:36px;font-weight:900;margin:0;color:var(--text-dark);}
 
@@ -250,6 +284,14 @@ for($m=1; $m<=12; $m++){
             grid-template-columns:3fr 1fr;
             gap:30px;
             margin-bottom:40px;
+        }
+
+        /* New Chart Row (Gallery & Messages) */
+        .charts-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
         /* --- Chart Card --- */
@@ -371,7 +413,11 @@ for($m=1; $m<=12; $m++){
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
         }
-        .action-list{list-style: none; padding: 0; margin: 0;}
+        .action-list{
+            list-style: none; padding: 0; margin: 0;
+            /* Flex layout for multi-column quick actions */
+            display:flex; flex-wrap: wrap; gap: 15px;
+        }
         .action-list a{
             display:flex;
             align-items:center;
@@ -384,6 +430,8 @@ for($m=1; $m<=12; $m++){
             font-weight:500;
             transition:background 0.3s,transform 0.1s;
             border: 1px solid var(--border-color);
+            flex-basis: calc(33.33% - 15px); /* Three items per row */
+            min-width: 200px;
         }
         .action-list a:hover{
             background:rgba(0, 123, 255, 0.1);
@@ -397,9 +445,10 @@ for($m=1; $m<=12; $m++){
         /* Responsive */
         @media (max-width: 900px) {
             .charts-and-activity{grid-template-columns:1fr;}
+            .charts-row-2 {grid-template-columns: 1fr;}
             .dashboard{max-width: 95%;}
-            .charts-and-activity:last-of-type {
-                grid-template-columns: 1fr;
+            .action-list a {
+                flex-basis: 100%; /* Single column on small screens */
             }
         }
         @media (max-width: 768px) {
@@ -427,7 +476,7 @@ for($m=1; $m<=12; $m++){
                 <div class="icon-box"><i data-feather="bell"></i></div>
             </div>
             <div class="stat-card gallery">
-                <div><h3><?= $lang['gallery'] ?? 'Gallery' ?></h3><p><?= $total_gallery ?></p></div>
+                <div><h3><?= $lang['gallery'] ?? 'Gallery Items' ?></h3><p><?= $total_gallery ?></p></div>
                 <div class="icon-box"><i data-feather="image"></i></div>
             </div>
             <div class="stat-card messages">
@@ -435,8 +484,12 @@ for($m=1; $m<=12; $m++){
                 <div class="icon-box"><i data-feather="inbox"></i></div>
             </div>
             <div class="stat-card admins">
-                <div><h3><?= $lang['admins'] ?? 'Admins' ?></h3><p><?= $total_admins ?></p></div>
+                <div><h3><?= $lang['admins'] ?? 'Total Admins' ?></h3><p><?= $total_admins ?></p></div>
                 <div class="icon-box"><i data-feather="users"></i></div>
+            </div>
+            <div class="stat-card active-admins">
+                <div><h3><?= $lang['active_admins'] ?? 'Active Admins' ?></h3><p><?= $total_active_admins ?></p></div>
+                <div class="icon-box"><i data-feather="user-check"></i></div>
             </div>
         </div>
 
@@ -464,21 +517,27 @@ for($m=1; $m<=12; $m++){
             </div>
         </div>
 
-        <div class="charts-and-activity" style="grid-template-columns: 2fr 1fr; max-width: 100%;">
-            <div class="chart-card" style="min-height: 350px;">
-                <h3><i data-feather="pie-chart"></i> <?= $lang['messages'] ?> (<?= $lang['by_type'] ?? 'By Type' ?>)</h3>
-                <canvas id="messagesChart" style="max-height: 300px;"></canvas>
+        <div class="charts-row-2">
+            <div class="chart-card">
+                <h3><i data-feather="trending-up"></i> <?= $lang['gallery'] ?> (<?= $lang['monthly_uploads'] ?? 'Monthly Uploads' ?>)</h3>
+                <canvas id="galleryChart"></canvas>
             </div>
 
-            <div class="quick-actions-card" style="min-height: 350px;">
-                <h3><i data-feather="zap"></i> <?= $lang['quick_actions'] ?? 'Quick Actions' ?></h3>
-                <div class="action-list">
-                    <a href="add_notice.php"><i data-feather="plus-circle"></i> <?= $lang['add_notice'] ?? 'Add New Notice' ?></a>
-                    <a href="manage_notices.php"><i data-feather="file-text"></i> <?= $lang['manage_notices'] ?? 'Manage Notices' ?></a>
-                    <a href="add_gallery_image.php"><i data-feather="camera"></i> <?= $lang['add_image'] ?? 'Upload Image' ?></a>
-                    <a href="messages.php"><i data-feather="mail"></i> <?= $lang['view_messages'] ?? 'View Messages' ?></a>
-                    <a href="add_admin.php"><i data-feather="user-plus"></i> <?= $lang['add_new_admin'] ?? 'Add New Admin' ?></a>
-                </div>
+            <div class="chart-card">
+                <h3><i data-feather="pie-chart"></i> <?= $lang['messages'] ?> (<?= $lang['by_type'] ?? 'By Type' ?>)</h3>
+                <canvas id="messagesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="quick-actions-card">
+            <h3><i data-feather="zap"></i> <?= $lang['quick_actions'] ?? 'Quick Actions' ?></h3>
+            <div class="action-list">
+                <a href="add_notice.php"><i data-feather="plus-circle"></i> <?= $lang['add_notice'] ?? 'Add New Notice' ?></a>
+                <a href="manage_notices.php"><i data-feather="file-text"></i> <?= $lang['manage_notices'] ?? 'Manage Notices' ?></a>
+                <a href="gallery_add.php"><i data-feather="camera"></i> <?= $lang['add_image'] ?? 'Upload Image' ?></a>
+                <a href="messages.php"><i data-feather="mail"></i> <?= $lang['view_messages'] ?? 'View Messages' ?></a>
+                <a href="add_admin.php"><i data-feather="user-plus"></i> <?= $lang['add_new_admin'] ?? 'Add New Admin' ?></a>
+                <a href="profile.php"><i data-feather="settings"></i> <?= $lang['profile'] ?? 'My Profile' ?></a>
             </div>
         </div>
     </div>
@@ -487,6 +546,7 @@ for($m=1; $m<=12; $m++){
 <script>
     feather.replace();
 
+    // --- CHART 1: Notices Per Month (Bar Chart) ---
     const noticesChart = new Chart(document.getElementById('noticesChart'), {
         type: 'bar',
         data: {
@@ -513,10 +573,41 @@ for($m=1; $m<=12; $m++){
         }
     });
 
+    // --- CHART 2: Gallery Uploads Per Month (Line Chart) ---
+    const galleryChart = new Chart(document.getElementById('galleryChart'), {
+        type: 'line',
+        data: {
+            labels: <?= json_encode($months_labels, JSON_UNESCAPED_UNICODE) ?>,
+            datasets: [{
+                label: '<?= $lang['gallery_uploads'] ?? 'Gallery Uploads' ?>',
+                data: [<?= implode(',', $gallery_per_month) ?>],
+                backgroundColor: 'rgba(23, 162, 184, 0.2)',
+                borderColor: 'var(--chart-gallery-color)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: 'var(--chart-gallery-color)',
+                pointBorderColor: '#fff',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            aspectRatio: 1.5,
+            plugins: {
+                legend: { position: 'top' }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { family: 'Roboto' } } },
+                y: { beginAtZero: true, grid: { color: 'var(--border-color)' } }
+            }
+        }
+    });
+
+    // --- CHART 3: Messages By Type (Doughnut Chart) ---
     const messagesChart = new Chart(document.getElementById('messagesChart'), {
         type: 'doughnut',
         data: {
-            labels: ['General','Complaint','Suggestion'],
+            labels: ['<?= $lang['general'] ?? 'General' ?>','<?= $lang['complaint'] ?? 'Complaint' ?>','<?= $lang['suggestion'] ?? 'Suggestion' ?>'],
             datasets: [{
                 data: [<?= $messages_count['general'] ?>, <?= $messages_count['complaint'] ?>, <?= $messages_count['suggestion'] ?>],
                 backgroundColor: ['var(--success-color)','var(--danger-color)','var(--warning-color)'],
@@ -526,10 +617,19 @@ for($m=1; $m<=12; $m++){
         },
         options: {
             responsive: true,
-            aspectRatio: 1.2,
+            aspectRatio: 1.5,
             plugins: {
                 legend: { position: 'right', labels: { boxWidth: 15, font: { family: 'Roboto' } } },
-                tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } if (context.parsed !== null) { label += context.parsed; } return label; } } }
+                tooltip: { callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed !== null) {
+                                label += context.parsed;
+                            }
+                            return label;
+                        }
+                    } }
             }
         }
     });

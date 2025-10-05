@@ -151,6 +151,13 @@ if ($admin_id === "master") {
             --color-card-bg: #ffffff;
             --color-hover-bg: #e6f3ff; /* Very Light Blue for Hover */
 
+            /* Master Admin Palette */
+            --color-master-bg: #2c3e50; /* Dark Slate/Navy */
+            --color-master-accent: #f1c40f; /* Gold/Amber */
+            --color-master-text: #ecf0f1;
+            --color-master-text-subtle: #bdc3c7;
+
+
             /* Shadows and Borders */
             --shadow-card: 0 0.5rem 1rem rgba(0, 0, 0, 0.08); /* Smoother shadow */
             --shadow-hover: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12); /* Deeper shadow on hover */
@@ -175,7 +182,7 @@ if ($admin_id === "master") {
             margin: 60px auto;
             padding: 30px;
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 320px 1fr; /* Two-column grid for normal admin */
             gap: 30px;
         }
 
@@ -183,7 +190,7 @@ if ($admin_id === "master") {
         .card {
             background: var(--color-card-bg);
             border-radius: var(--border-radius);
-            padding: 35px;
+            padding: 55px;
             box-shadow: var(--shadow-card);
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease-in-out;
             position: relative;
@@ -202,14 +209,15 @@ if ($admin_id === "master") {
             background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
         }
 
-        /* Profile Info Card Overrides */
+        /* --- NORMAL ADMIN PROFILE OVERHAUL (Vertical, Clean) --- */
         .card.profile-info {
             text-align: center;
-            border: none; /* Remove subtle inner border */
-            /* Use linear-gradient for a richer background */
-            background: linear-gradient(135deg, var(--color-card-bg) 95%, #f1f2f6 100%);
+            border: none;
+            /* Changed background to solid white for maximum cleanliness */
+            background: var(--color-card-bg);
             border-bottom: 5px solid var(--color-secondary);
-            padding-top: 50px; /* More space above picture */
+            padding-top: 50px;
+            align-self: flex-start; /* Center the card vertically in its grid cell */
         }
 
         /* Hover Effect */
@@ -224,8 +232,8 @@ if ($admin_id === "master") {
 
         /* Headings */
         h2 {
-            font-size: 32px; /* Larger main title */
-            color: var(--color-primary); /* Primary color for main title */
+            font-size: 32px;
+            color: var(--color-primary);
             margin-bottom: 20px;
             font-weight: 800;
             letter-spacing: -0.5px;
@@ -238,7 +246,7 @@ if ($admin_id === "master") {
             display: flex;
             align-items: center;
             padding-bottom: 10px;
-            border-bottom: 1px solid var(--input-border); /* Lighter divider */
+            border-bottom: 1px solid var(--input-border);
         }
         .card-title .icon {
             color: var(--color-secondary);
@@ -246,11 +254,11 @@ if ($admin_id === "master") {
 
         /* Profile Picture */
         .profile-info img {
-            width: 160px; /* Larger image */
-            height: 160px;
-            border: 6px solid var(--color-primary); /* Thicker border */
-            margin-bottom: 30px;
-            box-shadow: 0 0 0 10px rgba(30, 136, 229, 0.15); /* Stronger ring effect */
+            width: 140px; /* Slightly smaller for a tighter, centered look */
+            height: 140px;
+            border: 4px solid var(--color-primary); /* Slightly thinner border */
+            margin-bottom: 25px;
+            box-shadow: 0 0 0 8px rgba(30, 136, 229, 0.1);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .profile-info img:hover {
@@ -261,42 +269,45 @@ if ($admin_id === "master") {
         .profile-detail-list {
             list-style: none;
             padding: 0;
-            margin: 30px 0 0 0;
+            margin: 20px 0 0 0;
             text-align: left;
+            /* Center the list content itself by limiting width */
+            max-width: 280px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .profile-detail-list li {
-            padding: 15px 10px; /* More vertical padding */
-            font-size: 15px;
-            border-bottom: 1px dashed var(--input-border); /* Dashed divider for subtlety */
-            border-radius: 4px;
+            padding: 12px 0; /* Reduced padding */
+            font-size: 14px; /* Slightly smaller font for density */
+            border-bottom: 1px solid var(--input-border); /* Solid, clean line */
+            border-radius: 0;
         }
         .profile-detail-list li:hover {
-            background-color: var(--color-hover-bg);
+            background-color: transparent; /* Remove hover background for simplicity */
         }
         .profile-detail-list li:last-child {
             border-bottom: none;
         }
         .profile-detail-list strong {
-            font-weight: 700; /* Bolder label */
+            font-weight: 700;
             color: var(--color-text);
             display: flex;
             align-items: center;
-            /* Custom color for icons inside the list */
         }
         .profile-detail-list strong .icon {
             color: var(--color-primary);
             margin-right: 8px;
         }
         .profile-detail-list span {
-            color: var(--color-text-light);
+            color: var(--color-text); /* Make value darker for better reading */
             font-weight: 500;
             font-size: 14px;
         }
 
 
         /* Forms Styling */
-        form { gap: 25px; } /* Increased gap between form sections */
-        .form-group { gap: 8px; }
+        form { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
         label {
             font-weight: 600;
             font-size: 14px;
@@ -305,15 +316,17 @@ if ($admin_id === "master") {
         label .icon { color: var(--color-text-light); }
 
         input[type="text"], input[type="password"], input[type="file"] {
-            padding: 12px 16px; /* Optimized padding */
+            padding: 12px 16px;
             border-radius: 8px;
-            border: 1px solid var(--input-border); /* Thinner, lighter default border */
+            border: 1px solid var(--input-border);
             font-size: 16px;
             background: var(--color-card-bg);
+            width: 100%;
         }
         input[type="text"]:focus, input[type="password"]:focus {
             border-color: var(--color-primary);
-            box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.1); /* Lighter shadow on focus */
+            box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.1);
+            outline: none;
         }
         input[type="file"] {
             padding: 12px 16px;
@@ -322,21 +335,24 @@ if ($admin_id === "master") {
 
         /* Button Styling */
         button {
-            background: linear-gradient(45deg, var(--color-primary), #0077b6); /* Subtle gradient for depth */
+            background: linear-gradient(45deg, var(--color-primary), #0077b6);
+            color: white;
             padding: 14px;
             border: none;
             border-radius: 8px;
             font-weight: 700;
-            letter-spacing: 1px; /* Clearer button text */
+            letter-spacing: 1px;
             box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
-            margin-top: 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         button:hover {
             background: linear-gradient(45deg, var(--color-secondary), #00a4b6);
-            transform: translateY(-3px); /* Stronger hover effect */
+            transform: translateY(-3px);
             box-shadow: 0 8px 18px rgba(0, 188, 212, 0.5);
         }
-        button .icon { margin-right: 8px; color: white; } /* Ensure icons are white */
+        button .icon { margin-right: 8px; color: white; }
 
 
         /* Message Styles (More distinct) */
@@ -345,11 +361,13 @@ if ($admin_id === "master") {
             border-radius: 8px;
             font-weight: 600;
             margin-bottom: 30px;
+            display: flex;
+            align-items: center;
         }
         .error {
             background: #fef0f0;
             color: #c0392b;
-            border-left: 5px solid #c0392b; /* Strong left bar */
+            border-left: 5px solid #c0392b;
         }
         .success {
             background: #e6f7ed;
@@ -362,13 +380,100 @@ if ($admin_id === "master") {
         .master-warning {
             margin-top: 40px;
             font-weight: 700;
-            color: #e67e22; /* Darker amber for contrast */
+            color: #e67e22;
             padding: 20px;
             border: 3px dashed #f39c12;
             background-color: #fff9e6;
             border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         .master-warning .icon { color: #f39c12; margin-right: 15px; }
+
+        /* ====================================================
+           MASTER ADMIN SPECIFIC STYLING (Layout Overrides)
+           ==================================================== */
+
+        /* Force Master Admin to use a single column layout */
+        .container.master-admin-layout {
+            grid-template-columns: 1fr;
+        }
+
+        /* 1. Master Card Background & Border */
+        .card.master-admin {
+            background: linear-gradient(135deg, var(--color-master-bg) 0%, #34495e 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-bottom: 5px solid var(--color-master-accent);
+            border: none;
+        }
+
+        /* Override profile info specifics for master card */
+        .card.master-admin.profile-info {
+            background: linear-gradient(135deg, var(--color-master-bg) 95%, #34495e 100%);
+            border-bottom: 5px solid var(--color-master-accent);
+
+            /* LANDSCAPE LAYOUT */
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            text-align: left;
+            padding: 50px 80px;
+            gap: 40px;
+        }
+
+        .card.master-admin h2 {
+            color: var(--color-master-accent);
+            margin-bottom: 5px;
+        }
+        .card.master-admin img {
+            border: 6px solid var(--color-master-accent);
+            box-shadow: 0 0 0 10px rgba(241, 196, 15, 0.3);
+            margin-top: 10px;
+            margin-bottom: 0;
+            flex-shrink: 0;
+            width: 160px; /* Larger master image */
+            height: 160px;
+        }
+        .card.master-admin .profile-detail-list {
+            margin: 20px 0 0 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+            max-width: 700px;
+            margin-left: 0; /* Align left in landscape mode */
+            margin-right: 0;
+        }
+        .card.master-admin .profile-detail-list li {
+            padding: 10px 5px;
+            border-bottom: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card.master-admin .profile-detail-list li:nth-child(even) {
+            border-right: none;
+        }
+        .card.master-admin .profile-detail-list strong { color: var(--color-master-text); }
+        .card.master-admin .profile-detail-list span { color: var(--color-master-text-subtle); }
+        .card.master-admin .profile-detail-list strong .icon { color: var(--color-master-accent) !important; }
+
+        /* Reposition the master warning message */
+        .card.master-admin .master-warning {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            margin-top: 0;
+            padding: 10px 20px;
+            border: none;
+            background-color: #f39c12;
+            color: var(--color-master-bg);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        .card.master-admin .master-warning .icon {
+            color: var(--color-master-bg);
+        }
 
         /* Responsive adjustments */
         @media(max-width:992px){
@@ -384,6 +489,33 @@ if ($admin_id === "master") {
             .card {
                 padding: 25px;
             }
+
+            /* Responsive adjustment for Master Layout */
+            .card.master-admin.profile-info {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 30px;
+            }
+            .card.master-admin .profile-detail-list {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin: 20px auto;
+            }
+            .card.master-admin .profile-detail-list li {
+                border-right: none;
+                border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            }
+            .card.master-admin .master-warning {
+                position: static;
+                margin-top: 20px;
+                margin-bottom: 0;
+                color: #f39c12;
+                background-color: #34495e;
+            }
+            .card.master-admin .master-warning .icon {
+                color: var(--color-master-accent);
+            }
         }
     </style>
 </head>
@@ -391,39 +523,40 @@ if ($admin_id === "master") {
 
 <?php include '../components/admin_header.php'; // Ensure your header is included ?>
 
-<div class="container">
+<div class="container <?= $is_master ? 'master-admin-layout' : '' ?>">
 
-    <div class="card profile-info">
-        <h2><?= $lang['profile_overview'] ?></h2>
+    <div class="card profile-info <?= $is_master ? 'master-admin' : '' ?>">
 
-        <img src="../assets/uploads/profile/<?= htmlspecialchars($admin['profile_pic'] ?? 'default.png', ENT_QUOTES, 'UTF-8') ?>" alt="Profile Picture">
+        <img src="../assets/uploads/profile/<?= htmlspecialchars($admin['profile_pic'] ?? 'default.png', ENT_QUOTES, 'UTF-8') ?>" alt="Profile Picture" style="border-radius: 50%; object-fit: cover;">
 
-        <ul class="profile-detail-list">
-            <li>
-                <strong><i data-feather="user" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['username'] ?> :-</strong>
-                <span><?= htmlspecialchars($admin['username'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
-            </li>
-            <li>
-                <strong><i data-feather="mail" class="icon" style="color: var(--color-text-light);"></i> Email :-</strong>
-                <span><?= htmlspecialchars($admin['email'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
-            </li>
-            <li>
-                <strong><i data-feather="activity" class="icon" style="color: var(--color-text-light);"></i> Status :-</strong>
-                <span><?= htmlspecialchars(ucfirst($admin['status'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></span>
-            </li>
-            <li>
-                <strong><i data-feather="calendar" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['account_created'] ?> :-</strong>
-                <span><?= htmlspecialchars(date('M d, Y', strtotime($admin['created_at'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
-            </li>
-            <li>
-                <strong><i data-feather="clock" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['last_activity'] ?> :-</strong>
-                <span><?= htmlspecialchars(date('H:i A, M d', strtotime($admin['last_login'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
-            </li>
-        </ul>
-
+        <div>
+            <h2><?= $lang['profile_overview'] ?></h2>
+            <ul class="profile-detail-list">
+                <li>
+                    <strong><i data-feather="user" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['username'] ?> :-</strong>
+                    <span><?= htmlspecialchars($admin['username'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
+                </li>
+                <li>
+                    <strong><i data-feather="mail" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['email'] ?> :-</strong>
+                    <span><?= htmlspecialchars($admin['email'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
+                </li>
+                <li>
+                    <strong><i data-feather="activity" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['status'] ?> :-</strong>
+                    <span><?= htmlspecialchars(ucfirst($admin['status'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></span>
+                </li>
+                <li>
+                    <strong><i data-feather="calendar" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['account_created'] ?> :-</strong>
+                    <span><?= htmlspecialchars(date('M d, Y', strtotime($admin['created_at'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
+                </li>
+                <li>
+                    <strong><i data-feather="clock" class="icon" style="color: var(--color-text-light);"></i> <?= $lang['last_activity'] ?> :-</strong>
+                    <span><?= htmlspecialchars(date('H:i A, M d', strtotime($admin['last_login'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></span>
+                </li>
+            </ul>
+        </div>
         <?php if($is_master): ?>
             <p class="master-warning">
-                <i data-feather="lock" class="icon" style="color: #ff9800;"></i>
+                <i data-feather="lock" class="icon"></i>
                 <?= $lang['master_admin_locked'] ?>
             </p>
         <?php endif; ?>

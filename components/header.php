@@ -63,6 +63,9 @@ if (file_exists($langFile)) {
             <a href="../index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
                 <?= $lang['home'] ?? 'Home' ?>
             </a>
+            <a href="../notices.php" class="<?= $current_page == 'notices.php' ? 'active' : '' ?>">
+                <?= $lang['notices'] ?? 'Notices' ?>
+            </a>
             <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <?= $lang['about'] ?? 'About' ?>
