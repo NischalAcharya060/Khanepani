@@ -1,7 +1,23 @@
 <?php
+session_start();
 include 'config/db.php';
-include 'config/lang.php';
 include 'config/nepali_calendar.php';
+
+// If no language in session, default to English
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en';
+}
+
+// If user switches language (via ?lang=en or ?lang=np)
+if (isset($_GET['lang'])) {
+    $lang = $_GET['lang'] === 'np' ? 'np' : 'en';
+    $_SESSION['lang'] = $lang;
+    header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
+    exit();
+}
+
+include "lang/" . $_SESSION['lang'] . ".php";
+
 $cal = new Nepali_Calendar();
 ?>
 <!DOCTYPE html>

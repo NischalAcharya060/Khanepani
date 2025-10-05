@@ -243,6 +243,7 @@ $lang = [
     'user_subject' => 'Subject',
     'your_name' => 'Your Name',
     'your_email' => 'Your Email',
+    'your_phone' => 'Your Phone',
     'complaint_ref' => 'Complaint Reference Number (if any)',
     'complaint_details' => 'Complaint Details',
     'your_message' => 'Your Message',

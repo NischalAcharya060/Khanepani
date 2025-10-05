@@ -243,6 +243,7 @@ $lang = [
     'user_subject' => 'विषय',
     'your_name' => 'तपाईंको नाम',
     'your_email' => 'तपाईंको इमेल',
+    'your_phone' => 'तपाईको फोन',
     'complaint_ref' => 'गुनासो सन्दर्भ नम्बर (यदि छ भने)',
     'complaint_details' => 'गुनासोको विवरण',
     'your_message' => 'तपाईंको सन्देश',
