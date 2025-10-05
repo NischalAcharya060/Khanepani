@@ -22,6 +22,8 @@ if (file_exists($langFile)) {
 } else {
     include __DIR__ . '/../lang/en.php';
 }
+
+
 ?>
 
 <!-- ✅ Add inside <head> -->
@@ -29,6 +31,11 @@ if (file_exists($langFile)) {
 
 <!-- Info Bar -->
 <div class="info-bar">
+    <section class="datetime-bar">
+        <div class="container">
+            <span id="live-datetime"></span>
+        </div>
+    </section>
     <div class="container info-bar-content">
         <span><i class="fa-solid fa-phone"></i> +977 1 4117356, 4117358</span>
         <span><i class="fa-solid fa-envelope"></i> info@salakpurkhanepani.com</span>
@@ -342,5 +349,23 @@ if (file_exists($langFile)) {
                 dropdownContent.classList.toggle("show-dropdown");
             });
         });
+
+        const datetimeElement = document.getElementById('live-datetime');
+
+        function updateLiveDateTime() {
+            fetch('../utils/get_live_datetime.php')
+                .then(response => response.text())
+                .then(data => {
+                    datetimeElement.textContent = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching live datetime:', error);
+                    datetimeElement.textContent = 'Date/Time Error';
+                });
+        }
+
+        updateLiveDateTime();
+        setInterval(updateLiveDateTime, 1000);
+
     });
 </script>
