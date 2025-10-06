@@ -115,7 +115,7 @@ if (file_exists($langFile)) {
     .info-bar {
         background: linear-gradient(90deg, #004080, #0066cc);
         color: #ffffff;
-        padding: 8px 0;
+        padding: 3px 0;
         font-size: 14px;
     }
     .info-bar .info-bar-content {

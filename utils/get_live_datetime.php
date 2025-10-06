@@ -37,16 +37,14 @@ if ($lang === 'np') {
         $np_numbers
     );
 
-    // Format the time (e.g., 10:30:45 AM) and convert numbers to Nepali script
     $time_str = date("h:i:s A", $current_timestamp);
     $time_str = strtr($time_str, $np_numbers);
 
-    // Combine for final output
-    echo $date_str . " BS, " . $time_str;
-
+    // --- NEPALI DATE (BS) ---
+    echo "मिति: " . htmlspecialchars($date_str) . " | समय: " . htmlspecialchars($time_str);
 } else {
     // --- ENGLISH DATE (AD) ---
-    $date_format = "D, M j, Y, h:i:s A";
-    echo date($date_format, $current_timestamp);
+    $date_format = date("Y M j, h:i:s A", $current_timestamp);
+    echo "Date: " . date("Y-M-j") . " | Time: " . date("h:i:s A");
 }
 ?>

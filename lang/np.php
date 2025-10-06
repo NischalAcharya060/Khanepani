@@ -1,9 +1,9 @@
 <?php
 $lang = [
     // General
-    'english' => 'English',
+    'english' => 'अंग्रेजी',
     'nepali' => 'नेपाली',
-    "logo" => "सलाक्पुर खानेपानी",
+    "logo" => "सलकपुर खानेपानी उपभोक्ता तथा सरसफाइ समिति",
     "dashboard" => "ड्यासबोर्ड",
     "manage_notices" => "सूचना व्यवस्थापन",
     "manage_gallery" => "ग्यालरी व्यवस्थापन",
