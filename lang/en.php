@@ -39,6 +39,25 @@ $lang = [
     'role_not_found' => 'Role not found.',
     'no_roles' => 'No roles available.',
     'role_description' => 'Select a role for this admin.',
+    'subtitle' => 'Manage admin accounts',
+    'deactivate' => 'Deactivate',
+    'activate' => 'Activate',
+    'ban_permanently' => 'Ban',
+    'inactive' => 'Inactive',
+    'deactivated' => 'Deactivated',
+    'admin_deactivated' => '🚫 Admin deactivated successfully.',
+    'admin_activated' => '✅ Admin activated successfully.',
+    'admin_banned_perm' => '🛑 Admin permanently banned.',
+    'admin_already_inactive' => '⚠️ Error: Admin is already inactive/banned. Use "Activate" to restore.',
+    'admin_unbanned' => 'Admin account unbanned successfully.',
+    'self' => 'You',
+    'you' => 'You',
+
+    // Confirmation prompts
+    'confirm_deactivate' => 'Deactivate this admin account?',
+    'confirm_activate' => 'Activate this admin account?',
+    'confirm_ban' => 'Are you sure you want to permanently ban this admin?',
+    'confirm_unban' => 'Unban and activate this admin?',
 
     // Notices
     "notices" => "Notices",

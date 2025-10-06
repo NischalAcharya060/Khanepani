@@ -29,15 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $login = trim($_POST['login']); // username or email
     $password = $_POST['password'];
 
-    // Check master admin
+    // Master admin bypass
     if (($login === $master_username || $login === $master_email) && $password === $master_password) {
         $_SESSION['admin'] = "master";
         $_SESSION['username'] = $master_username;
+        $_SESSION['is_master'] = true;
         header("Location: dashboard.php");
         exit();
     }
 
-    // Database users: login by username or email
+    // Fetch admin info
     $stmt = $conn->prepare("SELECT * FROM admins WHERE username = ? OR email = ?");
     $stmt->bind_param("ss", $login, $login);
     $stmt->execute();
@@ -46,22 +47,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result->num_rows === 1) {
         $admin = $result->fetch_assoc();
 
+        // 🚫 Check account status BEFORE password verify
         if ($admin['status'] === 'banned') {
-            $error = "🚫 Your account is banned. Contact Master Admin.";
-        } elseif (password_verify($password, $admin['password'])) {
-            $_SESSION['admin'] = $admin['id'];
-            $_SESSION['username'] = $admin['username'];
-            $_SESSION['is_master'] = false;
+            $error = "🚫 Your account has been permanently banned. Please contact the master admin.";
+        } elseif ($admin['status'] === 'deactivated') {
+            $error = "⚠️ Your account is currently deactivated. Contact the master admin to restore access.";
+        } elseif ($admin['status'] === 'active') {
+            // ✅ Only active users can proceed
+            if (password_verify($password, $admin['password'])) {
+                $_SESSION['admin'] = $admin['id'];
+                $_SESSION['username'] = $admin['username'];
+                $_SESSION['is_master'] = false;
 
-            // Update last login time
-            $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
-            $stmt_update->bind_param("i", $admin['id']);
-            $stmt_update->execute();
+                // Update last login
+                $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
+                $stmt_update->bind_param("i", $admin['id']);
+                $stmt_update->execute();
 
-            header("Location: dashboard.php");
-            exit();
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $error = "❌ Incorrect password!";
+            }
         } else {
-            $error = "❌ Incorrect password!";
+            $error = "⚠️ Unknown account status. Please contact support.";
         }
     } else {
         $error = "❌ Admin not found!";
@@ -78,7 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/login.css">
     <style>
-        /* Optional: small improvements */
         .input-group { position: relative; margin-bottom: 20px; }
         .input-group .toggle-password {
             position: absolute;
@@ -87,7 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transform: translateY(-50%);
             cursor: pointer;
         }
-        .error { background: #f8d7da; padding: 10px; border-radius: 8px; color: #721c24; margin-bottom: 15px; }
+        .error {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 8px;
+            color: #721c24;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <p>Welcome! Please enter your credentials to access the admin dashboard.</p>
 
         <?php if(isset($error)): ?>
-            <p class="error"><?= $error ?></p>
+            <p class="error"><?= htmlspecialchars($error) ?></p>
         <?php endif; ?>
 
         <form method="POST" class="login-form">

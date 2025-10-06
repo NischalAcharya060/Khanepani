@@ -529,17 +529,6 @@ for($m=1; $m<=12; $m++){
             </div>
         </div>
 
-        <div class="quick-actions-card">
-            <h3><i data-feather="zap"></i> <?= $lang['quick_actions'] ?? 'Quick Actions' ?></h3>
-            <div class="action-list">
-                <a href="add_notice.php"><i data-feather="plus-circle"></i> <?= $lang['add_notice'] ?? 'Add New Notice' ?></a>
-                <a href="manage_notices.php"><i data-feather="file-text"></i> <?= $lang['manage_notices'] ?? 'Manage Notices' ?></a>
-                <a href="gallery_add.php"><i data-feather="camera"></i> <?= $lang['add_image'] ?? 'Upload Image' ?></a>
-                <a href="messages.php"><i data-feather="mail"></i> <?= $lang['view_messages'] ?? 'View Messages' ?></a>
-                <a href="add_admin.php"><i data-feather="user-plus"></i> <?= $lang['add_new_admin'] ?? 'Add New Admin' ?></a>
-                <a href="profile.php"><i data-feather="settings"></i> <?= $lang['profile'] ?? 'My Profile' ?></a>
-            </div>
-        </div>
     </div>
 </div>
 
