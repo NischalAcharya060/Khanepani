@@ -209,6 +209,13 @@ $lang = [
     'save_profile' => 'Save Profile',
     'update_password' => 'Update Password',
 
+    // Danger Zone
+    'danger_zone' => 'DANGER ZONE',
+    'warning_title' => '⚠️ Warning:',
+    'warning_message' => 'Deleting your account is a permanent action and cannot be undone. All your associated data will be removed from the system. Please proceed with extreme caution.',
+    'delete_account_button' => 'PERMANENTLY DELETE ACCOUNT',
+    'confirm_delete_alert' => '🚨 ARE YOU ABSOLUTELY SURE?\n\nThis action is PERMANENT and will immediately delete your admin account from the database. You will be logged out.\n\nPress OK to confirm deletion.',
+
     // User side
     "home" => "Home",
     "about" => "About",

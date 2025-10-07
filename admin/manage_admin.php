@@ -3,7 +3,6 @@ session_start();
 include '../config/db.php';
 include '../config/lang.php';
 
-// Check if admin is logged in
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit();
@@ -12,9 +11,31 @@ if (!isset($_SESSION['admin'])) {
 $admin_id = $_SESSION['admin'];
 $username = $_SESSION['username'] ?? '';
 
-// --- Dual Action Handler ---
+// --- Handle Role Update ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
+    $admin_id_to_update = intval($_POST['admin_id']);
+    $new_role_id = intval($_POST['role_id']);
 
-// Handle Activate/Deactivate toggle
+    $check_admin_query = mysqli_query($conn, "SELECT username FROM admins WHERE id=$admin_id_to_update");
+    $target_admin = mysqli_fetch_assoc($check_admin_query);
+
+    if ($target_admin && $target_admin['username'] === 'masteradmin') {
+        $_SESSION['msg'] = "❌ Cannot modify the role of the 'masteradmin' account.";
+        $_SESSION['msg_type'] = 'error';
+    } elseif ($admin_id_to_update == $admin_id) {
+        $_SESSION['msg'] = "⚠️ You cannot change your own role from here. Use the profile page for permissions or ask another master admin.";
+        $_SESSION['msg_type'] = 'error';
+    } else {
+        mysqli_query($conn, "UPDATE admins SET role_id=$new_role_id WHERE id=$admin_id_to_update");
+        $_SESSION['msg'] = "✅ Role updated successfully for admin ID: $admin_id_to_update.";
+        $_SESSION['msg_type'] = 'success';
+    }
+
+    header("Location: manage_admin.php");
+    exit();
+}
+
+// --- Handle Activate/Deactivate toggle ---
 if (isset($_GET['toggle'])) {
     $id = intval($_GET['toggle']);
     $check = mysqli_query($conn, "SELECT username, status FROM admins WHERE id=$id");
@@ -48,7 +69,7 @@ if (isset($_GET['toggle'])) {
     exit();
 }
 
-// Handle Permanent Ban
+// --- Handle Permanent Ban ---
 if (isset($_GET['ban'])) {
     $id = intval($_GET['ban']);
     $check = mysqli_query($conn, "SELECT username, status FROM admins WHERE id=$id");
@@ -75,6 +96,14 @@ if (isset($_GET['ban'])) {
     exit();
 }
 
+// --- Fetch Roles for Dropdown ---
+$roles_result = mysqli_query($conn, "SELECT id, role_name FROM roles ORDER BY role_name ASC");
+$roles = [];
+while ($role = mysqli_fetch_assoc($roles_result)) {
+    $roles[] = $role;
+}
+
+// --- Date Formatting Setup ---
 include '../config/Nepali_Calendar.php';
 $cal = new Nepali_Calendar();
 
@@ -102,9 +131,9 @@ function format_nepali_date($date_str, $cal) {
     }
 }
 
-// Fetch admins with roles
+// --- Fetch admins with roles ---
 $result = mysqli_query($conn, "
-    SELECT a.*, r.role_name 
+    SELECT a.*, r.role_name, r.id AS current_role_id
     FROM admins a
     LEFT JOIN roles r ON a.role_id = r.id
     ORDER BY FIELD(a.username, 'masteradmin') DESC, a.created_at DESC
@@ -176,6 +205,19 @@ $hasAdmins = mysqli_num_rows($result) > 0;
         .message { margin-bottom: 15px; padding: 12px; border-radius: 8px; font-size: 14px; }
         .success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
         .error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+
+        .role-select {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            font-size: 13px;
+            min-width: 120px;
+        }
+        .role-form {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -236,9 +278,32 @@ $hasAdmins = mysqli_num_rows($result) > 0;
                         </span>
                     </td>
                     <td><?= $row['last_login'] ? format_nepali_date($row['last_login'], $cal) : '—' ?></td>
-                    <td><?= htmlspecialchars($row['role_name'] ?? '—') ?></td>
+
+                    <td>
+                        <?php if ($row['username'] === 'masteradmin'): ?>
+                            <span class="badge badge-warning">Master Admin</span>
+                            <input type="hidden" value="<?= $row['current_role_id'] ?>">
+                        <?php else: ?>
+                            <form method="POST" class="role-form" id="role-form-<?= $row['id'] ?>">
+                                <input type="hidden" name="update_role" value="1">
+                                <input type="hidden" name="admin_id" value="<?= $row['id'] ?>">
+                                <select name="role_id" class="role-select"
+                                        onchange="document.getElementById('role-form-<?= $row['id'] ?>').submit()">
+                                    <?php foreach ($roles as $role): ?>
+                                        <option value="<?= $role['id'] ?>"
+                                                <?= ($row['current_role_id'] == $role['id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($role['role_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+
                     <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <?php if($row['status'] === 'active'): ?>
+                        <?php if ($row['username'] === 'masteradmin'): ?>
+                            <span class="badge badge-warning">🔒</span>
+                        <?php elseif($row['status'] === 'active'): ?>
                             <a href="manage_admin.php?toggle=<?= $row['id'] ?>"
                                class="btn btn-deactivate"
                                onclick="return confirm('<?= $lang['confirm_deactivate'] ?>')">🚫 <?= $lang['deactivate'] ?></a>
@@ -258,9 +323,6 @@ $hasAdmins = mysqli_num_rows($result) > 0;
                             <a href="manage_admin.php?toggle=<?= $row['id'] ?>"
                                class="btn btn-activate"
                                onclick="return confirm('<?= $lang['confirm_unban'] ?>')">🔓 <?= $lang['unban'] ?></a>
-
-                        <?php elseif($row['id'] == $admin_id): ?>
-                            <span class="badge badge-warning">⚙️ <?= $lang['you'] ?></span>
 
                         <?php else: ?>
                             —

@@ -49,7 +49,7 @@ if ($admin_id === "master") {
     }
 
     // --- Handle Form Submissions (Update Profile) ---
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['change_password'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['change_password']) && !isset($_POST['delete_account'])) {
         $new_username = trim($_POST['username']);
         $profile_pic = $admin['profile_pic'] ?? 'default.png';
 
@@ -127,6 +127,24 @@ if ($admin_id === "master") {
             $error = "❌ Current password is incorrect.";
         }
     }
+
+    // --- Handle Form Submissions (Account Deletion) ---
+    if (isset($_POST['delete_account'])) {
+        if ($_POST['confirm_delete'] === 'yes') {
+            $stmt = $conn->prepare("DELETE FROM admins WHERE id = ?");
+            if ($stmt === false) die("❌ SQL Prepare (Delete) failed: " . htmlspecialchars($conn->error));
+            $stmt->bind_param("i", $admin['id']);
+            if (!$stmt->execute()) die("❌ SQL Execute (Delete) failed: " . htmlspecialchars($stmt->error));
+            $stmt->close();
+
+            // Clear session and redirect after successful deletion
+            session_destroy();
+            header("Location: login.php?msg=account_deleted");
+            exit();
+        } else {
+            $error = "⚠️ Account deletion was not explicitly confirmed.";
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -135,6 +153,7 @@ if ($admin_id === "master") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Profile - <?= htmlspecialchars($admin['username']) ?></title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
@@ -150,6 +169,8 @@ if ($admin_id === "master") {
             --color-bg: #f5f8fa; /* Very Light Background */
             --color-card-bg: #ffffff;
             --color-hover-bg: #e6f3ff; /* Very Light Blue for Hover */
+            --color-danger: #e74c3c; /* Red for Danger */
+            --color-danger-dark: #c0392b; /* Darker Red */
 
             /* Master Admin Palette */
             --color-master-bg: #2c3e50; /* Dark Slate/Navy */
@@ -354,6 +375,16 @@ if ($admin_id === "master") {
         }
         button .icon { margin-right: 8px; color: white; }
 
+        /* Danger Button Styling */
+        .danger-button {
+            background: linear-gradient(45deg, var(--color-danger), var(--color-danger-dark));
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+        .danger-button:hover {
+            background: linear-gradient(45deg, var(--color-danger-dark), #922b21);
+            box-shadow: 0 8px 18px rgba(231, 76, 60, 0.5);
+        }
+
 
         /* Message Styles (More distinct) */
         .message-box {
@@ -391,6 +422,32 @@ if ($admin_id === "master") {
             text-align: center;
         }
         .master-warning .icon { color: #f39c12; margin-right: 15px; }
+
+        /* Danger Zone Card */
+        .card.danger-zone {
+            /* Override for a distinct, high-alert look */
+            background-color: #fcebeb;
+            border: 1px solid var(--color-danger);
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.1);
+            margin-top: 30px;
+            padding: 25px;
+        }
+        .card.danger-zone:before {
+            background: var(--color-danger);
+        }
+        .danger-zone .card-title {
+            color: var(--color-danger-dark);
+            border-bottom: 1px dashed var(--color-danger);
+        }
+        .danger-zone .card-title .icon {
+            color: var(--color-danger);
+        }
+        .danger-zone p {
+            color: var(--color-danger-dark);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
 
         /* ====================================================
            MASTER ADMIN SPECIFIC STYLING (Layout Overrides)
@@ -563,62 +620,82 @@ if ($admin_id === "master") {
     </div>
 
     <?php if(!$is_master): ?>
-        <div class="card">
-            <?php if($error): ?>
-                <p class="message-box error">
-                    <i data-feather="alert-triangle"></i> <?= htmlspecialchars($error) ?>
-                </p>
-            <?php endif; ?>
-            <?php if($success): ?>
-                <p class="message-box success">
-                    <i data-feather="check-circle"></i> <?= htmlspecialchars($success) ?>
-                </p>
-            <?php endif; ?>
+        <div>
+            <div class="card">
+                <?php if($error): ?>
+                    <p class="message-box error">
+                        <i data-feather="alert-triangle"></i> <?= htmlspecialchars($error) ?>
+                    </p>
+                <?php endif; ?>
+                <?php if($success): ?>
+                    <p class="message-box success">
+                        <i data-feather="check-circle"></i> <?= htmlspecialchars($success) ?>
+                    </p>
+                <?php endif; ?>
 
-            <h3 class="card-title"><i data-feather="settings" class="icon"></i> <?= $lang['edit_account_details'] ?></h3>
-            <form method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="username"><i data-feather="user-check" class="icon"></i> <?= $lang['username'] ?>:</label>
-                    <input type="text" id="username" name="username" value="<?= htmlspecialchars($admin['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
-                </div>
+                <h3 class="card-title"><i data-feather="settings" class="icon"></i> <?= $lang['edit_account_details'] ?></h3>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="username"><i data-feather="user-check" class="icon"></i> <?= $lang['username'] ?>:</label>
+                        <input type="text" id="username" name="username" value="<?= htmlspecialchars($admin['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="profile_pic"><i data-feather="camera" class="icon"></i> <?= $lang['change_profile_picture'] ?>:</label>
-                    <input type="file" id="profile_pic" name="profile_pic" accept=".jpg,.jpeg,.png,.gif">
-                </div>
+                    <div class="form-group">
+                        <label for="profile_pic"><i data-feather="camera" class="icon"></i> <?= $lang['change_profile_picture'] ?>:</label>
+                        <input type="file" id="profile_pic" name="profile_pic" accept=".jpg,.jpeg,.png,.gif">
+                    </div>
 
-                <button type="submit"><i data-feather="save"></i> <?= $lang['save_changes'] ?></button>
-            </form>
+                    <button type="submit"><i data-feather="save"></i> <?= $lang['save_changes'] ?></button>
+                </form>
 
-            <h3 class="card-title" style="margin-top: 40px;"><i data-feather="key" class="icon"></i> <?= $lang['update_security_credentials'] ?></h3>
-            <form method="POST">
-                <input type="hidden" name="change_password" value="1">
+                <h3 class="card-title" style="margin-top: 40px;"><i data-feather="key" class="icon"></i> <?= $lang['update_security_credentials'] ?></h3>
+                <form method="POST">
+                    <input type="hidden" name="change_password" value="1">
 
-                <div class="form-group">
-                    <label><i data-feather="lock" class="icon"></i> <?= $lang['current_password'] ?>:</label>
-                    <input type="password" name="current_password" required placeholder="••••••••">
-                </div>
+                    <div class="form-group">
+                        <label><i data-feather="lock" class="icon"></i> <?= $lang['current_password'] ?>:</label>
+                        <input type="password" name="current_password" required placeholder="••••••••">
+                    </div>
 
-                <div class="form-group">
-                    <label><i data-feather="unlock" class="icon"></i> <?= $lang['new_password'] ?>:</label>
-                    <input type="password" name="new_password" required placeholder="••••••••">
-                </div>
+                    <div class="form-group">
+                        <label><i data-feather="unlock" class="icon"></i> <?= $lang['new_password'] ?>:</label>
+                        <input type="password" name="new_password" required placeholder="••••••••">
+                    </div>
 
-                <div class="form-group">
-                    <label><i data-feather="repeat" class="icon"></i> <?= $lang['confirm_password'] ?>:</label>
-                    <input type="password" name="confirm_password" required placeholder="••••••••">
-                </div>
+                    <div class="form-group">
+                        <label><i data-feather="repeat" class="icon"></i> <?= $lang['confirm_password'] ?>:</label>
+                        <input type="password" name="confirm_password" required placeholder="••••••••">
+                    </div>
 
-                <button type="submit"><i data-feather="rotate-ccw"></i> <?= $lang['change_password'] ?></button>
-            </form>
-        </div>
-    <?php endif; ?>
+                    <button type="submit"><i data-feather="rotate-ccw"></i> <?= $lang['change_password'] ?></button>
+                </form>
+            </div>
 
-</div>
+            <div class="card danger-zone">
+                <h3 class="card-title"><i data-feather="alert-triangle" class="icon"></i> <?= $lang['danger_zone'] ?></h3>
+                <p> <strong><?= $lang['warning_title'] ?></strong> <?= $lang['warning_message'] ?></p>
 
-<script>
-    feather.replace();
-</script>
+                <form id="delete-form" method="POST" onsubmit="return confirmAccountDeletion()">
+                    <input type="hidden" name="delete_account" value="1">
+                    <input type="hidden" id="confirm_delete_input" name="confirm_delete" value="no">
+                    <button type="submit" class="danger-button">
+                        <i data-feather="trash-2"></i> <?= $lang['delete_account_button'] ?>
+                    </button>
+                </form>
+                <?php endif; ?>
+            </div>
+
+            <script>
+                feather.replace();
+
+                /**
+                 * Confirms permanent account deletion before submitting the form.
+                 * @returns {boolean} True if deletion is confirmed, false otherwise.
+                 */
+                function confirmAccountDeletion() {
+                    return confirm("<?= $lang['confirm_delete_alert'] ?>");
+                }
+            </script>
 
 </body>
 </html>
