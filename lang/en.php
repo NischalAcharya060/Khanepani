@@ -23,42 +23,6 @@ $lang = [
     'manage' => 'Manage',
     'settings_desc' => 'Change password, update profile, and system settings.',
 
-    // Admins
-    "active" => "Active",
-    "banned" => "Banned",
-    "ban" => "Ban",
-    "unban" => "Unban",
-    "last_login" => "Last Login",
-    "no_admins" => "No admins available.",
-    "subtitle_admin" => "Ban/unban admin accounts (Master Admin excluded).",
-    "admins" => "Admins",
-    'role' => 'Role',
-    'roles' => 'Roles',
-    'select_role' => 'Select Role',
-    'role_assigned' => 'Role assigned successfully.',
-    'role_not_found' => 'Role not found.',
-    'no_roles' => 'No roles available.',
-    'role_description' => 'Select a role for this admin.',
-    'subtitle' => 'Manage admin accounts',
-    'deactivate' => 'Deactivate',
-    'activate' => 'Activate',
-    'ban_permanently' => 'Ban',
-    'inactive' => 'Inactive',
-    'deactivated' => 'Deactivated',
-    'admin_deactivated' => '🚫 Admin deactivated successfully.',
-    'admin_activated' => '✅ Admin activated successfully.',
-    'admin_banned_perm' => '🛑 Admin permanently banned.',
-    'admin_already_inactive' => '⚠️ Error: Admin is already inactive/banned. Use "Activate" to restore.',
-    'admin_unbanned' => 'Admin account unbanned successfully.',
-    'self' => 'You',
-    'you' => 'You',
-
-    // Confirmation prompts
-    'confirm_deactivate' => 'Deactivate this admin account?',
-    'confirm_activate' => 'Activate this admin account?',
-    'confirm_ban' => 'Are you sure you want to permanently ban this admin?',
-    'confirm_unban' => 'Unban and activate this admin?',
-
     // Notices
     "notices" => "Notices",
     "add_notice" => "Add Notice",
@@ -166,18 +130,6 @@ $lang = [
     "db_error" => "Database error:",
     "file_upload_failed" => "Failed to upload file.",
     "allowed_types" => "Only JPG, JPEG, PNG, GIF allowed.",
-
-    // Add admin
-    'username' => 'Username',
-    'password' => 'Password',
-    'username_exists' => 'Username already exists.',
-    'new_admin_added' => 'New admin added successfully!',
-    'subtitle_add_admin' => 'Create a new admin account to manage the dashboard.',
-    'username_placeholder' => 'Enter username',
-    'email_placeholder' => 'Enter email',
-    'password_placeholder' => 'Enter password',
-    'confirm_password_placeholder' => 'Confirm password',
-    'optional' => 'optional',
 
     // Profile
     'profile_overview' => 'Profile Overview',
