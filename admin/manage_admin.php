@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
         $_SESSION['msg'] = "❌ Cannot modify the role of the 'masteradmin' account.";
         $_SESSION['msg_type'] = 'error';
     } elseif ($admin_id_to_update == $admin_id) {
-        $_SESSION['msg'] = "⚠️ You cannot change your own role from here. Use the profile page for permissions or ask another master admin.";
+        $_SESSION['msg'] = "⚠️ You cannot change your own role from here.";
         $_SESSION['msg_type'] = 'error';
     } else {
         mysqli_query($conn, "UPDATE admins SET role_id=$new_role_id WHERE id=$admin_id_to_update");
@@ -131,13 +131,14 @@ function format_nepali_date($date_str, $cal) {
     }
 }
 
-// --- Fetch admins with roles ---
+// --- Fetch admins with roles (fixed LEFT JOIN to include all) ---
 $result = mysqli_query($conn, "
     SELECT a.*, r.role_name, r.id AS current_role_id
     FROM admins a
     LEFT JOIN roles r ON a.role_id = r.id
-    ORDER BY FIELD(a.username, 'masteradmin') DESC, a.created_at DESC
+    ORDER BY a.created_at DESC
 ");
+
 $hasAdmins = mysqli_num_rows($result) > 0;
 ?>
 <!DOCTYPE html>
@@ -222,7 +223,6 @@ $hasAdmins = mysqli_num_rows($result) > 0;
 </head>
 <body>
 <?php include '../components/admin_header.php'; ?>
-
 <main class="main-content">
     <h2>👥 <?= $lang['manage_admin'] ?></h2>
     <a href="add_admin.php" class="add-btn">➕ <?= $lang['add'] ?> <?= $lang['add_new_admin'] ?></a>
@@ -282,48 +282,35 @@ $hasAdmins = mysqli_num_rows($result) > 0;
                     <td>
                         <?php if ($row['username'] === 'masteradmin'): ?>
                             <span class="badge badge-warning">Master Admin</span>
-                            <input type="hidden" value="<?= $row['current_role_id'] ?>">
                         <?php else: ?>
                             <form method="POST" class="role-form" id="role-form-<?= $row['id'] ?>">
                                 <input type="hidden" name="update_role" value="1">
                                 <input type="hidden" name="admin_id" value="<?= $row['id'] ?>">
-                                <select name="role_id" class="role-select"
-                                        onchange="document.getElementById('role-form-<?= $row['id'] ?>').submit()">
+                                <select name="role_id" class="role-select" onchange="document.getElementById('role-form-<?= $row['id'] ?>').submit()">
                                     <?php foreach ($roles as $role): ?>
-                                        <option value="<?= $role['id'] ?>"
-                                                <?= ($row['current_role_id'] == $role['id']) ? 'selected' : '' ?>>
+                                        <option value="<?= $role['id'] ?>" <?= ($row['current_role_id']==$role['id'])?'selected':'' ?>>
                                             <?= htmlspecialchars($role['role_name']) ?>
                                         </option>
                                     <?php endforeach; ?>
+                                    <?php if(!$row['role_id']): ?>
+                                        <option value="" selected>No Role</option>
+                                    <?php endif; ?>
                                 </select>
                             </form>
                         <?php endif; ?>
                     </td>
 
-                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <td>
                         <?php if ($row['username'] === 'masteradmin'): ?>
                             <span class="badge badge-warning">🔒</span>
                         <?php elseif($row['status'] === 'active'): ?>
-                            <a href="manage_admin.php?toggle=<?= $row['id'] ?>"
-                               class="btn btn-deactivate"
-                               onclick="return confirm('<?= $lang['confirm_deactivate'] ?>')">🚫 <?= $lang['deactivate'] ?></a>
-                            <a href="manage_admin.php?ban=<?= $row['id'] ?>"
-                               class="btn btn-ban"
-                               onclick="return confirm('<?= $lang['confirm_ban'] ?>')">🛑 <?= $lang['ban'] ?></a>
-
+                            <a href="manage_admin.php?toggle=<?= $row['id'] ?>" class="btn btn-deactivate">🚫 <?= $lang['deactivate'] ?></a>
+                            <a href="manage_admin.php?ban=<?= $row['id'] ?>" class="btn btn-ban">🛑 <?= $lang['ban'] ?></a>
                         <?php elseif($row['status'] === 'deactivated'): ?>
-                            <a href="manage_admin.php?toggle=<?= $row['id'] ?>"
-                               class="btn btn-activate"
-                               onclick="return confirm('<?= $lang['confirm_activate'] ?>')">✅ <?= $lang['activate'] ?></a>
-                            <a href="manage_admin.php?ban=<?= $row['id'] ?>"
-                               class="btn btn-ban"
-                               onclick="return confirm('<?= $lang['confirm_ban'] ?>')">🛑 <?= $lang['ban'] ?></a>
-
+                            <a href="manage_admin.php?toggle=<?= $row['id'] ?>" class="btn btn-activate">✅ <?= $lang['activate'] ?></a>
+                            <a href="manage_admin.php?ban=<?= $row['id'] ?>" class="btn btn-ban">🛑 <?= $lang['ban'] ?></a>
                         <?php elseif($row['status'] === 'banned'): ?>
-                            <a href="manage_admin.php?toggle=<?= $row['id'] ?>"
-                               class="btn btn-activate"
-                               onclick="return confirm('<?= $lang['confirm_unban'] ?>')">🔓 <?= $lang['unban'] ?></a>
-
+                            <a href="manage_admin.php?toggle=<?= $row['id'] ?>" class="btn btn-activate">🔓 <?= $lang['unban'] ?></a>
                         <?php else: ?>
                             —
                         <?php endif; ?>

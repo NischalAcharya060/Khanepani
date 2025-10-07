@@ -82,6 +82,20 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 // Sidebar state from session (default expanded for desktop)
 $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
+
+$role_id = 2; // default role
+if ($admin_id === 'master') {
+    $role_id = 1; // master admin
+} else {
+    $stmt = $conn->prepare("SELECT role_id FROM admins WHERE id = ?");
+    $stmt->bind_param("i", $admin_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($res && $res->num_rows === 1) {
+        $row = $res->fetch_assoc();
+        $role_id = intval($row['role_id']);
+    }
+}
 ?>
 <header class="admin-header">
     <div class="logo">
@@ -165,7 +179,9 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
         <li><a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">📢 <span class="link-text"><?= $lang['manage_notices'] ?></span></a></li>
         <li><a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">🖼 <span class="link-text"><?= $lang['manage_gallery'] ?></span></a></li>
         <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
-        <li><a href="../admin/manage_admin.php" class="<?= $current_page == 'manage_admin.php' ? 'active' : '' ?>">👥 <span class="link-text"><?= $lang['manage_admin'] ?></span></a></li>
+        <?php if($role_id === 1 || $role_id === 2): ?>
+            <li><a href="../admin/manage_admin.php" class="<?= $current_page == 'manage_admin.php' ? 'active' : '' ?>">👥 <span class="link-text"><?= $lang['manage_admin'] ?></span></a></li>
+        <?php endif; ?>
         <li><a href="../admin/activity.php" class="<?= $current_page == 'activity.php' ? 'active' : '' ?>">🕒 <span class="link-text"><?= $lang['recent_activity'] ?></span></a></li>
         <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
     </ul>

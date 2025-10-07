@@ -14,7 +14,7 @@ $stmt_check->bind_param("s", $master_username);
 $stmt_check->execute();
 $result_check = $stmt_check->get_result();
 if ($result_check->num_rows === 0) {
-    $stmt_insert = $conn->prepare("INSERT INTO admins (username, email, password, status, created_at, last_login) VALUES (?, ?, ?, 'active', NOW(), NOW())");
+    $stmt_insert = $conn->prepare("INSERT INTO admins (username, email, password, status, role_id, created_at, last_login) VALUES (?, ?, ?, 'active', 1, NOW(), NOW())");
     $stmt_insert->bind_param("sss", $master_username, $master_email, $hashed_password);
     $stmt_insert->execute();
 }
