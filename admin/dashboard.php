@@ -484,7 +484,7 @@ for($m=1; $m<=12; $m++){
                 <div class="icon-box"><i data-feather="inbox"></i></div>
             </div>
             <div class="stat-card admins">
-                <div><h3><?= $lang['admins'] ?? 'Total Admins' ?></h3><p><?= $total_admins ?></p></div>
+                <div><h3><?= $lang['admins'] ?? 'Admins' ?></h3><p><?= $total_admins ?></p></div>
                 <div class="icon-box"><i data-feather="users"></i></div>
             </div>
             <div class="stat-card active-admins">

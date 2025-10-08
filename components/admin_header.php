@@ -57,7 +57,7 @@ $unread_count = count($unread_messages);
 // --- Profile Fetch for Header Display ---
 $admin_id = $_SESSION['admin'];
 $username = $_SESSION['username'] ?? 'Admin';
-$profile_pic = 'default.png';
+$profile_pic = 'assets/profile/default.png';
 
 if ($admin_id !== 'master') {
     $admin_id_int = intval($admin_id);
@@ -164,7 +164,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
         <li><a href="../admin/dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">🏠 <span class="link-text"><?= $lang['dashboard'] ?></span></a></li>
         <li><a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">📢 <span class="link-text"><?= $lang['manage_notices'] ?></span></a></li>
         <li><a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">🖼 <span class="link-text"><?= $lang['manage_gallery'] ?></span></a></li>
-        <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
+        <li><a href="../admin/manage_admins.php" class="<?= $current_page == 'manage_admins.php' ? 'active' : '' ?>">👥 <span class="link-text"><?= $lang['manage_admins'] ?></span></a></li>        <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
         <li><a href="../admin/activity.php" class="<?= $current_page == 'activity.php' ? 'active' : '' ?>">🕒 <span class="link-text"><?= $lang['recent_activity'] ?></span></a></li>
         <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
     </ul>

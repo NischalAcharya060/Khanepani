@@ -134,6 +134,7 @@ $lang = [
     // Profile
     'profile_overview' => 'Profile Overview',
     'edit_account_details' => 'Edit Account Details',
+    'username' => 'Username',
     'update_security_credentials' => 'Update Security Credentials',
     'account_created' => 'Account Created',
     'last_activity' => 'Last Activity',
@@ -145,6 +146,18 @@ $lang = [
     'new_password' => 'New Password (min 8 chars)',
     'confirm_password' => 'Confirm New Password',
     'change_password' => 'Change Password',
+
+    // --- Admin Management ---
+    'manage_admins'         => 'Manage Admins',
+    'manage_admins_subtitle' => 'Add, view, or remove admin users.',
+    'add_admin'             => 'Add New Admin',
+    'you'                   => 'You',
+    'admin_delete_confirm'        => 'Are you sure you want to delete this admin?',
+    'no_admins'             => 'No admins found.',
+    'role'	=> 'Role',
+    'created_at'	=> 'Created at',
+    'last_login'	=> 'Last Login',
+    'profile'	=> 'Profile',
 
     // Messages
     'master_admin_locked' => 'Master Admin: Profile settings are locked for security.',
