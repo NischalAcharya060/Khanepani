@@ -57,7 +57,8 @@ $unread_count = count($unread_messages);
 // --- Profile Fetch for Header Display ---
 $admin_id = $_SESSION['admin'];
 $username = $_SESSION['username'] ?? 'Admin';
-$profile_pic = 'assets/profile/default.png';
+
+$profile_pic_path = '../assets/profile/default.png';
 
 if ($admin_id !== 'master') {
     $admin_id_int = intval($admin_id);
@@ -69,9 +70,16 @@ if ($admin_id !== 'master') {
             $result = $stmt->get_result();
             $admin_data = $result->fetch_assoc();
             $stmt->close();
+
             if ($admin_data) {
-                $profile_pic = $admin_data['profile_pic'] ?: 'default.png';
                 $username = $admin_data['username'] ?: 'Admin';
+                $db_profile_pic = $admin_data['profile_pic'] ?? '';
+
+                $uploaded_path_check = '../assets/uploads/profile/' . $db_profile_pic;
+
+                if (!empty($db_profile_pic) && $db_profile_pic !== 'default.png' && file_exists($uploaded_path_check)) {
+                    $profile_pic_path = $uploaded_path_check;
+                }
             }
         }
     }
@@ -109,7 +117,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
 
         <div class="profile-menu">
             <div class="profile-trigger" onclick="toggleProfileMenu()">
-                <img src="../assets/uploads/profile/<?= htmlspecialchars($profile_pic, ENT_QUOTES, 'UTF-8') ?>"
+                <img src="<?= htmlspecialchars($profile_pic_path, ENT_QUOTES, 'UTF-8') ?>"
                      alt="Profile" class="profile-pic">
                 <span><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></span>
                 <i class="arrow">&#9662;</i>

@@ -1,9 +1,11 @@
 <?php
 session_start();
-// Assuming '../config/db.php' and '../config/Nepali_Calendar.php' exist
 include '../config/db.php';
 include '../config/Nepali_Calendar.php';
 $cal = new Nepali_Calendar();
+
+// Define a constant for "Active Now" check (e.g., 5 minutes = 300 seconds)
+const ACTIVE_NOW_THRESHOLD = 100;
 
 // --- Nepali date formatter (Used for Created At) ---
 function format_nepali_date($date_str, $cal) {
@@ -16,8 +18,6 @@ function format_nepali_date($date_str, $cal) {
     $minute = (int)date('i', $timestamp);
     $ampm  = date('A', $timestamp);
 
-    // This block assumes the existence of the $lang array globally, which is included later.
-    // In a real scenario, $lang should be passed in or be a global. We'll rely on it being global later.
     global $lang;
 
     if (($_SESSION['lang'] ?? 'en') === 'np') {
@@ -38,11 +38,11 @@ function format_nepali_date($date_str, $cal) {
 function format_time_ago($date_str) {
     if (!$date_str || strtotime($date_str) === false) return '—';
 
-    global $lang; // Access the language array
+    global $lang;
     $timestamp = strtotime($date_str);
     $diff = time() - $timestamp;
 
-    if ($diff < 1) {
+    if ($diff < 60) {
         return $lang['just_now'] ?? 'just now';
     }
 
@@ -56,32 +56,35 @@ function format_time_ago($date_str) {
         1        => $lang['second'] ?? 'second'
     );
 
+    $lang_ago = $lang['ago'] ?? 'ago';
+
     // Select the largest time period
     foreach ($periods as $seconds => $name) {
         if ($diff >= $seconds) {
             $value = floor($diff / $seconds);
-
-            // For seconds, we still return "just now" if less than a minute
-            if ($name === ($lang['second'] ?? 'second') && $value < 60) {
-                return $lang['just_now'] ?? 'just now';
-            }
-
             $phrase = $name . ($value > 1 ? 's' : '');
 
-            if (($_SESSION['lang'] ?? 'en') === 'np') {
-                // For Nepali, we might need a more complex structure, but for simplicity, we'll return
-                // English phrasing (e.g., "3 minutes ago") or use simple Nepali equivalents if available.
-                // Assuming $lang['ago'] exists and value has a corresponding Nepali number function if needed.
-                // For this fix, we will stick to the general structure and English terms for simplicity in the PHP string.
-                return "$value $phrase " . ($lang['ago'] ?? 'ago');
-            }
-
-            return "$value $phrase " . ($lang['ago'] ?? 'ago');
+            return "$value $phrase $lang_ago";
         }
     }
 
     return '—';
 }
+
+/**
+ * Checks if an admin's last login time is within the ACTIVE_NOW_THRESHOLD.
+ * @param string|null $last_login_str The last_login timestamp string.
+ * @return bool True if active now, false otherwise.
+ */
+function is_admin_active_now(?string $last_login_str): bool {
+    if (!$last_login_str) return false;
+    $last_login_timestamp = strtotime($last_login_str);
+    if ($last_login_timestamp === false) return false;
+
+    // Check if the last login was within the last N seconds (e.g., 300s = 5 mins)
+    return (time() - $last_login_timestamp) < ACTIVE_NOW_THRESHOLD;
+}
+
 
 // --- Authentication ---
 if (!isset($_SESSION['admin'])) {
@@ -107,9 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $response = ['success' => false, 'message' => $lang['db_error'] ?? 'Database error.'];
     $admin_id = intval($_POST['id'] ?? 0);
 
-    // Master Admin Lock: Prevents non-Master Admin from changing Master Admin's settings
-    if ($admin_id === 1 && $admin_id !== $current_admin_id) {
-        $response['message'] = $lang['master_admin_locked'] ?? 'Master Admin settings are locked for security.';
+    if ($admin_id === 1) {
+        $response['message'] = $lang['master_admin_locked_no_edit'] ?? 'Master Admin settings cannot be modified for security.';
         echo json_encode($response);
         exit;
     }
@@ -120,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
-    // Additional self/master status lock check within update_status case is kept for redundancy
 
     if ($admin_id > 0) {
         $action = $_POST['action'];
@@ -139,13 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'update_status':
-                // Final check to prevent changing self or master's status
-                if ($admin_id === $current_admin_id || $admin_id === 1) {
-                    $response['message'] = $lang['self_master_status_lock'] ?? 'Cannot change your own or Master Admin status.';
-                    echo json_encode($response);
-                    exit;
-                }
-
                 $status = $_POST['value'];
                 if (in_array($status, ['active', 'inactive', 'banned'])) {
                     $stmt = $conn->prepare("UPDATE admins SET status = ? WHERE id = ?");
@@ -165,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         } else if (isset($stmt) && $stmt->errno) {
             $response['message'] = ($lang['db_query_error'] ?? 'Database query error:') . ' ' . $stmt->error;
         } else if (!$update_successful) {
-            $response['message'] = $lang['update_failed'] ?? 'Update failed.';
+            $response['message'] = $lang['update_failed'] ?? 'Update failed. (No change or database issue)';
         }
     } else {
         $response['message'] = $lang['invalid_id'] ?? 'Invalid admin ID.';
@@ -348,6 +342,20 @@ $username = $_SESSION['username'] ?? 'Admin';
             background-color: #ef4444;
         }
 
+        /* New Active Now styling */
+        .active-now {
+            font-weight: 700;
+            color: #059669; /* Same as active status for consistency */
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .active-now::before {
+            content: '•';
+            font-size: 1.5em;
+            line-height: 0.5em;
+            color: #059669;
+        }
 
         /* --- Inline Edit Styling (Role) --- */
         .role-display {
@@ -489,12 +497,13 @@ $username = $_SESSION['username'] ?? 'Admin';
                     <td>
                         <?php
                         $admin_profile_pic = $admin['profile_pic'] ?? '';
-                        $profilePath = "../uploads/" . htmlspecialchars($admin_profile_pic);
+                        $uploadedPath = "../assets/uploads/profile/" . htmlspecialchars($admin_profile_pic);
+                        $defaultPath = "../assets/profile/default.png";
 
-                        if (!empty($admin_profile_pic) && file_exists($profilePath)) {
-                            echo '<img src="' . $profilePath . '" class="profile-pic" alt="Profile">';
+                        if (!empty($admin_profile_pic) && file_exists($uploadedPath) && $admin_profile_pic !== 'default.png') {
+                            echo '<img src="' . $uploadedPath . '" class="profile-pic" alt="Profile">';
                         } else {
-                            echo '<img src="../assets/profile/default.png" class="profile-pic" alt="Default">';
+                            echo '<img src="' . $defaultPath . '" class="profile-pic" alt="Default">';
                         }
                         ?>
                     </td>
@@ -520,8 +529,16 @@ $username = $_SESSION['username'] ?? 'Admin';
                     </td>
 
                     <td><?= format_nepali_date($admin['created_at'], $cal) ?></td>
-                    <td title="<?= !empty($admin['last_login']) ? date('Y-m-d H:i:s', strtotime($admin['last_login'])) : '—' ?>">
-                        <?= !empty($admin['last_login']) ? format_time_ago($admin['last_login']) : '—' ?>
+                    <td>
+                        <?php
+                        $is_active_now = $is_self || is_admin_active_now($admin['last_login'] ?? null);
+                        if ($is_active_now) {
+                            echo '<span class="active-now">' . ($lang['active_now'] ?? 'Active Now') . '</span>';
+                        } else {
+                            $last_login_display = !empty($admin['last_login']) ? format_time_ago($admin['last_login']) : '—';
+                            echo '<span title="' . (!empty($admin['last_login']) ? date('Y-m-d H:i:s', strtotime($admin['last_login'])) : '—') . '">' . $last_login_display . '</span>';
+                        }
+                        ?>
                     </td>
 
                     <td class="action-buttons-cell">
