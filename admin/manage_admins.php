@@ -4,10 +4,10 @@ include '../config/db.php';
 include '../config/Nepali_Calendar.php';
 $cal = new Nepali_Calendar();
 
-// Define a constant for "Active Now" check (e.g., 5 minutes = 300 seconds)
+// Define a constant for "Active Now" check (e.g., 100 seconds)
 const ACTIVE_NOW_THRESHOLD = 100;
 
-// --- Nepali date formatter (Used for Created At) ---
+// --- Nepali date formatter ---
 function format_nepali_date($date_str, $cal) {
     if (!$date_str) return '—';
     $timestamp = strtotime($date_str);
@@ -34,7 +34,7 @@ function format_nepali_date($date_str, $cal) {
     }
 }
 
-// --- Time Ago Formatter (Used for Last Login) ---
+// --- Time Ago Formatter ---
 function format_time_ago($date_str) {
     if (!$date_str || strtotime($date_str) === false) return '—';
 
@@ -47,23 +47,21 @@ function format_time_ago($date_str) {
     }
 
     $periods = array(
-        31536000 => $lang['year'] ?? 'year',
-        2592000  => $lang['month'] ?? 'month',
-        604800   => $lang['week'] ?? 'week',
-        86400    => $lang['day'] ?? 'day',
-        3600     => $lang['hour'] ?? 'hour',
-        60       => $lang['minute'] ?? 'minute',
-        1        => $lang['second'] ?? 'second'
+            31536000 => $lang['year'] ?? 'year',
+            2592000  => $lang['month'] ?? 'month',
+            604800   => $lang['week'] ?? 'week',
+            86400    => $lang['day'] ?? 'day',
+            3600     => $lang['hour'] ?? 'hour',
+            60       => $lang['minute'] ?? 'minute',
+            1        => $lang['second'] ?? 'second'
     );
 
     $lang_ago = $lang['ago'] ?? 'ago';
 
-    // Select the largest time period
     foreach ($periods as $seconds => $name) {
         if ($diff >= $seconds) {
             $value = floor($diff / $seconds);
             $phrase = $name . ($value > 1 ? 's' : '');
-
             return "$value $phrase $lang_ago";
         }
     }
@@ -71,20 +69,13 @@ function format_time_ago($date_str) {
     return '—';
 }
 
-/**
- * Checks if an admin's last login time is within the ACTIVE_NOW_THRESHOLD.
- * @param string|null $last_login_str The last_login timestamp string.
- * @return bool True if active now, false otherwise.
- */
+// --- Active now check ---
 function is_admin_active_now(?string $last_login_str): bool {
     if (!$last_login_str) return false;
     $last_login_timestamp = strtotime($last_login_str);
     if ($last_login_timestamp === false) return false;
-
-    // Check if the last login was within the last N seconds (e.g., 300s = 5 mins)
     return (time() - $last_login_timestamp) < ACTIVE_NOW_THRESHOLD;
 }
-
 
 // --- Authentication ---
 if (!isset($_SESSION['admin'])) {
@@ -92,7 +83,8 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 $current_admin_id = $_SESSION['admin'];
-$is_master_admin_session = ($current_admin_id == 1);
+$current_admin_role = $_SESSION['role_name'] ?? '';
+$is_master_admin_session = ($current_admin_role === 'masteradmin');
 
 // --- Language Handling ---
 if (!isset($_SESSION['lang'])) $_SESSION['lang'] = 'en';
@@ -100,88 +92,90 @@ if (isset($_GET['lang'])) {
     $allowed_langs = ['en','np'];
     if (in_array($_GET['lang'], $allowed_langs)) $_SESSION['lang'] = $_GET['lang'];
 }
-include '../lang/' . $_SESSION['lang'] . '.php'; // $lang array is now available
+include '../lang/' . $_SESSION['lang'] . '.php';
 
-// ----------------------------------------------------------------------
 // --- AJAX HANDLER FOR ROLE/STATUS UPDATES ---
-// ----------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
     $response = ['success' => false, 'message' => $lang['db_error'] ?? 'Database error.'];
     $admin_id = intval($_POST['id'] ?? 0);
 
-    if ($admin_id === 1) {
-        $response['message'] = $lang['master_admin_locked_no_edit'] ?? 'Master Admin settings cannot be modified for security.';
+    // Masteradmin cannot edit own account
+    if ($admin_id === $current_admin_id && $current_admin_role === 'masteradmin') {
+        $response['message'] = $lang['self_edit_forbidden'] ?? 'You cannot edit your own account.';
         echo json_encode($response);
         exit;
     }
 
-    if ($admin_id === $current_admin_id && $_POST['action'] === 'update_status') {
-        $response['message'] = $lang['self_status_lock'] ?? 'Cannot change your own status.';
+    // Only masteradmins can perform role/status updates
+    if ($current_admin_role !== 'masteradmin') {
+        $response['message'] = $lang['no_permission'] ?? 'You do not have permission.';
         echo json_encode($response);
         exit;
     }
 
-
-    if ($admin_id > 0) {
-        $action = $_POST['action'];
-        $update_successful = false;
-
-        switch ($action) {
-            case 'update_role':
-                $role_id = intval($_POST['value'] ?? 0);
-                $stmt = $conn->prepare("UPDATE admins SET role_id = ? WHERE id = ?");
-                $stmt->bind_param("ii", $role_id, $admin_id);
-                $update_successful = $stmt->execute();
-                if ($update_successful) {
-                    $role_name_to_return = $_POST['new_role_name'] ?? 'N/A';
-                    $response['new_role_name'] = htmlspecialchars($role_name_to_return);
-                }
-                break;
-
-            case 'update_status':
-                $status = $_POST['value'];
-                if (in_array($status, ['active', 'inactive', 'banned'])) {
-                    $stmt = $conn->prepare("UPDATE admins SET status = ? WHERE id = ?");
-                    $stmt->bind_param("si", $status, $admin_id);
-                    $update_successful = $stmt->execute();
-                    $response['new_status'] = $status;
-                }
-                break;
-            default:
-                $response['message'] = $lang['invalid_action'] ?? 'Invalid action.';
-                break;
-        }
-
-        if ($update_successful) {
-            $response['success'] = true;
-            $response['message'] = $lang['update_success'] ?? 'Update successful.';
-        } else if (isset($stmt) && $stmt->errno) {
-            $response['message'] = ($lang['db_query_error'] ?? 'Database query error:') . ' ' . $stmt->error;
-        } else if (!$update_successful) {
-            $response['message'] = $lang['update_failed'] ?? 'Update failed. (No change or database issue)';
-        }
-    } else {
+    if ($admin_id <= 0) {
         $response['message'] = $lang['invalid_id'] ?? 'Invalid admin ID.';
+        echo json_encode($response);
+        exit;
+    }
+
+    $action = $_POST['action'];
+    $update_successful = false;
+
+    switch ($action) {
+        case 'update_role':
+            $role_id = intval($_POST['value'] ?? 0);
+            $stmt = $conn->prepare("UPDATE admins SET role_id = ? WHERE id = ?");
+            $stmt->bind_param("ii", $role_id, $admin_id);
+            $update_successful = $stmt->execute();
+            if ($update_successful) {
+                $role_name_to_return = $_POST['new_role_name'] ?? 'N/A';
+                $response['new_role_name'] = htmlspecialchars($role_name_to_return);
+            }
+            break;
+
+        case 'update_status':
+            $status = $_POST['value'];
+            if (in_array($status, ['active', 'inactive', 'banned'])) {
+                $stmt = $conn->prepare("UPDATE admins SET status = ? WHERE id = ?");
+                $stmt->bind_param("si", $status, $admin_id);
+                $update_successful = $stmt->execute();
+                $response['new_status'] = $status;
+            }
+            break;
+
+        default:
+            $response['message'] = $lang['invalid_action'] ?? 'Invalid action.';
+            break;
+    }
+
+    if ($update_successful) {
+        $response['success'] = true;
+        $response['message'] = $lang['update_success'] ?? 'Update successful.';
+    } else if (isset($stmt) && $stmt->errno) {
+        $response['message'] = ($lang['db_query_error'] ?? 'Database query error:') . ' ' . $stmt->error;
+    } else if (!$update_successful) {
+        $response['message'] = $lang['update_failed'] ?? 'Update failed.';
     }
 
     echo json_encode($response);
     exit;
 }
 
-// Fetch all available roles for the inline editor
+// Fetch all roles
 $roles_result = $conn->query("SELECT id, role_name FROM roles ORDER BY id ASC");
 $roles = [];
 while ($row = $roles_result->fetch_assoc()) {
     $roles[$row['id']] = $row;
 }
 
-// --- Pagination ---
+// Pagination
 $limit = 5;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $limit;
 
-// --- Fetch admins ---
+// Fetch admins
 $query = "
     SELECT a.*, r.role_name, r.id AS role_id_fk
     FROM admins a 
@@ -190,7 +184,7 @@ $query = "
     LIMIT $offset, $limit";
 $admins = $conn->query($query);
 
-// --- Count total ---
+// Count total
 $total_result = $conn->query("SELECT COUNT(*) as total FROM admins");
 $total_row = $total_result->fetch_assoc();
 $total_pages = ceil($total_row['total'] / $limit);
@@ -452,6 +446,21 @@ $username = $_SESSION['username'] ?? 'Admin';
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Spinner animation only */
+        .spinner {
+            display: inline-block;
+            font-size: 13px;
+            color: #007bff;
+            animation: spin 1s linear infinite;
+            margin-left: 4px;
+        }
+
+        @keyframes spin {
+            0% { opacity: 0.5; transform: rotate(0deg); }
+            50% { opacity: 1; transform: rotate(180deg); }
+            100% { opacity: 0.5; transform: rotate(360deg); }
+        }
+
         /* ---------------------------------------------------------------------- */
         /* --- PAGINATION STYLING: MODERN AND USABLE --- */
         /* ---------------------------------------------------------------------- */
@@ -491,7 +500,7 @@ $username = $_SESSION['username'] ?? 'Admin';
             <?php $sn = $offset + 1; ?>
             <?php while ($admin = $admins->fetch_assoc()): ?>
                 <?php $is_self = ($admin['id'] == $current_admin_id); ?>
-                <?php $is_master = ($admin['id'] == 1); ?>
+                <?php $is_master = ($admin['role_id_fk'] == 1); ?>
                 <tr>
                     <td><?= $sn++ ?></td>
                     <td>
@@ -499,7 +508,6 @@ $username = $_SESSION['username'] ?? 'Admin';
                         $admin_profile_pic = $admin['profile_pic'] ?? '';
                         $uploadedPath = "../assets/uploads/profile/" . htmlspecialchars($admin_profile_pic);
                         $defaultPath = "../assets/profile/default.png";
-
                         if (!empty($admin_profile_pic) && file_exists($uploadedPath) && $admin_profile_pic !== 'default.png') {
                             echo '<img src="' . $uploadedPath . '" class="profile-pic" alt="Profile">';
                         } else {
@@ -511,12 +519,14 @@ $username = $_SESSION['username'] ?? 'Admin';
                     <td><?= htmlspecialchars($admin['email'] ?? 'N/A') ?></td>
 
                     <td data-role-id="<?= $admin['role_id_fk'] ?>" data-admin-id="<?= $admin['id'] ?>" class="role-cell">
-                        <?php if ($is_master): ?>
-                            <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?></span> (<?= $lang['master'] ?? 'Master' ?>)
-                        <?php else: ?>
+                        <?php if ($is_self && $is_master): ?>
+                            <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?></span> (<?= $lang['you'] ?? 'You' ?>)
+                        <?php elseif ($current_admin_role === 'masteradmin'): ?>
                             <span class="role-display" id="role-display-<?= $admin['id'] ?>">
                                 <?= htmlspecialchars($admin['role_name'] ?? '—') ?>
                             </span>
+                        <?php else: ?>
+                            <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?></span> (<?= $lang['no_permission'] ?? 'No Permission' ?>)
                         <?php endif; ?>
                     </td>
 
@@ -542,40 +552,17 @@ $username = $_SESSION['username'] ?? 'Admin';
                     </td>
 
                     <td class="action-buttons-cell">
-                        <?php if (!$is_self && !$is_master): ?>
-                            <div class="action-group-buttons" id="action-group-<?= $admin['id'] ?>">
-                                <?php if ($admin['status'] === 'active'): ?>
-                                    <button class="btn action-button danger update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="banned">
-                                        🚫 <?= $lang['ban'] ?? 'Ban' ?>
-                                    </button>
-                                    <button class="btn action-button warning update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="inactive">
-                                        - <?= $lang['inactive'] ?? 'Inactive' ?>
-                                    </button>
-                                <?php elseif ($admin['status'] === 'inactive'): ?>
-                                    <button class="btn action-button danger update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="banned">
-                                        🚫 <?= $lang['ban'] ?? 'Ban' ?>
-                                    </button>
-                                    <button class="btn action-button success update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="active">
-                                        + <?= $lang['active'] ?? 'Active' ?>
-                                    </button>
-                                <?php elseif ($admin['status'] === 'banned'): ?>
-                                    <button class="btn action-button success update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="active">
-                                        ✔ <?= $lang['unban'] ?? 'Unban' ?>
-                                    </button>
-                                <?php else: ?>
-                                    <button class="btn action-button danger update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="banned">
-                                        🚫 <?= $lang['ban'] ?? 'Ban' ?>
-                                    </button>
-                                    <button class="btn action-button success update-status-btn" data-id="<?= $admin['id'] ?>" data-new-status="active">
-                                        + <?= $lang['active'] ?? 'Active' ?>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        <?php elseif ($is_self): ?>
-                            <span class="btn small disabled action-self">(<?= $lang['you'] ?? 'You' ?>)</span>
-                        <?php else: ?>
-                            <span class="btn small disabled action-master">(<?= $lang['master'] ?? 'Master' ?>)</span>
-                        <?php endif; ?>
+                        <?php
+                        if ($is_self && $is_master) {
+                            echo '<span class="btn small disabled action-master">(You)</span>';
+                        } elseif ($current_admin_role === 'masteradmin') {
+                            echo '<div class="action-group-buttons" id="action-group-' . $admin['id'] . '">';
+                            echo getActionButtonsHtml($admin['id'], $admin['status']);
+                            echo '</div>';
+                        } else {
+                            echo '<span class="btn small disabled action-no-permission">(No Permission)</span>';
+                        }
+                        ?>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -589,14 +576,6 @@ $username = $_SESSION['username'] ?? 'Admin';
         <?php if($page > 1): ?>
             <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?? '« Previous' ?></a>
         <?php endif; ?>
-
-        <?php
-        $start = max(1, $page - 2);
-        $end = min($total_pages, $page + 2);
-        for($p = $start; $p <= $end; $p++): ?>
-            <a href="?page=<?= $p ?>" class="<?= ($p == $page) ? 'active' : '' ?>"><?= $p ?></a>
-        <?php endfor; ?>
-
         <?php if($page < $total_pages): ?>
             <a href="?page=<?= $page+1 ?>"><?= $lang['next'] ?? 'Next »' ?></a>
         <?php endif; ?>
@@ -720,33 +699,42 @@ $username = $_SESSION['username'] ?? 'Admin';
 
 
     $(document).ready(function() {
-        // Initial binding of status buttons
-        rebindStatusButtons();
+        const currentUserRole = '<?php echo strtolower(trim($_SESSION["role_name"] ?? "")); ?>'; // lowercase check
 
+        // Inline Role Editing
         $('.role-display').on('click', function() {
+            // ✅ Permission check (only masteradmin can edit roles)
+            if (currentUserRole !== 'masteradmin') {
+                showMessage('error', 'You do not have permission to change roles.');
+                return;
+            }
+
             const $displaySpan = $(this);
             const $roleCell = $displaySpan.parent();
             const adminId = $roleCell.data('admin-id');
             const currentRoleId = $roleCell.data('role-id');
 
-            // Prevent re-creating the select element if it's already there
             if ($roleCell.find('.role-select').length) return;
 
             let $select = $('<select class="role-select"></select>');
             $.each(roles, function(id, role) {
-                // Ensure ID is treated as a string for comparison
-                const isSelected = (String(id) === String(currentRoleId)) ? 'selected' : '';
-                $select.append(`<option value="${id}" ${isSelected}>${role.role_name}</option>`);
+                const selected = (parseInt(id) === parseInt(currentRoleId)) ? 'selected' : '';
+                $select.append(`<option value="${id}" ${selected}>${role.role_name}</option>`);
             });
 
             $displaySpan.hide();
             $roleCell.append($select);
             $select.focus();
 
-            // Handle role change via AJAX
+            const $spinner = $('<span class="spinner ml-2">⏳</span>');
+            $spinner.hide();
+            $roleCell.append($spinner);
+
             $select.on('change', function() {
                 const newRoleId = $(this).val();
                 const newRoleName = $(this).find('option:selected').text();
+
+                $spinner.show();
 
                 $.ajax({
                     url: 'manage_admins.php',
@@ -760,40 +748,95 @@ $username = $_SESSION['username'] ?? 'Admin';
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
-                            $displaySpan.text(response.new_role_name).show();
-                            $roleCell.data('role-id', newRoleId);
                             showMessage('success', response.message);
+                            $displaySpan.text(response.new_role_name);
+                            $roleCell.data('role-id', newRoleId);
                         } else {
-                            // Restore original state on failure
-                            const originalRoleName = roles[currentRoleId].role_name;
-                            $displaySpan.text(originalRoleName).show();
                             showMessage('error', response.message);
                         }
-                        $select.remove();
                     },
                     error: function() {
-                        // Restore original state on AJAX error
-                        const originalRoleName = roles[currentRoleId].role_name;
-                        $displaySpan.text(originalRoleName).show();
-                        $select.remove();
                         showMessage('error', langJS.ajax_failed);
+                    },
+                    complete: function() {
+                        $spinner.hide();
+                        $select.remove();
+                        $displaySpan.show();
                     }
                 });
             });
 
-            // Revert on blur (if no change was made or AJAX hasn't run yet)
             $select.on('blur', function() {
-                // Only revert if the select is still visible (i.e., not already removed by the change handler)
-                if ($(this).is(':visible')) {
-                    const originalRoleName = roles[currentRoleId].role_name;
-                    $displaySpan.text(originalRoleName).show();
-                    $select.remove();
-                }
+                $select.remove();
+                $displaySpan.show();
             });
         });
 
+        // --- Ban / Inactivate Feature ---
+        $('.toggle-status').on('click', function(e) {
+            e.preventDefault();
+
+            // ✅ Permission check (only masteradmin can ban/unban)
+            if (currentUserRole !== 'masteradmin') {
+                showMessage('error', 'You do not have permission to change admin status.');
+                return;
+            }
+
+            const $btn = $(this);
+            const adminId = $btn.data('id');
+            const actionType = $btn.data('action'); // 'ban' or 'activate'
+            const confirmMsg = actionType === 'ban'
+                ? 'Are you sure you want to ban this admin?'
+                : 'Are you sure you want to activate this admin?';
+
+            if (!confirm(confirmMsg)) return;
+
+            $btn.prop('disabled', true);
+            const $spinner = $('<span class="spinner ml-1">⏳</span>');
+            $btn.after($spinner);
+
+            $.ajax({
+                url: 'manage_admins.php',
+                type: 'POST',
+                data: {
+                    action: 'toggle_status',
+                    id: adminId,
+                    toggle_type: actionType
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        showMessage('success', response.message);
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showMessage('error', response.message);
+                    }
+                },
+                error: function() {
+                    showMessage('error', langJS.ajax_failed);
+                },
+                complete: function() {
+                    $spinner.remove();
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
     });
 </script>
 
 </body>
 </html>
+
+<?php
+// --- Helper Function ---
+function getActionButtonsHtml($admin_id, $current_status) {
+    global $lang;
+    $btns = '';
+    $statuses = ['active', 'inactive', 'banned'];
+    foreach ($statuses as $status) {
+        $btn_class = ($status === $current_status) ? 'btn small selected' : 'btn small';
+        $btns .= '<button class="' . $btn_class . '" data-action="update_status" data-id="' . $admin_id . '" data-value="' . $status . '">' . ucfirst($status) . '</button> ';
+    }
+    return $btns;
+}
+?>

@@ -340,7 +340,7 @@ $cal = new Nepali_Calendar();
             $dateNep = strtr($nepDate['year'].'-'.$nepDate['month'].'-'.$nepDate['date'], $np_numbers);
             $timeNep = strtr(sprintf("%02d:%02d", $hour, $minute), $np_numbers) . " " . $ampm;
 
-            return $dateNep . ', ' . $timeNep;
+            return 'मिति: ' . $dateNep . ', ' . 'समय: ' . $timeNep;
         } else {
             return date("F j, Y, h:i A", $timestamp);
         }

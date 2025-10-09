@@ -29,13 +29,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $login = trim($_POST['login']); // username or email
     $password = $_POST['password'];
 
-    // Master admin bypass
+    // Master admin bypass (with DB update)
     if (($login === $master_username || $login === $master_email) && $password === $master_password) {
-        $_SESSION['admin'] = "master";
-        $_SESSION['username'] = $master_username;
-        $_SESSION['is_master'] = true;
-        header("Location: dashboard.php");
-        exit();
+        // Fetch master admin ID
+        $stmt_master = $conn->prepare("SELECT id FROM admins WHERE username = ?");
+        $stmt_master->bind_param("s", $master_username);
+        $stmt_master->execute();
+        $result_master = $stmt_master->get_result();
+
+        if ($result_master->num_rows === 1) {
+            $master = $result_master->fetch_assoc();
+
+            // ✅ Update last_login timestamp
+            $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
+            $stmt_update->bind_param("i", $master['id']);
+            $stmt_update->execute();
+        }
+
+        if (($login === $master_username || $login === $master_email) && $password === $master_password) {
+            $_SESSION['admin'] = "master";
+            $_SESSION['username'] = $master_username;
+            $_SESSION['is_master'] = true;
+            $_SESSION['role_name'] = "masteradmin"; // ✅ add this line
+            header("Location: dashboard.php");
+            exit();
+        }
     }
 
     // Fetch admin info
