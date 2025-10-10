@@ -5,6 +5,7 @@ $lang = [
     'nepali' => 'Nepali',
     "logo" => "Salakpur KhanePani",
     "dashboard" => "Dashboard",
+    "management" => "Management",
     "manage_notices" => "Manage Notices",
     "manage_gallery" => "Manage Gallery",
     "messages" => "Messages",

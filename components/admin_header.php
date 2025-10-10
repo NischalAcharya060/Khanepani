@@ -90,6 +90,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 // Sidebar state from session (default expanded for desktop)
 $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
+
+$current_admin_id = $_SESSION['admin'] ?? '';
+
+$current_role_id = $_SESSION['role_id'] ?? 0;
 ?>
 <header class="admin-header">
     <div class="logo">
@@ -170,9 +174,37 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
     </div>
     <ul>
         <li><a href="../admin/dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">🏠 <span class="link-text"><?= $lang['dashboard'] ?></span></a></li>
-        <li><a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">📢 <span class="link-text"><?= $lang['manage_notices'] ?></span></a></li>
-        <li><a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">🖼 <span class="link-text"><?= $lang['manage_gallery'] ?></span></a></li>
-        <li><a href="../admin/manage_admins.php" class="<?= $current_page == 'manage_admins.php' ? 'active' : '' ?>">👥 <span class="link-text"><?= $lang['manage_admins'] ?></span></a></li>        <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
+
+        <li class="sidebar-dropdown">
+            <a href="javascript:void(0)" class="dropdown-toggle <?= in_array($current_page, ['manage_notices.php', 'manage_gallery.php']) ? 'active' : '' ?>">
+                📦 <span class="link-text"><?= $lang['management'] ?? 'Management' ?> ⏷</span>
+                <i class="fa fa-chevron-down dropdown-arrow"></i>
+            </a>
+
+            <ul class="dropdown-content">
+                <li>
+                    <a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">
+                        <span class="sub-icon">📢</span> <span class="link-text"><?= $lang['manage_notices'] ?></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">
+                        <span class="sub-icon">🖼</span> <span class="link-text"><?= $lang['manage_gallery'] ?></span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <?php
+        // Logic to check if the user is a master admin OR has a permitted role ID (1 or 2)
+        if ($current_admin_id === 'master' || in_array($current_role_id, [1, 2])):
+            ?>
+            <li>
+                <a href="../admin/manage_admins.php" class="<?= $current_page == 'manage_admins.php' ? 'active' : '' ?>">
+                    👥 <span class="link-text"><?= $lang['manage_admins'] ?></span>
+                </a>
+            </li>
+        <?php endif; ?>
+        <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
         <li><a href="../admin/activity.php" class="<?= $current_page == 'activity.php' ? 'active' : '' ?>">🕒 <span class="link-text"><?= $lang['recent_activity'] ?></span></a></li>
         <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
     </ul>
@@ -184,7 +216,7 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
     ================================ */
     :root {
         --sidebar-mobile-width: 240px;
-        --sidebar-collapsed-width: 70px;
+        --sidebar-collapsed-width: 60px;
         --sidebar-expanded-width: 240px;
     }
 
@@ -497,9 +529,105 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
         transform: rotate(180deg);
     }
 
+    /* --------------------------------
+       SIDEBAR DROPDOWN STYLES (NEW)
+       -------------------------------- */
+    .sidebar-dropdown {
+        position: relative;
+    }
+
+    .dropdown-toggle {
+        justify-content: space-between;
+        /* Ensures chevron is on the right */
+        transition: background 0.3s ease;
+    }
+
+    /* Remove extra padding on hover for dropdown link */
+    .dropdown-toggle:hover {
+        padding-left: 28px;
+    }
+
+    .dropdown-arrow {
+        margin-left: auto;
+        font-size: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Dropdown Content */
+    .dropdown-content {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 0; /* Starts hidden */
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+    }
+
+    /* Styling for nested links */
+    .dropdown-content li a {
+        padding-left: 45px; /* Indent sub-links */
+        font-size: 14px;
+        border-left: none; /* Remove main border */
+    }
+
+    /* Sub-link hover/active state */
+    .dropdown-content li a.active,
+    .dropdown-content li a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        padding-left: 55px; /* Indent on hover/active */
+        border-left: 2px solid #ff6600; /* Add a sub-link border */
+    }
+
+    .dropdown-content li a .sub-icon {
+        margin-right: 10px;
+    }
+
+    /* DROPDOWN OPEN STATES (JS controlled via 'open') */
+    .sidebar-dropdown.open .dropdown-content {
+        max-height: 500px; /* Large enough value to show all content */
+    }
+    .sidebar-dropdown.open .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Sidebar Collapsed State Overrides */
+    .sidebar.collapsed .sidebar-dropdown .dropdown-toggle {
+        /* Make entire collapsed toggle the hover trigger */
+        position: relative;
+        z-index: 20;
+    }
+
+    /* Hide text/arrow in collapsed state */
+    .sidebar.collapsed .dropdown-toggle .link-text,
+    .sidebar.collapsed .dropdown-toggle .dropdown-arrow {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .sidebar.collapsed .dropdown-content {
+        /* Hide content completely in collapsed mode */
+        max-height: 0 !important;
+        overflow: hidden;
+    }
+
+    /* Active styling for the dropdown link when child is active */
+    .sidebar-dropdown .dropdown-toggle.active {
+        /* Ensure background and border are applied */
+        background: linear-gradient(90deg, #004080, #0059b3);
+        border-left: 4px solid #ff6600;
+        box-shadow: inset 3px 0 10px rgba(0,0,0,0.2);
+    }
+
+    /* Re-show link-text and arrow for active state when collapsed */
+    .sidebar.collapsed .sidebar-dropdown .dropdown-toggle.active .link-text,
+    .sidebar.collapsed .sidebar-dropdown .dropdown-toggle.active .dropdown-arrow {
+        opacity: 1;
+        visibility: visible;
+    }
+
     /* ================================
     NOTIFICATION MODAL
- ================================ */
+    ================================ */
     .notif-modal {
         display: none;
         position: fixed;
@@ -730,5 +858,30 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
         if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.style.display = "none";
         }
+    });
+
+    // ==================================
+    // NEW: Sidebar Dropdown Logic
+    // ==================================
+    document.querySelectorAll('.sidebar-dropdown .dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const parentLi = this.closest('.sidebar-dropdown');
+
+            // Do nothing if sidebar is collapsed on desktop
+            if (window.innerWidth > 900 && document.getElementById('sidebar').classList.contains('collapsed')) {
+                return;
+            }
+
+            // Close other open dropdowns
+            document.querySelectorAll('.sidebar-dropdown').forEach(item => {
+                if (item !== parentLi && item.classList.contains('open')) {
+                    item.classList.remove('open');
+                }
+            });
+
+            // Toggle current dropdown
+            parentLi.classList.toggle('open');
+        });
     });
 </script>
