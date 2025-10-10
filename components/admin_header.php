@@ -194,6 +194,10 @@ $current_role_id = $_SESSION['role_id'] ?? 0;
                 </li>
             </ul>
         </li>
+
+        <!-- Separator added to clearly group Content Management from Administrative Tools -->
+        <li class="sidebar-group-separator"></li>
+
         <?php
         // Logic to check if the user is a master admin OR has a permitted role ID (1 or 2)
         if ($current_admin_id === 'master' || in_array($current_role_id, [1, 2])):
@@ -530,6 +534,26 @@ $current_role_id = $_SESSION['role_id'] ?? 0;
     }
 
     /* --------------------------------
+       NEW: SIDEBAR GROUP SEPARATOR
+       -------------------------------- */
+    .sidebar ul li.sidebar-group-separator {
+        height: 1px;
+        margin: 15px 15px;
+        background: rgba(255, 255, 255, 0.25); /* Stronger visibility */
+        border-radius: 1px;
+        list-style: none;
+        /* Reset default list item margin */
+        padding: 0;
+    }
+
+    /* Adjust separator when collapsed */
+    .sidebar.collapsed .sidebar-group-separator {
+        margin: 15px 5px;
+        /* Full width of the collapsed sidebar */
+        width: calc(100% - 10px);
+    }
+
+    /* --------------------------------
        SIDEBAR DROPDOWN STYLES (NEW)
        -------------------------------- */
     .sidebar-dropdown {
@@ -831,19 +855,20 @@ $current_role_id = $_SESSION['role_id'] ?? 0;
         }
     });
 
+    // NOTE: Changed alert() to console.log as per platform constraints.
     document.getElementById("clearUnread")?.addEventListener("click", function() {
         fetch("../admin/clear_unread.php", { method: "POST" })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert("✅ All unread messages cleared!");
+                    console.log("✅ All unread messages cleared!");
                     location.reload();
                 } else {
-                    alert("❌ Failed to clear messages.");
+                    console.log("❌ Failed to clear messages.");
                 }
             })
             .catch(error => {
-                alert("❌ An error occurred while communicating with the server.");
+                console.log("❌ An error occurred while communicating with the server.");
             });
     });
 
