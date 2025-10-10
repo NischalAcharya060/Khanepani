@@ -182,6 +182,19 @@ $lang = [
     'delete_account_button' => 'PERMANENTLY DELETE ACCOUNT',
     'confirm_delete_alert' => '🚨 ARE YOU ABSOLUTELY SURE?\n\nThis action is PERMANENT and will immediately delete your admin account from the database. You will be logged out.\n\nPress OK to confirm deletion.',
 
+    // Settings
+    'settings_title' => 'Settings',
+    'basic_site_settings' => 'Basic Site Settings',
+    'contact_email' => 'Contact Email',
+    'contact_phone' => 'Contact Phone',
+    'facebook_link' => 'Facebook Page Link',
+    'save_settings' => 'Save Settings',
+    'email_required' => '❌ Email is required!',
+    'db_prepare_error' => '❌ Database prepare error: ',
+    'settings_updated' => '✅ Settings updated successfully!',
+    'no_changes' => '⚠ No changes detected or row does not exist.',
+    'update_failed' => '❌ Failed to update settings: ',
+
     // User side
     "home" => "Home",
     "about" => "About",

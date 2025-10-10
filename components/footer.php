@@ -1,3 +1,17 @@
+<?php
+require_once __DIR__ . '/../config/db.php';
+$settings = [
+        'email' => 'info@salakpurkhanepani.com',
+        'phone' => '+977-1-4117356',
+        'facebook_link' => '#'
+];
+
+$sql = "SELECT email, phone, facebook_link FROM settings WHERE id = 1 LIMIT 1";
+$result = $conn->query($sql);
+if ($result && $result->num_rows > 0) {
+    $settings = $result->fetch_assoc();
+}
+?>
 <footer>
     <div class="footer-container">
         <div class="footer-section">
@@ -17,18 +31,14 @@
 
         <div class="footer-section">
             <h4><?= $lang['contact_us'] ?? 'CONTACT US' ?></h4>
-            <p><strong><?= $lang['office_name'] ?? 'सलकपुर खानेपानी' ?></strong></p>
-            <p><?= $lang['office_address'] ?? 'Salakpur, Nepal' ?></p>
-            <p><?= $lang['phone'] ?? 'Phone' ?>: 977-1-4117356, 4117358</p>
-            <p><?= $lang['fax'] ?? 'Fax' ?>: 977-1-4259824, 4262229</p>
-            <p><?= $lang['user_email'] ?? 'Email' ?>: info@salakpurwater.org</p>
-            <p><?= $lang['zip_code'] ?? 'Zip code' ?>: 57200</p>
+            <p><?= $lang['phone'] ?? 'Phone' ?>: <?= htmlspecialchars($settings['phone']) ?></p>
+            <p><?= $lang['email'] ?? 'Email' ?>: <?= htmlspecialchars($settings['email']) ?></p>
         </div>
 
         <div class="footer-section social">
             <h4><?= $lang['social_media'] ?? 'SOCIAL MEDIA' ?></h4>
             <div class="social-icons">
-                <a href="https://www.facebook.com/profile.php?id=61578812410424" target="_blank">
+                <a href="<?= htmlspecialchars($settings['facebook_link']) ?>" target="_blank">
                     <i class="fab fa-facebook-f"></i>
                 </a>
             </div>
@@ -49,13 +59,12 @@
     <div class="footer-bottom">
         <p>&copy; <?php echo date('Y'); ?> <?= $lang['office_name'] ?? 'सलकपुर खानेपानी / Salakpur KhanePani' ?>. <?= $lang['all_rights'] ?? 'All rights reserved.' ?></p>
         <span style="display:none;">
-        <a href="https://acharyanischal.com.np" target="_blank">Developed by Nischal Acharya</a>
+            <a href="https://acharyanischal.com.np" target="_blank">Developed by Nischal Acharya</a>
         </span>
     </div>
 </footer>
 
 <style>
-    /* Footer */
     footer {
         background: #004080;
         color: #fff;

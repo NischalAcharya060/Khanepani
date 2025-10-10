@@ -207,6 +207,7 @@ $current_role_id = $_SESSION['role_id'] ?? 0;
                     👥 <span class="link-text"><?= $lang['manage_admins'] ?></span>
                 </a>
             </li>
+            <li class="sidebar-group-separator"></li>
         <?php endif; ?>
         <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
         <li><a href="../admin/activity.php" class="<?= $current_page == 'activity.php' ? 'active' : '' ?>">🕒 <span class="link-text"><?= $lang['recent_activity'] ?></span></a></li>

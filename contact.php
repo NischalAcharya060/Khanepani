@@ -22,6 +22,17 @@ if (file_exists($langFile)) {
 } else {
     include __DIR__ . '/lang/en.php';
 }
+
+$settings = [
+        'email' => 'info@salakpurkhanepani.com',
+        'phone' => '+977-1-4117356',
+];
+
+$sql = "SELECT email, phone, facebook_link FROM settings WHERE id = 1 LIMIT 1";
+$result = $conn->query($sql);
+if ($result && $result->num_rows > 0) {
+    $settings = $result->fetch_assoc();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -301,10 +312,8 @@ if (file_exists($langFile)) {
             <h3><?= $lang['contact_details'] ?></h3>
 
             <p><i class="fa fa-map-marker-alt"></i> Corporate Office: Salakpur Chowk, Kathmandu, Nepal</p>
-
-            <p><i class="fa fa-phone"></i> +977 1 4117356, 4117358</p>
-
-            <p><i class="fa fa-envelope"></i> info@salakpurkhanepani.com</p>
+            <p><i class="fa fa-phone"></i> <?= htmlspecialchars($settings['phone']) ?></p>
+            <p><i class="fa fa-envelope"></i> <?= htmlspecialchars($settings['email']) ?></p>
 
             <p><i class="fa fa-clock"></i> Sun - Fri: 10:00 AM - 5:00 PM</p>
 
@@ -339,7 +348,6 @@ if (file_exists($langFile)) {
                 <textarea name="message" id="message" rows="6" placeholder="<?= $lang['your_message'] ?>" required></textarea>
 
                 <div class="g-recaptcha" data-sitekey="6Lex7dcrAAAAAPeIL3aTKqVvlaWewWRnUcF03IX4"></div>
-
                 <br>
 
                 <button type="submit">
@@ -358,7 +366,6 @@ if (file_exists($langFile)) {
     const messageField = document.getElementById('message');
     const contactForm = document.getElementById('contactForm');
     const submitBtn = contactForm.querySelector("button[type='submit']");
-    const submitIcon = submitBtn.querySelector("i");
 
     typeSelect.addEventListener('change', function() {
         if (this.value === 'complaint') {
