@@ -26,10 +26,8 @@ if (file_exists($langFile)) {
 
 ?>
 
-<!-- ✅ Add inside <head> -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Info Bar -->
 <div class="info-bar">
     <section class="datetime-bar">
         <div class="container">
@@ -42,10 +40,8 @@ if (file_exists($langFile)) {
     </div>
 </div>
 
-<!-- Header -->
 <header>
     <div class="container header-container">
-        <!-- Logo -->
         <div class="logo">
             <a href="../index.php">
                 <img src="../assets/images/logo.jpg" alt="Khane Pani Logo">
@@ -53,12 +49,10 @@ if (file_exists($langFile)) {
             </a>
         </div>
 
-        <!-- Hamburger (visible only on mobile) -->
         <div class="hamburger" id="hamburger">
             <i class="fa-solid fa-bars"></i>
         </div>
 
-        <!-- Navigation -->
         <nav class="main-nav" id="main-nav">
             <a href="../index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
                 <?= $lang['home'] ?? 'Home' ?>
@@ -66,22 +60,22 @@ if (file_exists($langFile)) {
             <a href="../notices.php" class="<?= $current_page == 'notices.php' ? 'active' : '' ?>">
                 <?= $lang['notices'] ?? 'Notices' ?>
             </a>
-            <div class="dropdown">
+            <div class="dropdown" id="about-dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
-                    <?= $lang['about'] ?? 'About' ?>
+                    <?= $lang['about'] ?? 'About' ?> <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
                 </a>
                 <div class="dropdown-content">
-                    <a href="../about_us.php"><?= $lang['about_us'] ?? 'About Us' ?></a>
-                    <a href="../our_services.php"><?= $lang['our_services'] ?? 'Our Services' ?></a>
+                    <a href="../about_us.php"><i class="fa-solid fa-info-circle"></i> <?= $lang['about_us'] ?? 'About Us' ?></a>
+                    <a href="../our_services.php"><i class="fa-solid fa-faucet-drip"></i> <?= $lang['our_services'] ?? 'Our Services' ?></a>
                 </div>
             </div>
-            <div class="dropdown">
+            <div class="dropdown" id="resources-dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
-                    <?= $lang['resources'] ?? 'Resources' ?>
+                    <?= $lang['resources'] ?? 'Resources' ?> <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
                 </a>
                 <div class="dropdown-content">
-                    <a href="../gallery.php"><?= $lang['user_gallery'] ?? 'Gallery' ?></a>
-                    <a href="../nepali_unicode.php"><?= $lang['nepali_unicode'] ?? 'Nepali Unicode' ?></a>
+                    <a href="../gallery.php"><i class="fa-solid fa-images"></i> <?= $lang['user_gallery'] ?? 'Gallery' ?></a>
+                    <a href="../nepali_unicode.php"><i class="fa-solid fa-keyboard"></i> <?= $lang['nepali_unicode'] ?? 'Nepali Unicode' ?></a>
                 </div>
             </div>
 
@@ -89,7 +83,6 @@ if (file_exists($langFile)) {
                 <?= $lang['contact'] ?? 'Contact' ?>
             </a>
 
-            <!-- Utilities move inside nav for mobile -->
             <div class="header-utilities">
                 <a href="../admin/login.php" class="employee-btn">
                     <i class="fa-solid fa-user-shield"></i> <?= $lang['employee_portal'] ?? 'Employee Portal' ?>
@@ -181,6 +174,7 @@ if (file_exists($langFile)) {
         padding: 6px 0;
         position: relative;
     }
+
     .main-nav a::after {
         content: "";
         display: block;
@@ -196,33 +190,74 @@ if (file_exists($langFile)) {
         width: 100%;
     }
 
-    /* Dropdown */
+    /* =====================
+       DROPDOWN (Fixed Hover Sensitivity and Mobile Icon Rotation)
+    ===================== */
     .dropdown {
         position: relative;
     }
-    .dropbtn { cursor: pointer; }
+    .dropbtn {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Style for the Chevron icon */
+    .dropdown-arrow {
+        font-size: 10px;
+        margin-left: 5px;
+        transition: transform 0.3s ease;
+    }
+
     .dropdown-content {
         display: none;
         position: absolute;
-        top: 120%;
+        top: 100%;
         left: 0;
         background: #fff;
         min-width: 160px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         border-radius: 6px;
+        z-index: 10;
+        padding-top: 10px;
+        top: calc(100% - 10px);
     }
+
     .dropdown-content a {
         display: block;
         padding: 10px 14px;
         color: #333;
+        white-space: nowrap;
+        position: relative;
+        top: 10px;
     }
+
+    .dropdown-content a:first-child {
+        margin-top: -10px;
+    }
+
+    /* Icon Spacing for Dropdown Links */
+    .dropdown-content a i {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+    }
+
     .dropdown-content a:hover {
         background: #ff6600;
         color: #fff;
     }
-    .dropdown:hover .dropdown-content {
-        display: block;
+
+    /* Desktop Hover Activation & Chevron Rotation */
+    @media (min-width: 993px) {
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .dropdown:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
     }
+
 
     /* =====================
        HAMBURGER
@@ -290,7 +325,7 @@ if (file_exists($langFile)) {
     }
 
     /* =====================
-       RESPONSIVE
+       RESPONSIVE (Mobile Overrides)
     ===================== */
     @media (max-width: 992px) {
         .main-nav {
@@ -309,10 +344,27 @@ if (file_exists($langFile)) {
         .main-nav a { border-bottom: 1px solid #eee; padding: 10px 0; }
         .main-nav a:last-child { border-bottom: none; }
 
-        /* dropdown inside mobile */
-        .dropdown-content { display: none; position: static; box-shadow: none; background: #f9f9f9; }
-        .dropdown-content.show-dropdown { display: block; }
-        .dropbtn::after { content: " ▾"; font-size: 12px; }
+        .dropdown-content {
+            display: none;
+            position: static;
+            top: unset;
+            left: unset;
+            min-width: 100%;
+            box-shadow: none;
+            background: #f9f9f9;
+            border-radius: 0;
+            padding: 5px 0;
+        }
+
+        /* The class toggled by JS on mobile */
+        .dropdown-content.show-dropdown {
+            display: block;
+        }
+
+        .dropdown-content.show-dropdown ~ .dropbtn .dropdown-arrow,
+        .dropdown-content.show-dropdown + .dropbtn .dropdown-arrow {
+            transform: rotate(180deg);
+        }
 
         .hamburger { display: block; }
 
@@ -336,26 +388,50 @@ if (file_exists($langFile)) {
         const hamburger = document.getElementById("hamburger");
         const nav = document.getElementById("main-nav");
 
+        // Hamburger/Navigation Toggle
         hamburger.addEventListener("click", function () {
             nav.classList.toggle("show");
+
+            // Toggle hamburger icon between bars and xmark
             this.innerHTML = nav.classList.contains("show")
                 ? '<i class="fa-solid fa-xmark"></i>'
                 : '<i class="fa-solid fa-bars"></i>';
+
+            // Close all dropdowns when the main nav is closed
+            if (!nav.classList.contains("show")) {
+                document.querySelectorAll(".dropdown-content").forEach(content => {
+                    content.classList.remove("show-dropdown");
+                });
+            }
         });
 
-        // Mobile dropdown toggle
         const dropdowns = document.querySelectorAll(".dropdown > .dropbtn");
         dropdowns.forEach((btn) => {
             btn.addEventListener("click", function (e) {
-                e.preventDefault();
-                const dropdownContent = this.nextElementSibling;
-                dropdownContent.classList.toggle("show-dropdown");
+                if (window.innerWidth <= 992) {
+                    e.preventDefault();
+
+                    const dropdownContent = this.nextElementSibling;
+
+                    document.querySelectorAll(".dropdown-content").forEach(content => {
+                        if (content !== dropdownContent) {
+                            content.classList.remove("show-dropdown");
+                        }
+                    });
+
+                    // Toggle the current dropdown content
+                    dropdownContent.classList.toggle("show-dropdown");
+                }
             });
         });
 
+        // Live Datetime Update
         const datetimeElement = document.getElementById('live-datetime');
 
         function updateLiveDateTime() {
+            // Check if the element exists before trying to fetch
+            if (!datetimeElement) return;
+
             fetch('../utils/get_live_datetime.php')
                 .then(response => response.text())
                 .then(data => {
