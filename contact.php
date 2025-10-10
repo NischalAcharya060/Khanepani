@@ -26,9 +26,10 @@ if (file_exists($langFile)) {
 $settings = [
         'email' => 'info@salakpurkhanepani.com',
         'phone' => '+977-1-4117356',
+        'map_embed' => 'map_embed',
 ];
 
-$sql = "SELECT email, phone, facebook_link FROM settings WHERE id = 1 LIMIT 1";
+$sql = "SELECT email, phone, facebook_link, map_embed FROM settings WHERE id = 1 LIMIT 1";
 $result = $conn->query($sql);
 if ($result && $result->num_rows > 0) {
     $settings = $result->fetch_assoc();
@@ -57,14 +58,6 @@ if ($result && $result->num_rows > 0) {
             --shadow-elevation: 0 10px 30px rgba(0, 0, 0, 0.08); /* Modern, soft shadow */
         }
 
-        body {
-            font-family: 'Poppins', 'Roboto', sans-serif;
-            background: var(--background-light);
-            color: var(--text-dark);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-        }
 
         .contact-section {
             padding: 90px 20px;
@@ -319,7 +312,7 @@ if ($result && $result->num_rows > 0) {
 
             <div class="map">
                 <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3565.5095854783654!2d87.36577937488643!3d26.664180170728024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef6f34daba5585%3A0x243be79d3c22c683!2sSalakpur%20khanepani!5e0!3m2!1sen!2snp!4v1758365945264!5m2!1sen!2snp"
+                        src="<?= htmlspecialchars($settings['map_embed'], ENT_QUOTES, 'UTF-8') ?>"
                         allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                 </iframe>
             </div>

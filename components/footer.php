@@ -3,10 +3,11 @@ require_once __DIR__ . '/../config/db.php';
 $settings = [
         'email' => 'info@salakpurkhanepani.com',
         'phone' => '+977-1-4117356',
-        'facebook_link' => '#'
+        'facebook_link' => '#',
+        'map_embed' => 'Map Embed',
 ];
 
-$sql = "SELECT email, phone, facebook_link FROM settings WHERE id = 1 LIMIT 1";
+$sql = "SELECT email, phone, facebook_link, map_embed FROM settings WHERE id = 1 LIMIT 1";
 $result = $conn->query($sql);
 if ($result && $result->num_rows > 0) {
     $settings = $result->fetch_assoc();
@@ -47,7 +48,7 @@ if ($result && $result->num_rows > 0) {
         <div class="footer-section">
             <h4><?= $lang['our_location'] ?? 'OUR LOCATION' ?></h4>
             <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3565.5095854783654!2d87.36577937488643!3d26.664180170728024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ef6f34daba5585%3A0x243be79d3c22c683!2sSalakpur%20khanepani!5e0!3m2!1sen!2snp!4v1758365945264!5m2!1sen!2snp"
+                    src="<?= htmlspecialchars($settings['map_embed'], ENT_QUOTES, 'UTF-8') ?>"
                     style="border:0; border-radius:8px;"
                     allowfullscreen=""
                     loading="lazy"

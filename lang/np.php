@@ -52,6 +52,7 @@ $lang = [
     "read_more" => "थप पढ्नुहोस् →",
     "see_all_notices" => "सबै सूचनाहरू हेर्नुहोस् →",
     "user_no_notices" => "यस समयमा कुनै नवीनतम सूचनाहरू छैनन्।",
+    'no_results' => 'तपाईंको खोजको लागि कुनै परिणाम फेला परेन।',
 
     // Gallery
     "gallery" => "ग्यालरी",
@@ -197,6 +198,9 @@ $lang = [
     'settings_updated' => '✅ सेटिङहरू सफलतापूर्वक अपडेट गरियो!',
     'no_changes' => '⚠ कुनै परिवर्तन छैन वा पंक्ति अवस्थित छैन।',
     'update_failed' => '❌ सेटिङ अपडेट गर्न असफल: ',
+    'admin_settings_desc' => 'जानकारी र सामाजिक सञ्जाल लिङ्कहरू कन्फिगर गर्नुहोस्।',
+    'map_embed' => 'नक्सा (Google Maps Link)',
+    'map_placeholder' => 'तपाईंको Google Maps iframe Link कोड यहाँ टाँस्नुहोस्...',
 
     // User side
     "home" => "गृहपृष्ठ",

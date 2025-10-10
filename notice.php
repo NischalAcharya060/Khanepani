@@ -21,19 +21,18 @@ function format_date($date_str, $cal) {
 
     if ( ($_SESSION['lang'] ?? 'en') === 'np' ) {
         $nepDate = $cal->eng_to_nep($year, $month, $day);
-        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','८','9'=>'९'];
+        $np_numbers = ['0'=>'०','1'=>'१','2'=>'२','3'=>'३','4'=>'४','5'=>'५','6'=>'६','7'=>'७','8'=>'८','9'=>'९'];
 
         $dateNep = strtr($nepDate['year'].'-'.$nepDate['month'].'-'.$nepDate['date'], $np_numbers);
         $timeNep = strtr(sprintf("%02d:%02d", $hour, $minute), $np_numbers) . " " . $ampm;
 
+        // Concatenated format for a single line in the detail view
         return 'मिति: ' . $dateNep . ', ' . 'समय: ' . $timeNep;
     } else {
         return date("F d, Y, h:i A", $timestamp);
     }
 }
-?>
 
-<?php
 if(!isset($_GET['id'])) {
     header("Location: index.php");
     exit();
@@ -82,15 +81,10 @@ if ($has_files) {
     }
 }
 
-// If there was no image, but there are other files, we list all files under attachments.
 if ($inline_image === null) {
     $other_attachments = $attached_files;
 } else {
-    // If there is an inline image, we ensure it's still clickable in the attachments list
-    // OR we can decide to omit it from the list if it's displayed prominently.
-    // For simplicity and clarity, we'll keep it in the attachment list too.
-    // The previous loop already separated the *first* image into $inline_image
-    // and put all *remaining* files into $other_attachments. We'll stick with that.
+    // Logic handles separation of first image for inline display vs remaining files for attachment list
 }
 
 $has_other_attachments = !empty($other_attachments);
@@ -106,19 +100,20 @@ $has_other_attachments = !empty($other_attachments);
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* --- CSS Variables & Reset --- */
+        /* --- CSS Variables & Reset (MODERNIZED) --- */
         :root {
             --primary: #007bff;
-            --primary-dark: #0056b3;
+            --primary-light: #e6f2ff; /* Light primary for accents */
+            --primary-dark: #004d99;
             --secondary: #6c757d;
             --success: #28a745;
             --warning: #ffc107;
-            --text-dark: #343a40;
-            --text-light: #6c757d;
-            --bg-light: #f5f7fa;
+            --text-dark: #212529; /* Darker text */
+            --text-light: #606b74;
+            --bg-light: #f8f9fa; /* Lighter base background */
             --card-bg: #ffffff;
-            --border-color: #e9ecef;
-            --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+            --border-color: #dee2e6;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Softer, deeper shadow */
         }
 
         body {
@@ -132,25 +127,51 @@ $has_other_attachments = !empty($other_attachments);
         .notice-detail {
             max-width: 900px;
             margin: 50px auto;
-            padding: 40px 30px;
+            padding: 45px 40px; /* Increased padding */
             background: var(--card-bg);
-            border-radius: 15px;
+            border-radius: 18px; /* More rounded */
             box-shadow: var(--shadow);
-            position: relative;
         }
 
-        /* --- Header & Meta --- */
+        /* --- Back Button (Pill-shaped, Integrated into flow) --- */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 15px;
+            margin-bottom: 25px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: 20px; /* Pill shape */
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid var(--primary);
+        }
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            border-color: var(--primary-dark);
+        }
+        .back-btn i { width: 14px; height: 14px; margin-right: 6px; }
+
+
+        /* --- Header & Meta (Enhanced) --- */
         .notice-detail h2 {
-            font-size: 34px;
-            margin-bottom: 8px;
+            font-size: 38px; /* Larger title */
+            margin-bottom: 15px;
             color: var(--text-dark);
             font-weight: 900;
+            line-height: 1.2;
         }
 
         .notice-meta {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--text-light);
-            margin-bottom: 30px;
+            margin-bottom: 40px; /* More space before content */
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border-color); /* Dashed separator */
             display: flex;
             align-items: center;
         }
@@ -160,33 +181,12 @@ $has_other_attachments = !empty($other_attachments);
             color: var(--primary);
         }
 
-        /* --- Back Button (Cleaned up, now top-right floating) --- */
-        .back-btn {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 18px;
-            background: var(--secondary);
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .back-btn:hover { background: var(--secondary); opacity: 0.9; }
-        .back-btn i { width: 16px; height: 16px; margin-right: 5px; }
-
-
-        /* --- Content & Inline Image --- */
+        /* --- Content & Inline Image (Improved Readability) --- */
         .notice-content {
-            font-size: 17px;
-            line-height: 1.75;
+            font-size: 18px; /* Slightly larger text */
+            line-height: 1.8;
             color: var(--text-dark);
-            border-top: 1px solid var(--border-color);
-            padding-top: 30px;
+            padding-top: 0;
         }
         .notice-content p {
             margin-top: 0;
@@ -197,9 +197,10 @@ $has_other_attachments = !empty($other_attachments);
             max-width: 100%;
             height: auto;
             border-radius: 12px;
-            margin: 30px 0;
+            margin: 30px auto; /* Centered */
+            display: block;
             cursor: zoom-in;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Subtle image shadow */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .notice-inline-image:hover {
@@ -207,21 +208,22 @@ $has_other_attachments = !empty($other_attachments);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
-        /* --- Attachments Section (Aesthetic List) --- */
+        /* --- Attachments Section (Subtle Card Style) --- */
         .attachments-section {
-            margin-top: 40px;
-            padding: 20px 25px;
-            border-radius: 10px;
-            background: #eef2f8; /* Very light background for distinction */
-            border: 1px solid #dcdfe4;
+            margin-top: 50px;
+            padding: 25px 30px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Subtle lift */
         }
         .attachments-section h3 {
-            font-size: 20px;
+            font-size: 22px;
             color: var(--primary-dark);
-            margin: 0 0 15px 0;
+            margin: 0 0 20px 0;
             font-weight: 700;
-            display: flex;
-            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
         }
 
         .attachment-item {
@@ -230,13 +232,20 @@ $has_other_attachments = !empty($other_attachments);
             padding: 12px 0;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            color: inherit;
         }
         .attachment-item:last-child {
             border-bottom: none;
         }
         .attachment-item:hover {
-            background-color: rgba(0, 123, 255, 0.05); /* Light hover effect */
+            background-color: var(--primary-light); /* Light blue hover for interactivity */
+            border-radius: 4px;
+            margin-left: -5px;
+            margin-right: -5px;
+            padding-left: 5px;
+            padding-right: 5px;
         }
 
         .file-info-group {
@@ -245,7 +254,6 @@ $has_other_attachments = !empty($other_attachments);
             width: 100%;
         }
 
-        /* New File Icon Styling */
         .file-icon-wrapper {
             background: var(--primary);
             border-radius: 6px;
@@ -268,14 +276,14 @@ $has_other_attachments = !empty($other_attachments);
             text-overflow: ellipsis;
         }
 
-        /* --- Lightbox (Unchanged) --- */
+        /* --- Lightbox (Modernized) --- */
         .lightbox {
             display: none;
             position: fixed;
             z-index: 1000;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(33, 37, 41, 0.98); /* Darker, slightly blue tint background */
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -289,16 +297,43 @@ $has_other_attachments = !empty($other_attachments);
             font-size: 40px;
             color: #fff;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 300; /* Lighter weight for modern look */
             transition: color 0.3s;
         }
-        .lightbox .close:hover { color: var(--warning); }
+        .lightbox .close:hover { color: var(--primary); }
+
+        .lightbox-caption {
+            color: #fff;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        #previewFrame {
+            display: none;
+            width: 90%;
+            height: 80vh;
+            border: none;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        #lightbox-img {
+            display: none;
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 10px;
+        }
 
         /* Responsive adjustments */
         @media (max-width: 600px) {
-            .notice-detail { margin: 20px auto; padding: 20px 15px; }
+            .notice-detail { margin: 20px auto; padding: 20px 15px; border-radius: 12px; }
             .notice-detail h2 { font-size: 28px; }
-            .back-btn { position: static; margin-bottom: 20px; display: block; width: 100%; text-align: center; }
+            .back-btn { margin-bottom: 15px; padding: 8px 15px; }
+            .notice-meta { font-size: 14px; margin-bottom: 25px; padding-bottom: 15px; }
+            .notice-content { font-size: 16px; line-height: 1.6; }
+            .attachments-section { margin-top: 30px; padding: 20px 15px; }
         }
     </style>
 </head>
@@ -322,7 +357,6 @@ $has_other_attachments = !empty($other_attachments);
             $inline_filePath = "../assets/uploads/".$inline_image;
             $inline_fileExt = strtolower(pathinfo($inline_image, PATHINFO_EXTENSION));
 
-            // Generate full URL for lightbox to open it immediately on click
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
             $base_uri = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
             $inline_url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $base_uri . $inline_filePath;
@@ -348,17 +382,15 @@ $has_other_attachments = !empty($other_attachments);
                     $filePath = "../assets/uploads/".$file_name;
                     $fileExt = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
-                    // Safely determine the protocol and construct the full public URL
                     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
                     $base_uri = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
                     $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $base_uri . $filePath;
                     $url = str_replace('//', '/', $url);
 
-                    // Determine the appropriate Feather Icon based on extension
                     $icon = 'file';
                     $icon_color = 'var(--primary)';
                     if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) { $icon = 'image'; $icon_color = 'var(--success)'; }
-                    else if ($fileExt === 'pdf') { $icon = 'file-text'; $icon_color = '#dc3545'; } // Red for PDF
+                    else if ($fileExt === 'pdf') { $icon = 'file-text'; $icon_color = '#dc3545'; }
                     else if (in_array($fileExt, ['doc', 'docx'])) { $icon = 'file-text'; $icon_color = 'var(--primary-dark)'; }
                     else if (in_array($fileExt, ['xls', 'xlsx'])) { $icon = 'file-text'; $icon_color = '#1e7e34'; }
 
@@ -391,7 +423,6 @@ $has_other_attachments = !empty($other_attachments);
 <?php include 'components/footer.php'; ?>
 
 <script>
-    // Initialize Feather Icons
     feather.replace();
 
     const lightbox = document.getElementById('lightbox');
@@ -400,12 +431,6 @@ $has_other_attachments = !empty($other_attachments);
     const closeBtn = document.querySelector('.lightbox .close');
     const caption = document.getElementById('lightbox-caption');
 
-    /**
-     * Opens the lightbox to preview images or files.
-     * @param {string} filePath - Local path to the file.
-     * @param {string} fileExt - File extension.
-     * @param {string} fullUrl - Full public URL of the file for Google Viewer.
-     */
     function openPreview(filePath, fileExt, fullUrl) {
         lightbox.style.display = 'flex';
         caption.innerText = "";
@@ -413,34 +438,38 @@ $has_other_attachments = !empty($other_attachments);
         const imageExtensions = ['jpg','jpeg','png','gif'];
         const docExtensions = ['pdf','doc','docx','xls','xlsx','ppt','pptx'];
 
+        // Reset both before loading
+        lightboxImg.style.display = 'none';
+        previewFrame.style.display = 'none';
+        previewFrame.src = "";
+        lightboxImg.src = "";
+
         if (imageExtensions.includes(fileExt)) {
-            previewFrame.style.display = 'none';
             lightboxImg.style.display = 'block';
             lightboxImg.src = filePath;
             caption.innerText = "<?= $lang['image_preview'] ?? 'Image Preview' ?>";
-        } else if(docExtensions.includes(fileExt)) {
-            lightboxImg.style.display = 'none';
+        }
+        else if (docExtensions.includes(fileExt)) {
             previewFrame.style.display = 'block';
 
-            let src = filePath;
-            if (fileExt !== 'pdf') {
-                // Use Google Docs Viewer for non-PDF documents
-                src = "https://docs.google.com/gview?url=" + encodeURIComponent(fullUrl) + "&embedded=true";
+            // PDFs load directly, others use Google Docs Viewer
+            if (fileExt === 'pdf') {
+                previewFrame.src = fullUrl;
+            } else {
+                previewFrame.src = "https://docs.google.com/gview?url=" + encodeURIComponent(fullUrl) + "&embedded=true";
             }
-            previewFrame.src = src;
 
             caption.innerText = "<?= $lang['file_preview'] ?? 'File Preview (may require Google Viewer)' ?>";
-        } else {
-            // If preview isn't supported, prompt the user to download instead
+        }
+        else {
             const downloadConfirm = confirm("<?= $lang['preview_not_supported_download'] ?? 'Preview not available for this file type. Would you like to download it?' ?>");
             if (downloadConfirm) {
-                window.location.href = filePath; // Triggers download
+                window.location.href = filePath;
             }
             lightbox.style.display = 'none';
         }
     }
 
-    // Close handlers (optimized to clear resources)
     function closeLightbox() {
         lightbox.style.display = 'none';
         lightboxImg.src = "";
@@ -448,7 +477,6 @@ $has_other_attachments = !empty($other_attachments);
     }
 
     closeBtn.addEventListener('click', closeLightbox);
-
     lightbox.addEventListener('click', e => {
         if(e.target === lightbox) {
             closeLightbox();

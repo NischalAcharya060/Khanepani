@@ -194,6 +194,8 @@ $lang = [
     'settings_updated' => '✅ Settings updated successfully!',
     'no_changes' => '⚠ No changes detected or row does not exist.',
     'update_failed' => '❌ Failed to update settings: ',
+    'map_embed' => 'Map Embed Code (Google Maps Iframe)',
+    'map_placeholder' => 'Paste your Google Maps iframe code here...',
 
     // User side
     "home" => "Home",
@@ -227,7 +229,7 @@ $lang = [
     'preview_not_supported_download' => 'Preview not available for this file type. Would you like to download it?',
     'important_documents' => 'Important Documents',
     'document_type' => 'Document Type',
-    // --- END NEW KEYS ---
+    'no_results' => 'No results found for your search.',
 
     //User Gallery
     'photo_gallery' => 'Photo Gallery',
