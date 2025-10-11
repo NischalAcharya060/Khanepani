@@ -35,144 +35,200 @@ if (file_exists($langFile)) {
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: #f5f6fa;
+            background: #f5f5f5;
             margin: 0;
             padding: 0;
+            color: #333;
+            line-height: 1.6;
         }
 
-        /* Gallery Section */
         .gallery {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 20px;
+            max-width: 1280px;
+            margin: 60px auto;
+            padding: 0 30px;
         }
 
         .gallery h2 {
             text-align: center;
-            margin-bottom: 40px;
-            font-size: 36px;
-            font-weight: 700;
-            color: #2c3e50;
+            margin-bottom: 50px;
+            font-size: 40px;
+            font-weight: 900;
+            color: #1a237e;
+            letter-spacing: 1px;
+            position: relative;
         }
 
-        /* Grid layout */
+        .gallery h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: #ff6f00;
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
         }
 
-        /* Album Card */
         .album-card {
             position: relative;
             cursor: pointer;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            border-radius: 10px;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
+            border-radius: 12px;
             display: inline-block;
-        }
-        .album-card:hover {
-            transform: translateY(-8px) scale(1.02);
+            overflow: visible;
         }
 
-        /* Pile effect for multiple images */
+        .album-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            z-index: 10;
+        }
+
         .album-card.pile::before,
         .album-card.pile::after {
             content: "";
             position: absolute;
-            top: 12px;
-            left: 12px;
-            right: -12px;
-            bottom: -12px;
-            border-radius: 10px;
+            top: 8px;
+            left: 8px;
+            right: -8px;
+            bottom: -8px;
+            border-radius: 12px;
             background: #fff;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
             z-index: 0;
-            transform: rotate(-4deg);
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
         }
         .album-card.pile::after {
-            top: 20px;
-            left: 20px;
-            right: -20px;
-            bottom: -20px;
-            transform: rotate(5deg);
-            opacity: 0.9;
+            top: 16px;
+            left: 16px;
+            right: -16px;
+            bottom: -16px;
+            transform: rotate(3deg);
+            opacity: 0.8;
         }
 
-        /* Album Pile */
+        .album-card:hover.pile::before {
+            transform: rotate(-4deg) translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .album-card:hover.pile::after {
+            transform: rotate(5deg) translateY(-2px);
+        }
+
         .album-pile {
             position: relative;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             background: #fff;
             z-index: 1;
         }
 
-        /* Album Image */
+        .album-card:hover .album-pile {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
         .album-image {
-            height: 220px;
+            height: 250px;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 12px 12px 0 0;
         }
         .album-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.4s ease;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .album-card:hover .album-image img {
-            transform: scale(1.08);
+            transform: scale(1.1);
         }
 
-        /* Overlay */
         .overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4), transparent);
             color: #fff;
-            padding: 12px;
-            border-radius: 0 0 10px 10px;
+            padding: 15px;
+            border-radius: 0 0 12px 12px;
             z-index: 2;
+            box-sizing: border-box;
         }
+
         .overlay .title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
         .overlay .count {
-            font-size: 13px;
-            opacity: 0.85;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .overlay .count::before {
+            font-family: "Font Awesome 6 Free";
+            content: "\f03e";
+            font-weight: 900;
         }
 
         .no-data {
-            grid-column: 1/-1; /* span full width */
+            grid-column: 1/-1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px 20px;
-            background: #fff;
+            padding: 80px 20px;
+            background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             color: #7f8c8d;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 500;
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .no-data:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
         .no-data i {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #bdc3c7;
+            font-size: 64px;
+            margin-bottom: 25px;
+            color: #95a5a6;
+            transition: color 0.3s ease;
+        }
+
+        .no-data:hover i {
+            color: #34495e;
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                margin: 30px auto;
+                padding: 0 15px;
+            }
+
+            .gallery h2 {
+                font-size: 32px;
+                margin-bottom: 30px;
+            }
+
+            .album-image {
+                height: 200px;
+            }
         }
     </style>
 </head>

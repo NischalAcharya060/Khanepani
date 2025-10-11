@@ -4,6 +4,9 @@
 //    session_start();
 //}
 
+// Include database
+include 'config/db.php';
+
 // Language handling
 if (!isset($_SESSION['lang'])) {
     $_SESSION['lang'] = 'en';
@@ -23,7 +26,17 @@ if (file_exists($langFile)) {
     include __DIR__ . '/../lang/en.php';
 }
 
+$settings = [
+        'email' => 'info@salakpurkhanepani.com',
+        'phone' => '+977-1-4117356',
+        'map_embed' => 'map_embed',
+];
 
+$sql = "SELECT email, phone, facebook_link, map_embed FROM settings WHERE id = 1 LIMIT 1";
+$result = $conn->query($sql);
+if ($result && $result->num_rows > 0) {
+    $settings = $result->fetch_assoc();
+}
 ?>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,8 +48,8 @@ if (file_exists($langFile)) {
         </div>
     </section>
     <div class="container info-bar-content">
-        <span><i class="fa-solid fa-phone"></i> +977 1 4117356, 4117358</span>
-        <span><i class="fa-solid fa-envelope"></i> info@salakpurkhanepani.com</span>
+        <span><i class="fa-solid fa-phone"></i> <?= htmlspecialchars($settings['phone']) ?></span>
+        <span><i class="fa-solid fa-envelope"></i> <?= htmlspecialchars($settings['email']) ?></span>
     </div>
 </div>
 

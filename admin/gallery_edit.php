@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="input-group">
             <label><i data-feather="tag" style="width:14px; height:14px;"></i> <?= $lang['image_title'] ?? "Title" ?></label>
-            <input type="text" name="title" value="<?= htmlspecialchars($image['title']) ?>" placeholder="<?= $lang['image_title_placeholder'] ?? "Enter image title" ?>" required>
+            <input type="text" name="title" value="<?= htmlspecialchars($image['title']) ?>" placeholder="<?= $lang['image_title_placeholder'] ?? "Enter image title" ?>">
         </div>
 
         <div class="input-group">
