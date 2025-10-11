@@ -83,8 +83,8 @@ $lang = [
 
     // Messages
     "messages_subtitle" => "View messages sent from the contact form.",
-    "read" => "✔ Read",
-    "unread" => "✉ Unread",
+    "mark_read" => "✔ Read",
+    "mark_unread" => "✉ Unread",
     "delete_confirm_message" => "Delete this message?",
     "no_messages" => "No messages found.",
 
@@ -258,8 +258,8 @@ $lang = [
     'suggestion_feedback_placeholder' => 'Write your suggestion or feedback here',
     'default_subject' => 'New Message',
     'fill_required_fields' => 'Please fill all required fields correctly.',
-    'message_saved' => 'Thank you! Your message has been saved successfully.',
-    'message_failed' => 'Sorry, your message could not be saved. Please try again later.',
+    'message_saved' => 'Thank you! Your message has been sent successfully.',
+    'message_failed' => 'Sorry, your message could not be sent. Please try again later.',
     'sending' => 'Sending...',
 
     // Captcha messages

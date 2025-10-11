@@ -255,6 +255,11 @@ $unread = $countResult->fetch_assoc()['unread_count'];
             </div>
 
             <div class="message-field">
+                <span class="message-label"><i data-feather="phone" style="width:14px; height:14px;"></i> <?= $lang['phone'] ?></span>
+                <div class="message-value phone"><?= htmlspecialchars($message['phone']) ?></div>
+            </div>
+
+            <div class="message-field">
                 <span class="message-label"><i data-feather="clock" style="width:14px; height:14px;"></i> <?= $lang['date'] ?></span>
                 <div class="message-value"><?= format_nepali_date($message['created_at'], $cal) ?></div>
             </div>

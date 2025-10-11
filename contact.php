@@ -1,289 +1,219 @@
 <?php
-// Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Include database
 include 'config/db.php';
-
-// Language handling
 if (!isset($_SESSION['lang'])) {
     $_SESSION['lang'] = 'en';
 }
 if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','np'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
-
-// Include language file
 $langFile = __DIR__ . '/lang/' . $_SESSION['lang'] . '.php';
 if (file_exists($langFile)) {
     include $langFile;
 } else {
     include __DIR__ . '/lang/en.php';
 }
-
 $settings = [
-        'email' => 'info@salakpurkhanepani.com',
-        'phone' => '+977-1-4117356',
-        'map_embed' => 'map_embed',
+        'email' => 'info@example.com',
+        'phone' => '+977-1-0000000',
+        'facebook_link' => '#',
+        'map_embed' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.7562473456385!2d85.32147311453896!3d27.693433982798625!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19a4e61c3241%3A0x644265576a4f933e!2sKathmandu!5e0!3m2!1sen!2snp!4v1678873724213!5m2!1sen!2snp',
 ];
-
 $sql = "SELECT email, phone, facebook_link, map_embed FROM settings WHERE id = 1 LIMIT 1";
 $result = $conn->query($sql);
 if ($result && $result->num_rows > 0) {
-    $settings = $result->fetch_assoc();
+    $db_settings = $result->fetch_assoc();
+    $settings = array_merge($settings, $db_settings);
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $_SESSION['lang'] ?>">
 <head>
     <meta charset="UTF-8">
-    <title><?= $lang['user_contact_us'] ?> - <?= $lang['logo'] ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($lang['user_contact_us']) ?> - <?= htmlspecialchars($lang['logo']) ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #1e78c8; /* A vibrant, modern blue */
-            --secondary-orange: #ff6f61; /* A warm, inviting orange */
-            --background-light: #f7f9fb; /* Very light, soft background */
+            --primary-blue: #007bff;
+            --secondary-teal: #17a2b8;
+            --background-light: #f0f2f5;
             --card-background: #ffffff;
-            --text-dark: #333333;
-            --text-medium: #666666;
-            --border-color: #e0e6ed;
-            --border-radius-large: 15px;
-            --shadow-elevation: 0 10px 30px rgba(0, 0, 0, 0.08); /* Modern, soft shadow */
+            --text-dark: #212529;
+            --border-color: #dee2e6;
+            --radius: 18px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
-
-
         .contact-section {
-            padding: 90px 20px;
-            max-width: 1280px;
+            padding: 80px 20px;
+            max-width: 1200px;
             margin: auto;
         }
-
-        /* Section Header */
         .contact-section h2 {
             text-align: center;
-            color: var(--primary-blue);
-            font-size: 42px;
+            font-size: 40px;
             font-weight: 700;
             margin-bottom: 20px;
-            letter-spacing: -0.5px;
+            animation: slideInUp 0.8s ease-out;
         }
-
         .contact-section h2::after {
             content: '';
             display: block;
-            width: 100px;
-            height: 5px;
-            background: var(--secondary-orange);
-            margin: 20px auto 50px;
-            border-radius: 5px;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--secondary-teal));
+            margin: 15px auto 50px;
+            border-radius: 2px;
         }
-
+        .contact-info h3, .contact-form h3 {
+            color: var(--primary-blue);
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
         .contact-content {
             display: flex;
-            gap: 40px;
-            justify-content: center;
+            gap: 30px;
             flex-wrap: wrap;
         }
-
-        /* Contact Info Box */
-        .contact-info {
-            flex: 1 1 40%;
+        .contact-info, .contact-form {
+            flex: 1 1 48%;
             min-width: 350px;
             background: var(--card-background);
-            padding: 40px;
-            border-radius: var(--border-radius-large);
-            box-shadow: var(--shadow-elevation);
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            border-top: 5px solid var(--secondary-orange);
+            padding: 35px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: all 0.4s ease;
         }
-
+        .contact-info {
+            border-left: 5px solid var(--secondary-teal);
+            animation: fadeInRight 1s ease-out;
+        }
+        .contact-form {
+            border-right: 5px solid var(--primary-blue);
+            animation: fadeInLeft 1s ease-out;
+        }
         .contact-info:hover {
-            transform: translateY(-8px);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         }
-
-        .contact-info h3 {
-            color: var(--primary-blue);
-            margin-bottom: 30px;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .contact-info p {
-            margin: 20px 0;
-            font-size: 17px;
-            color: var(--text-medium);
+        .contact-item {
             display: flex;
             align-items: center;
+            margin: 20px 0;
+            font-size: 16px;
+            line-height: 1.5;
         }
-
-        .contact-info p i {
-            color: var(--secondary-orange);
+        .contact-item i {
+            color: var(--secondary-teal);
             margin-right: 15px;
             font-size: 20px;
             width: 25px;
+            animation: pulse 2s infinite ease-in-out;
         }
-
-        .map iframe {
-            margin-top: 30px;
-            width: 100%;
-            height: 320px;
-            border-radius: 10px;
-            border: 2px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Contact Form */
-        .contact-form {
-            flex: 1 1 55%;
-            min-width: 450px;
-            background: var(--card-background);
-            padding: 40px;
-            border-radius: var(--border-radius-large);
-            box-shadow: var(--shadow-elevation);
-        }
-
-        .contact-form h3 {
-            color: var(--primary-blue);
-            margin-bottom: 30px;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
+        .contact-item:nth-child(2) i { animation-delay: 0.2s; }
+        .contact-item:nth-child(3) i { animation-delay: 0.4s; }
+        .contact-form form input,
         .contact-form form select,
-        .contact-form form input:not([type="checkbox"]),
         .contact-form form textarea {
             width: 100%;
-            padding: 16px 20px;
+            padding: 14px 18px;
             margin-bottom: 20px;
             border-radius: 10px;
             border: 1px solid var(--border-color);
             font-size: 16px;
-            outline: none;
-            background: #ffffff;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            background: var(--background-light);
+            transition: all 0.3s;
             box-sizing: border-box;
         }
-
-        .contact-form form select:focus,
-        .contact-form form input:focus,
-        .contact-form form textarea:focus {
+        .contact-form form input:focus, .contact-form form textarea:focus {
             border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(30, 120, 200, 0.2);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
-
-        /* Submit Button */
-        .contact-form button {
-            background: linear-gradient(45deg, var(--primary-blue), #2c93e5);
-            color: #fff;
-            padding: 15px 35px;
-            border: none;
+        .map iframe {
+            width: 100%;
+            height: 300px;
             border-radius: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(30, 120, 200, 0.4);
+            border: 0;
+            margin-top: 30px;
         }
-
-        .contact-form button:hover {
-            background: linear-gradient(45deg, var(--secondary-orange), #ff968d);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 111, 97, 0.5);
+        .social-links { margin-top: 25px; text-align: center; }
+        .social-links a {
+            width: 40px; height: 40px; line-height: 40px;
+            margin: 0 6px;
+            background: var(--border-color);
+            color: var(--text-dark);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
         }
-
-        .hidden{
-            display: none;
+        .social-links a:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: scale(1.15) rotate(5deg);
         }
-
-        /* Flash Message Styling */
-        .flash-message {
-            padding: 18px 25px;
-            margin: 30px auto;
-            max-width: 800px;
+        .contact-form button {
+            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-teal));
+            color: #fff;
+            padding: 14px 30px;
             border-radius: 10px;
             font-size: 17px;
             font-weight: 600;
-            text-align: center;
-            animation: fadeIn 0.5s ease-in-out;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s;
+            overflow: hidden;
         }
-
-        .flash-message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .contact-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(23, 162, 184, 0.4);
         }
-
-        .flash-message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Loading Button */
         .contact-form button.loading {
-            background: #8899aa;
-            position: relative;
+            background: #adb5bd;
             pointer-events: none;
-            box-shadow: none;
+            position: relative;
         }
-
-        .contact-form button.loading i {
-            display: none;
-        }
-
+        .contact-form button.loading i { display: none; }
         .contact-form button.loading::after {
             content: "";
             position: absolute;
             right: 15px;
             top: 50%;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 3px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 0.8s linear infinite;
             transform: translateY(-50%);
         }
-
-        @keyframes spin {
-            0% { transform: translateY(-50%) rotate(0deg); }
-            100% { transform: translateY(-50%) rotate(360deg); }
+        .contact-form button.loading span { opacity: 0; }
+        .contact-form button.loading::before {
+            content: "<?= $lang['sending'] ?? 'SENDING...' ?>";
+            color: white;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
-
-        /* reCAPTCHA style adjustment */
-        .g-recaptcha {
-            margin-bottom: 20px;
+        .hidden { display: none !important; }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes spin { 0% { transform: translateY(-50%) rotate(0deg); } 100% { transform: translateY(-50%) rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); color: var(--primary-blue); } 100% { transform: scale(1); } }
+        @media screen and (max-width: 900px) {
+            .contact-content { flex-direction: column; gap: 25px; }
+            .contact-info, .contact-form { min-width: 100%; padding: 30px; }
+            .contact-section h2 { font-size: 34px; }
         }
-
-        /* Responsive */
-        @media screen and (max-width: 992px) {
-            .contact-content {
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .contact-info, .contact-form {
-                min-width: 100%;
-                padding: 30px;
-            }
-
-            .contact-section h2 {
-                font-size: 36px;
-            }
+        @media screen and (max-width: 500px) {
+            .contact-section { padding: 40px 15px; }
+            .contact-info, .contact-form { padding: 25px; }
+            .contact-section h2 { font-size: 28px; }
         }
     </style>
 </head>
@@ -292,23 +222,34 @@ if ($result && $result->num_rows > 0) {
 <?php include 'components/header.php'; ?>
 
 <?php if (isset($_SESSION['flash_message'])): ?>
-    <div class="flash-message <?= $_SESSION['flash_message']['type'] ?>">
-        <?= $_SESSION['flash_message']['text'] ?>
+    <div class="flash-message <?= htmlspecialchars($_SESSION['flash_message']['type']) ?>" style="max-width: 900px; margin: 30px auto;">
+        <?= htmlspecialchars($_SESSION['flash_message']['text']) ?>
     </div>
     <?php unset($_SESSION['flash_message']); ?>
 <?php endif; ?>
 
 <section class="contact-section">
-    <h2><?= $lang['user_contact_us'] ?></h2>
+    <h2><?= htmlspecialchars($lang['user_contact_us']) ?></h2>
     <div class="contact-content">
         <div class="contact-info">
-            <h3><?= $lang['contact_details'] ?></h3>
+            <h3><?= htmlspecialchars($lang['contact_details']) ?></h3>
 
-            <p><i class="fa fa-map-marker-alt"></i> Corporate Office: Salakpur Chowk, Kathmandu, Nepal</p>
-            <p><i class="fa fa-phone"></i> <?= htmlspecialchars($settings['phone']) ?></p>
-            <p><i class="fa fa-envelope"></i> <?= htmlspecialchars($settings['email']) ?></p>
-
-            <p><i class="fa fa-clock"></i> Sun - Fri: 10:00 AM - 5:00 PM</p>
+            <div class="contact-item">
+                <i class="fa fa-map-marker-alt"></i>
+                <p>Corporate Office: Salakpur Morang, Nepal</p>
+            </div>
+            <div class="contact-item">
+                <i class="fa fa-phone"></i>
+                <p><a href="tel:<?= htmlspecialchars($settings['phone']) ?>" style="color: inherit; text-decoration: none;"><?= htmlspecialchars($settings['phone']) ?></a></p>
+            </div>
+            <div class="contact-item">
+                <i class="fa fa-envelope"></i>
+                <p><a href="mailto:<?= htmlspecialchars($settings['email']) ?>" style="color: inherit; text-decoration: none;"><?= htmlspecialchars($settings['email']) ?></a></p>
+            </div>
+            <div class="contact-item">
+                <i class="fa fa-clock"></i>
+                <p>Sun - Fri: 10:00 AM - 5:00 PM</p>
+            </div>
 
             <div class="map">
                 <iframe
@@ -316,35 +257,39 @@ if ($result && $result->num_rows > 0) {
                         allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
                 </iframe>
             </div>
+
+            <div class="social-links">
+                <a href="<?= htmlspecialchars($settings['facebook_link'] ?? '#') ?>" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            </div>
         </div>
 
         <div class="contact-form">
-            <h3><?= $lang['send_message'] ?></h3>
+            <h3><?= htmlspecialchars($lang['send_message']) ?></h3>
             <form action="contact_process.php" method="post" id="contactForm">
-                <select name="type" id="type" required>
-                    <option value=""><?= $lang['select_message_type'] ?></option>
-                    <option value="general"><?= $lang['general_message'] ?></option>
-                    <option value="complaint"><?= $lang['complaint'] ?></option>
-                    <option value="suggestion"><?= $lang['suggestion_feedback'] ?></option>
+                <select name="type" id="type" required aria-label="<?= htmlspecialchars($lang['select_message_type']) ?>">
+                    <option value=""><?= htmlspecialchars($lang['select_message_type']) ?></option>
+                    <option value="general"><?= htmlspecialchars($lang['general_message']) ?></option>
+                    <option value="complaint"><?= htmlspecialchars($lang['complaint']) ?></option>
+                    <option value="suggestion"><?= htmlspecialchars($lang['suggestion_feedback']) ?></option>
                 </select>
 
-                <input type="text" name="subject" id="subject" placeholder="<?= $lang['user_subject'] ?>" required>
-                <input type="text" name="name" placeholder="<?= $lang['your_name'] ?>" required>
-                <input type="email" name="email" placeholder="<?= $lang['your_email'] ?>">
-                <input type="text" name="phone" placeholder="<?= $lang['your_phone'] ?>">
+                <input type="text" name="subject" id="subject" placeholder="<?= htmlspecialchars($lang['user_subject']) ?> *" required>
+                <input type="text" name="name" placeholder="<?= htmlspecialchars($lang['your_name']) ?> *" required>
+                <input type="email" name="email" placeholder="<?= htmlspecialchars($lang['your_email']) ?>">
+                <input type="text" name="phone" placeholder="<?= htmlspecialchars($lang['your_phone']) ?>">
 
                 <div id="complaintFields" class="hidden">
-                    <input type="text" name="complaint_ref" placeholder="<?= $lang['complaint_ref'] ?>">
-                    <textarea name="complaint_details" rows="4" placeholder="<?= $lang['complaint_details'] ?>"></textarea>
+                    <input type="text" name="complaint_ref" placeholder="<?= htmlspecialchars($lang['complaint_ref']) ?>">
+                    <textarea name="complaint_details" rows="4" placeholder="<?= htmlspecialchars($lang['complaint_details']) ?>"></textarea>
                 </div>
 
-                <textarea name="message" id="message" rows="6" placeholder="<?= $lang['your_message'] ?>" required></textarea>
+                <textarea name="message" id="message" rows="6" placeholder="<?= htmlspecialchars($lang['your_message']) ?> *" required></textarea>
 
                 <div class="g-recaptcha" data-sitekey="6Lex7dcrAAAAAPeIL3aTKqVvlaWewWRnUcF03IX4"></div>
                 <br>
 
-                <button type="submit">
-                    <i class="fa fa-paper-plane"></i> <?= $lang['send_message'] ?>
+                <button type="submit" id="submitButton">
+                    <i class="fa fa-paper-plane"></i> <span><?= htmlspecialchars($lang['send_message']) ?></span>
                 </button>
             </form>
         </div>
@@ -354,29 +299,61 @@ if ($result && $result->num_rows > 0) {
 <?php include 'components/footer.php'; ?>
 
 <script>
-    const typeSelect = document.getElementById('type');
-    const complaintFields = document.getElementById('complaintFields');
-    const messageField = document.getElementById('message');
-    const contactForm = document.getElementById('contactForm');
-    const submitBtn = contactForm.querySelector("button[type='submit']");
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('type');
+        const complaintFields = document.getElementById('complaintFields');
+        const messageField = document.getElementById('message');
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitButton');
+        const subjectInput = document.getElementById('subject');
 
-    typeSelect.addEventListener('change', function() {
-        if (this.value === 'complaint') {
-            complaintFields.classList.remove('hidden');
-            messageField.placeholder = "<?= $lang['additional_complaint_info'] ?>";
-        } else if (this.value === 'suggestion') {
-            complaintFields.classList.add('hidden');
-            messageField.placeholder = "<?= $lang['suggestion_feedback_placeholder'] ?>";
-        } else {
-            complaintFields.classList.add('hidden');
-            messageField.placeholder = "<?= $lang['your_message'] ?>";
-        }
-    });
+        const langStrings = {
+            additionalComplaintInfo: "<?= addslashes(htmlspecialchars($lang['additional_complaint_info'] ?? 'Additional message/notes (optional)')) ?>",
+            suggestionPlaceholder: "<?= addslashes(htmlspecialchars($lang['suggestion_feedback_placeholder'] ?? 'Please share your suggestion or feedback here.')) ?>",
+            yourMessage: "<?= addslashes(htmlspecialchars($lang['your_message'] ?? 'Your Message')) ?> *",
+            sending: "<?= addslashes(htmlspecialchars($lang['sending'] ?? 'SENDING...')) ?>",
+            complaintPrefix: "<?= addslashes(htmlspecialchars($lang['complaint_prefix'] ?? '[Complaint]')) ?>",
+            suggestionPrefix: "<?= addslashes(htmlspecialchars($lang['suggestion_prefix'] ?? '[Suggestion]')) ?>",
+            recaptchaRequired: "<?= addslashes(htmlspecialchars($lang['recaptcha_required'] ?? 'Please confirm you are not a robot.')) ?>"
+        };
 
-    contactForm.addEventListener('submit', function() {
-        submitBtn.classList.add("loading");
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = "<?= $lang['sending'] ?? 'Sending...' ?>";
+        typeSelect.addEventListener('change', function() {
+            const type = this.value;
+            if (type === 'complaint') {
+                complaintFields.classList.remove('hidden');
+                messageField.placeholder = langStrings.additionalComplaintInfo;
+            } else {
+                complaintFields.classList.add('hidden');
+                const optionalInputs = complaintFields.querySelectorAll('input, textarea');
+                optionalInputs.forEach(input => input.value = '');
+                messageField.placeholder = (type === 'suggestion') ? langStrings.suggestionPlaceholder : langStrings.yourMessage;
+            }
+            let cleanSubject = subjectInput.value.trim();
+            const prefixes = [langStrings.complaintPrefix, langStrings.suggestionPrefix];
+            prefixes.forEach(prefix => {
+                if (cleanSubject.startsWith(prefix)) {
+                    cleanSubject = cleanSubject.substring(prefix.length).trim();
+                }
+            });
+            if (type === 'complaint' && !cleanSubject.toLowerCase().includes('complaint')) {
+                subjectInput.value = langStrings.complaintPrefix + ' ' + cleanSubject;
+            } else if (type === 'suggestion' && !cleanSubject.toLowerCase().includes('suggestion')) {
+                subjectInput.value = langStrings.suggestionPrefix + ' ' + cleanSubject;
+            } else if (type === 'general') {
+                subjectInput.value = cleanSubject;
+            }
+        });
+
+        contactForm.addEventListener('submit', function(e) {
+            const captchaResponse = grecaptcha.getResponse();
+            if (captchaResponse.length === 0) {
+                alert(langStrings.recaptchaRequired);
+                e.preventDefault();
+                return;
+            }
+            submitBtn.classList.add("loading");
+            submitBtn.disabled = true;
+        });
     });
 </script>
 
