@@ -2,6 +2,22 @@
 session_start();
 include '../config/db.php';
 
+// --- Language Handling ---
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'en'; // default language
+}
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','np'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
+// Load language file
+$langFile = __DIR__ . '/../lang/' . $_SESSION['lang'] . '.php';
+if (file_exists($langFile)) {
+    include $langFile;
+} else {
+    include __DIR__ . '/../lang/en.php'; // fallback
+}
+
 // Master admin credentials
 $master_username = "masteradmin";
 $master_email = "master@admin.com";
@@ -96,37 +112,278 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $_SESSION['lang'] ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - सलकपुर खानेपानी</title>
+    <title><?= $lang['admin_login_title'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .input-group { position: relative; margin-bottom: 20px; }
+        :root {
+            --primary-color: #2a6fdb; /* A strong blue for municipality/public theme */
+            --secondary-color: #0d3b66; /* Dark blue for contrast */
+            --text-color: #333;
+            --white: #ffffff;
+            --bg-light: #f4f7f9;
+            --error-bg: #ffebeb;
+            --error-text: #cc0000;
+            --overlay-color: rgba(13, 59, 102, 0.75); /* Dark blue overlay */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-image: url('../assets/images/login_background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay-color);
+            z-index: 1;
+        }
+
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); /* Stronger shadow on the white box */
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--white);
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .left {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .right img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            opacity: 0.9;
+            animation: pulse 4s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .left > p:not(.error) {
+            color: #777;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+
+        .error {
+            background: var(--error-bg);
+            padding: 15px;
+            border-radius: 8px;
+            color: var(--error-text);
+            margin-bottom: 25px;
+            border-left: 5px solid var(--error-text);
+            font-weight: 600;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group .icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(42, 111, 219, 0.2);
+            outline: none;
+        }
+
         .input-group .toggle-password {
             position: absolute;
-            right: 12px;
+            right: 15px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
         }
-        .error {
-            background: #f8d7da;
-            padding: 10px;
+
+        .input-group .toggle-password:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 15px;
             border-radius: 8px;
-            color: #721c24;
-            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn:active {
+            transform: scale(0.99);
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .back-btn:hover {
+            color: var(--secondary-color);
+            transform: translateX(-5px);
+        }
+
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+        }
+
+        .language-selector select {
+            padding: 8px 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: var(--white);
+            color: var(--text-color);
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 95%;
+                margin: 20px 0;
+            }
+
+            .left, .right {
+                flex: none;
+            }
+
+            .left {
+                padding: 30px 20px;
+            }
+
+            .right {
+                display: none;
+            }
+
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
         }
     </style>
 </head>
 <body>
+<div class="language-selector">
+    <select onchange="window.location.href='?lang=' + this.value">
+        <option value="en" <?= ($_SESSION['lang'] === 'en') ? 'selected' : '' ?>>English</option>
+        <option value="np" <?= ($_SESSION['lang'] === 'np') ? 'selected' : '' ?>>नेपाली</option>
+    </select>
+</div>
+
 <div class="container">
     <div class="left">
-        <h2>सलकपुर खानेपानी Login</h2>
-        <p>Welcome! Please enter your credentials to access the admin dashboard.</p>
+        <h2><?= $lang['login_title'] ?></h2>
+        <p><?= $lang['login_subtitle'] ?></p>
 
         <?php if(isset($error)): ?>
             <p class="error"><?= htmlspecialchars($error) ?></p>
@@ -134,37 +391,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <form method="POST" class="login-form">
             <div class="input-group">
-                <span class="icon">👤</span>
-                <input type="text" name="login" placeholder="Username or Email" required>
+                <span class="icon"><i class="fas fa-user"></i></span>
+                <input type="text" name="login" placeholder="<?= $lang['placeholder_username_email'] ?>" required>
             </div>
 
             <div class="input-group">
-                <span class="icon">🔒</span>
-                <input type="password" name="password" id="password" placeholder="Password" required>
-                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                <span class="icon"><i class="fas fa-lock"></i></span>
+                <input type="password" name="password" id="password" placeholder="<?= $lang['placeholder_password'] ?>" required>
+                <span class="toggle-password" onclick="togglePassword()">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
 
-            <button type="submit" class="btn">Login Now</button>
+            <button type="submit" class="btn"><?= $lang['login_button'] ?></button>
         </form>
 
-        <a href="../index.php" class="back-btn">⬅ Back to Home</a>
+        <a href="../index.php" class="back-btn">
+            <i class="fas fa-arrow-left"></i> <?= $lang['back_home'] ?>
+        </a>
     </div>
 
     <div class="right">
-        <img src="../assets/images/login_img.png" alt="Login Illustration">
+        <img src="../assets/images/login_img.png" alt="Municipality Administration Illustration">
     </div>
 </div>
 
 <script>
     function togglePassword() {
         const passwordInput = document.getElementById('password');
-        const toggle = document.querySelector('.toggle-password');
+        const toggle = document.querySelector('.toggle-password i');
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
-            toggle.textContent = '🙈';
+            toggle.classList.remove('fa-eye');
+            toggle.classList.add('fa-eye-slash');
         } else {
             passwordInput.type = 'password';
-            toggle.textContent = '👁️';
+            toggle.classList.remove('fa-eye-slash');
+            toggle.classList.add('fa-eye');
         }
     }
 </script>

@@ -3,7 +3,7 @@ $lang = [
     // General
     'english' => 'English',
     'nepali' => 'Nepali',
-    "logo" => "Salakpur KhanePani",
+    "logo" => "Salakpur KhanePani Sanitation Committee",
     "dashboard" => "Dashboard",
     "management" => "Management",
     "manage_notices" => "Manage Notices",
@@ -15,6 +15,15 @@ $lang = [
     "logout" => "Logout",
     "unread_messages" => "Unread Messages",
     "no_unread" => "No unread messages.",
+
+    // Login
+    'admin_login_title' => 'Employee Login Portal - Salakpur KhanePani',
+    'login_title' => 'Employee Login Portal - Salakpur KhanePani',
+    'login_subtitle' => 'Welcome! Please enter your credentials to access the admin dashboard.',
+    'placeholder_username_email' => 'Username or Email',
+    'placeholder_password' => 'Password',
+    'login_button' => 'Login Now',
+    'back_home' => 'Back to Home',
 
     // Dashboard
     'welcome_back' => 'Welcome back',
