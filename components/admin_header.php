@@ -54,15 +54,16 @@ if ($notif_result !== false) {
 }
 $unread_count = count($unread_messages);
 
-// --- Profile Fetch for Header Display ---
 $admin_id = $_SESSION['admin'];
 $username = $_SESSION['username'] ?? 'Admin';
 
 $profile_pic_path = '../assets/profile/default.png';
 
+$current_role_id = $_SESSION['role_id'] ?? 0;
+
 if ($admin_id !== 'master') {
     $admin_id_int = intval($admin_id);
-    $stmt = $conn->prepare("SELECT username, profile_pic FROM admins WHERE id = ?");
+    $stmt = $conn->prepare("SELECT username, profile_pic, role_id FROM admins WHERE id = ?");
 
     if ($stmt !== false) {
         $stmt->bind_param("i", $admin_id_int);
@@ -75,6 +76,9 @@ if ($admin_id !== 'master') {
                 $username = $admin_data['username'] ?: 'Admin';
                 $db_profile_pic = $admin_data['profile_pic'] ?? '';
 
+                $current_role_id = $admin_data['role_id'] ?? 0;
+                $_SESSION['role_id'] = $current_role_id;
+
                 $uploaded_path_check = '../assets/uploads/profile/' . $db_profile_pic;
 
                 if (!empty($db_profile_pic) && $db_profile_pic !== 'default.png' && file_exists($uploaded_path_check)) {
@@ -83,17 +87,16 @@ if ($admin_id !== 'master') {
             }
         }
     }
+} else {
+    $current_role_id = 1;
+    $_SESSION['role_id'] = 1;
 }
 
-// Get current filename for active sidebar
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Sidebar state from session (default expanded for desktop)
 $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
 
 $current_admin_id = $_SESSION['admin'] ?? '';
-
-$current_role_id = $_SESSION['role_id'] ?? 0;
 ?>
 <header class="admin-header">
     <div class="logo">
@@ -195,11 +198,9 @@ $current_role_id = $_SESSION['role_id'] ?? 0;
             </ul>
         </li>
 
-        <!-- Separator added to clearly group Content Management from Administrative Tools -->
         <li class="sidebar-group-separator"></li>
 
         <?php
-        // Logic to check if the user is a master admin OR has a permitted role ID (1 or 2)
         if ($current_admin_id === 'master' || in_array($current_role_id, [1, 2])):
             ?>
             <li>
