@@ -24,6 +24,8 @@ $lang = [
     'placeholder_password' => 'Password',
     'login_button' => 'Login Now',
     'back_home' => 'Back to Home',
+    'error_banned' => "🚫 Your account has been permanently banned. Please contact the master admin.",
+    'error_deactivated' => "⚠️ Your account is currently deactivated. Contact the master admin to restore access.",
 
     // Dashboard
     'welcome_back' => 'Welcome back',

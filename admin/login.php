@@ -30,13 +30,14 @@ $stmt_check->bind_param("s", $master_username);
 $stmt_check->execute();
 $result_check = $stmt_check->get_result();
 if ($result_check->num_rows === 0) {
+    // Note: Assuming role_id=1 exists and is 'masteradmin'
     $stmt_insert = $conn->prepare("INSERT INTO admins (username, email, password, status, role_id, created_at, last_login) VALUES (?, ?, ?, 'active', 1, NOW(), NOW())");
     $stmt_insert->bind_param("sss", $master_username, $master_email, $hashed_password);
     $stmt_insert->execute();
 }
 
 // If already logged in, redirect to dashboard
-if (isset($_SESSION['admin'])) {
+if (isset($_SESSION['admin']) && $_SESSION['admin'] !== 'master') { // Added check to ignore 'master' string if it somehow got set previously
     header("Location: dashboard.php");
     exit();
 }
@@ -44,11 +45,17 @@ if (isset($_SESSION['admin'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $login = trim($_POST['login']); // username or email
     $password = $_POST['password'];
+    $error = '';
 
-    // Master admin bypass (with DB update)
+    // 🌟 FIX 1: Master admin hardcoded bypass (Use DB data for session consistency)
     if (($login === $master_username || $login === $master_email) && $password === $master_password) {
-        // Fetch master admin ID
-        $stmt_master = $conn->prepare("SELECT id FROM admins WHERE username = ?");
+        // Fetch master admin ID and role_name
+        $stmt_master = $conn->prepare("
+            SELECT a.id, a.username, r.role_name 
+            FROM admins a 
+            JOIN roles r ON a.role_id = r.id 
+            WHERE a.username = ?
+        ");
         $stmt_master->bind_param("s", $master_username);
         $stmt_master->execute();
         $result_master = $stmt_master->get_result();
@@ -56,24 +63,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result_master->num_rows === 1) {
             $master = $result_master->fetch_assoc();
 
-            // ✅ Update last_login timestamp
+            // 1. Set the correct ID (integer)
+            $_SESSION['admin'] = $master['id'];
+
+            // 2. Set necessary role and username
+            $_SESSION['username'] = $master['username'];
+            $_SESSION['role_name'] = $master['role_name'];
+            $_SESSION['is_master'] = true; // Use this for simple checks if needed
+
+            // 3. Update last_login timestamp
             $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
             $stmt_update->bind_param("i", $master['id']);
             $stmt_update->execute();
-        }
 
-        if (($login === $master_username || $login === $master_email) && $password === $master_password) {
-            $_SESSION['admin'] = "master";
-            $_SESSION['username'] = $master_username;
-            $_SESSION['is_master'] = true;
-            $_SESSION['role_name'] = "masteradmin"; // ✅ add this line
             header("Location: dashboard.php");
             exit();
+        } else {
+            // This is a safety net; the initial setup should prevent this.
+            $error = "❌ Master Admin not configured correctly in the database.";
         }
     }
 
-    // Fetch admin info
-    $stmt = $conn->prepare("SELECT * FROM admins WHERE username = ? OR email = ?");
+
+    // 🌟 FIX 2: Standard Login - Fetch admin info and role_name in one go
+    $stmt = $conn->prepare("
+        SELECT a.*, r.role_name 
+        FROM admins a 
+        JOIN roles r ON a.role_id = r.id 
+        WHERE a.username = ? OR a.email = ?
+    ");
     $stmt->bind_param("ss", $login, $login);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -83,15 +101,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 🚫 Check account status BEFORE password verify
         if ($admin['status'] === 'banned') {
-            $error = "🚫 Your account has been permanently banned. Please contact the master admin.";
-        } elseif ($admin['status'] === 'deactivated') {
-            $error = "⚠️ Your account is currently deactivated. Contact the master admin to restore access.";
+            $error = $lang['error_banned'] ?? "🚫 Your account has been permanently banned. Please contact the master admin.";
+        } elseif ($admin['status'] === 'inactive') {
+            $error = $lang['error_deactivated'] ?? "⚠️ Your account is currently deactivated. Contact the master admin to restore access.";
         } elseif ($admin['status'] === 'active') {
+
             // ✅ Only active users can proceed
             if (password_verify($password, $admin['password'])) {
+
+                // Set the session variables correctly
                 $_SESSION['admin'] = $admin['id'];
                 $_SESSION['username'] = $admin['username'];
-                $_SESSION['is_master'] = false;
+                $_SESSION['role_name'] = $admin['role_name'];
+                $_SESSION['is_master'] = (strtolower($admin['role_name']) === 'masteradmin');
 
                 // Update last login
                 $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");

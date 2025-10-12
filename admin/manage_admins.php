@@ -4,10 +4,8 @@ include '../config/db.php';
 include '../config/Nepali_Calendar.php';
 $cal = new Nepali_Calendar();
 
-// Define a constant for "Active Now" check (e.g., 100 seconds)
 const ACTIVE_NOW_THRESHOLD = 100;
 
-// --- Nepali date formatter ---
 function format_nepali_date($date_str, $cal) {
     if (!$date_str) return '—';
     $timestamp = strtotime($date_str);
@@ -34,7 +32,6 @@ function format_nepali_date($date_str, $cal) {
     }
 }
 
-// --- Time Ago Formatter ---
 function format_time_ago($date_str) {
     if (!$date_str || strtotime($date_str) === false) return '—';
 
@@ -69,7 +66,6 @@ function format_time_ago($date_str) {
     return '—';
 }
 
-// --- Active now check ---
 function is_admin_active_now(?string $last_login_str): bool {
     if (!$last_login_str) return false;
     $last_login_timestamp = strtotime($last_login_str);
@@ -77,16 +73,30 @@ function is_admin_active_now(?string $last_login_str): bool {
     return (time() - $last_login_timestamp) < ACTIVE_NOW_THRESHOLD;
 }
 
-// --- Authentication ---
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit();
 }
-$current_admin_id = $_SESSION['admin'];
-$current_admin_role = $_SESSION['role_name'] ?? '';
-$is_master_admin_session = ($current_admin_role === 'masteradmin');
 
-// --- Language Handling ---
+$current_admin_id = $_SESSION['admin'];
+
+// --- FIX: Robust privilege check against database ---
+// Fetch current role from DB using the logged-in ID for reliability.
+$current_admin_role_check = $conn->prepare("SELECT r.role_name FROM admins a JOIN roles r ON a.role_id = r.id WHERE a.id = ?");
+$current_admin_role_check->bind_param("i", $current_admin_id);
+$current_admin_role_check->execute();
+$result = $current_admin_role_check->get_result();
+$current_admin_db_role_name = $result->fetch_assoc()['role_name'] ?? '';
+
+// Use the reliable database role name for the rest of the page logic
+$current_admin_role = $current_admin_db_role_name;
+$is_master_admin_session = (strtolower($current_admin_role) === 'masteradmin');
+
+// Update session for consistency across other pages if needed
+$_SESSION['role_name'] = $current_admin_role;
+// ---------------------------------------------------
+
+
 if (!isset($_SESSION['lang'])) $_SESSION['lang'] = 'en';
 if (isset($_GET['lang'])) {
     $allowed_langs = ['en','np'];
@@ -94,21 +104,19 @@ if (isset($_GET['lang'])) {
 }
 include '../lang/' . $_SESSION['lang'] . '.php';
 
-// --- AJAX HANDLER FOR ROLE/STATUS UPDATES ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
     $response = ['success' => false, 'message' => $lang['db_error'] ?? 'Database error.'];
     $admin_id = intval($_POST['id'] ?? 0);
 
-    // Masteradmin cannot edit own account
-    if ($admin_id === $current_admin_id && $current_admin_role === 'masteradmin') {
+    // Use the reliable $current_admin_role for permission checks
+    if ($admin_id == $current_admin_id && strtolower($current_admin_role) === 'masteradmin') {
         $response['message'] = $lang['self_edit_forbidden'] ?? 'You cannot edit your own account.';
         echo json_encode($response);
         exit;
     }
 
-    // Only masteradmins can perform role/status updates
-    if ($current_admin_role !== 'masteradmin') {
+    if (strtolower($current_admin_role) !== 'masteradmin') {
         $response['message'] = $lang['no_permission'] ?? 'You do not have permission.';
         echo json_encode($response);
         exit;
@@ -120,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
+    // --- The rest of the POST logic remains unchanged ---
     $action = $_POST['action'];
     $update_successful = false;
 
@@ -162,20 +171,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     echo json_encode($response);
     exit;
 }
+// --- The rest of the page rendering logic remains unchanged ---
 
-// Fetch all roles
 $roles_result = $conn->query("SELECT id, role_name FROM roles ORDER BY id ASC");
 $roles = [];
 while ($row = $roles_result->fetch_assoc()) {
     $roles[$row['id']] = $row;
 }
 
-// Pagination
 $limit = 5;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $limit;
 
-// Fetch admins
 $query = "
     SELECT a.*, r.role_name, r.id AS role_id_fk
     FROM admins a 
@@ -184,13 +191,13 @@ $query = "
     LIMIT $offset, $limit";
 $admins = $conn->query($query);
 
-// Count total
 $total_result = $conn->query("SELECT COUNT(*) as total FROM admins");
 $total_row = $total_result->fetch_assoc();
 $total_pages = ceil($total_row['total'] / $limit);
 
 $username = $_SESSION['username'] ?? 'Admin';
 ?>
+
 <!DOCTYPE html>
 <html lang="<?= $_SESSION['lang'] ?>">
 <head>
@@ -212,7 +219,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             font-size: 1.05em;
         }
 
-        /* --- Modern Button (General) --- */
         .btn {
             padding: 10px 20px;
             font-size: 1em;
@@ -236,11 +242,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
 
-
-        /* ---------------------------------------------------------------------- */
-        /* --- TABLE STYLING: MODERN, AESTHETIC --- */
-        /* ---------------------------------------------------------------------- */
-
         .admin-table {
             width: 100%;
             border-collapse: separate;
@@ -251,7 +252,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             overflow: hidden;
         }
 
-        /* Header (Thead) Styling */
         .admin-table th {
             padding: 18px 15px;
             text-align: left;
@@ -263,7 +263,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             font-size: 0.9em;
         }
 
-        /* Body (Tbody) Styling */
         .admin-table td {
             padding: 16px 15px;
             text-align: left;
@@ -274,12 +273,10 @@ $username = $_SESSION['username'] ?? 'Admin';
             background-color: #ffffff;
         }
 
-        /* Striped effect for better readability */
         .admin-table tbody tr:nth-child(even) {
             background-color: #fcfdff;
         }
 
-        /* Hover Effect */
         .admin-table tbody tr:hover {
             background: #e6f3ff;
             box-shadow: inset 3px 0 0 0 #1e3a8a;
@@ -290,15 +287,18 @@ $username = $_SESSION['username'] ?? 'Admin';
             border-bottom: none;
         }
 
-        /* Column Sizing and Alignment */
         .admin-table td:nth-child(1), .admin-table th:nth-child(1) { text-align: center; width: 4%; }
         .admin-table td:nth-child(2), .admin-table th:nth-child(2) { text-align: center; width: 6%; }
         .admin-table td:nth-child(5), .admin-table th:nth-child(5) { width: 12%; }
-        .admin-table td:nth-child(6), .admin-table th:nth-child(6) { text-align: center; width: 8%; }
-        .admin-table td:nth-child(9), .admin-table th:nth-child(9) { text-align: center; width: 18%; }
+        /* Adjusted width for last column based on master admin visibility */
+        <?php if ($is_master_admin_session): ?>
+        .admin-table td:nth-child(6), .admin-table th:nth-child(6) { text-align: center; width: 8%; } /* Status */
+        .admin-table td:nth-child(9), .admin-table th:nth-child(9) { text-align: center; width: 18%; } /* Actions */
+        <?php else: ?>
+        .admin-table td:nth-child(6), .admin-table th:nth-child(6) { text-align: center; width: 10%; }
+        <?php endif; ?>
 
 
-        /* Profile Picture */
         .profile-pic {
             width: 40px;
             height: 40px;
@@ -312,7 +312,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             transform: scale(1.05);
         }
 
-        /* --- Status Badges (Modern Pill Shape) --- */
         .status-badge {
             padding: 6px 12px;
             border-radius: 50px;
@@ -336,10 +335,9 @@ $username = $_SESSION['username'] ?? 'Admin';
             background-color: #ef4444;
         }
 
-        /* New Active Now styling */
         .active-now {
             font-weight: 700;
-            color: #059669; /* Same as active status for consistency */
+            color: #059669;
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -351,7 +349,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             color: #059669;
         }
 
-        /* --- Inline Edit Styling (Role) --- */
         .role-display {
             cursor: pointer;
             color: #1e3a8a;
@@ -374,7 +371,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- Action Buttons (Refined Look) --- */
         .action-group-buttons {
             display: flex;
             gap: 8px;
@@ -395,7 +391,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
         }
 
-        /* Specific button colors */
         .btn.action-button.danger {
             background-color: #ef4444;
             color: white;
@@ -409,7 +404,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             color: white;
         }
 
-        /* Disabled and Self/Master status styles */
         .btn.small.disabled {
             background-color: #e9ecef !important;
             color: #6c757d !important;
@@ -421,7 +415,17 @@ $username = $_SESSION['username'] ?? 'Admin';
             box-shadow: none;
         }
 
-        /* General alerts for AJAX messages */
+        .status-unactivated {
+            color: #993300;
+            font-weight: 500;
+            font-style: italic;
+            background-color: #fff8e1;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px dashed #ffd54f;
+            display: inline-block;
+        }
+
         #message-container {
             position: fixed;
             top: 20px;
@@ -446,7 +450,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Spinner animation only */
         .spinner {
             display: inline-block;
             font-size: 13px;
@@ -461,9 +464,6 @@ $username = $_SESSION['username'] ?? 'Admin';
             100% { opacity: 0.5; transform: rotate(360deg); }
         }
 
-        /* ---------------------------------------------------------------------- */
-        /* --- PAGINATION STYLING: MODERN AND USABLE --- */
-        /* ---------------------------------------------------------------------- */
         .pagination { text-align: center; margin-top: 20px; }
         .pagination a { margin: 0 5px; text-decoration: none; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; color: #0056d6; }
         .pagination a.active { background-color: #0056d6; color: white; border-color: #0056d6; }
@@ -492,7 +492,10 @@ $username = $_SESSION['username'] ?? 'Admin';
             <th><?= $lang['status'] ?? 'Status' ?></th>
             <th><?= $lang['created_at'] ?? 'Created At' ?></th>
             <th><?= $lang['last_login'] ?? 'Last Login' ?></th>
-            <th><?= $lang['actions'] ?? 'Actions' ?></th>
+
+            <?php if ($is_master_admin_session): ?>
+                <th><?= $lang['actions'] ?? 'Actions' ?></th>
+            <?php endif; ?>
         </tr>
         </thead>
         <tbody>
@@ -526,7 +529,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                                 <?= htmlspecialchars($admin['role_name'] ?? '—') ?>
                             </span>
                         <?php else: ?>
-                            <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?></span> (<?= $lang['no_permission'] ?? 'No Permission' ?>)
+                            <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?>
                         <?php endif; ?>
                     </td>
 
@@ -541,33 +544,44 @@ $username = $_SESSION['username'] ?? 'Admin';
                     <td><?= format_nepali_date($admin['created_at'], $cal) ?></td>
                     <td>
                         <?php
-                        $is_active_now = $is_self || is_admin_active_now($admin['last_login'] ?? null);
+                        $last_login_str = $admin['last_login'] ?? null;
+                        $is_active_now = $is_self || is_admin_active_now($last_login_str);
+
                         if ($is_active_now) {
                             echo '<span class="active-now">' . ($lang['active_now'] ?? 'Active Now') . '</span>';
                         } else {
-                            $last_login_display = !empty($admin['last_login']) ? format_time_ago($admin['last_login']) : '—';
-                            echo '<span title="' . (!empty($admin['last_login']) ? date('Y-m-d H:i:s', strtotime($admin['last_login'])) : '—') . '">' . $last_login_display . '</span>';
+                            if (!empty($last_login_str)) {
+                                $last_login_display = format_time_ago($last_login_str);
+                                $title_text = date('Y-m-d H:i:s', strtotime($last_login_str));
+                                echo '<span title="' . $title_text . '">' . $last_login_display . '</span>';
+                            } else {
+                                $not_activated_text = $lang['account_not_activated'] ?? 'Account Not Activated';
+                                echo '<span class="status-unactivated" title="' . ($lang['account_never_logged_in'] ?? 'Account has never logged in.') . '">' . $not_activated_text . '</span>';
+                            }
                         }
                         ?>
                     </td>
 
-                    <td class="action-buttons-cell">
-                        <?php
-                        if ($is_self && $is_master) {
-                            echo '<span class="btn small disabled action-master">(You)</span>';
-                        } elseif ($current_admin_role === 'masteradmin') {
-                            echo '<div class="action-group-buttons" id="action-group-' . $admin['id'] . '">';
-                            echo getActionButtonsHtml($admin['id'], $admin['status']);
-                            echo '</div>';
-                        } else {
-                            echo '<span class="btn small disabled action-no-permission">(No Permission)</span>';
-                        }
-                        ?>
-                    </td>
+                    <?php if ($is_master_admin_session): ?>
+                        <td class="action-buttons-cell">
+                            <?php
+                            $you_text = $lang['you'] ?? 'You';
+
+                            if ($is_self && $is_master) {
+                                echo '<span class="btn small disabled action-master">(' . htmlspecialchars($you_text) . ')</span>';
+                            } else {
+                                $initial_status = $admin['status'] ?? 'inactive';
+                                echo '<div class="action-group-buttons" id="action-group-' . $admin['id'] . '" data-initial-status="' . $initial_status . '"></div>';
+                            }
+                            ?>
+                        </td>
+                    <?php endif; ?>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="9" style="text-align:center; padding:20px;"><?= $lang['no_admins'] ?? 'No admins found.' ?></td></tr>
+            <tr>
+                <td colspan="<?= $is_master_admin_session ? 9 : 8 ?>" style="text-align:center; padding:20px;"><?= $lang['no_admins'] ?? 'No admins found.' ?></td>
+            </tr>
         <?php endif; ?>
         </tbody>
     </table>
@@ -602,12 +616,6 @@ $username = $_SESSION['username'] ?? 'Admin';
         container.fadeIn().delay(3000).fadeOut();
     }
 
-    /**
-     * Generates the appropriate action buttons based on the admin's current status.
-     * @param {number} adminId - The ID of the administrator.
-     * @param {string} currentStatus - The current status ('active', 'inactive', 'banned').
-     * @returns {string} The HTML string for the action buttons.
-     */
     function getActionButtonsHtml(adminId, currentStatus) {
         let html = '';
         const banButton = `<button class="btn action-button danger update-status-btn" data-id="${adminId}" data-new-status="banned">🚫 ${langJS.ban}</button>`;
@@ -637,14 +645,16 @@ $username = $_SESSION['username'] ?? 'Admin';
     }
 
     function rebindStatusButtons() {
-        // Detach previous handlers before reattaching new ones
         $('.update-status-btn').off('click').on('click', function() {
             const $button = $(this);
             const adminId = $button.data('id');
             const newStatus = $button.data('new-status');
             const $actionGroup = $button.closest('.action-group-buttons');
+            const $badge = $('#badge-' + adminId);
 
-            // Use the language variable for the confirmation text
+            const originalStatusClassMatch = $badge.attr('class').match(/status-(active|inactive|banned)/);
+            const originalStatus = originalStatusClassMatch ? originalStatusClassMatch[1] : 'inactive';
+
             if (!confirm(`${langJS.confirm_status} "${newStatus.toUpperCase()}"?`)) {
                 return;
             }
@@ -659,38 +669,31 @@ $username = $_SESSION['username'] ?? 'Admin';
                 },
                 dataType: 'json',
                 beforeSend: function() {
-                    $actionGroup.find('.update-status-btn').attr('disabled', true);
-                    $button.text('...');
+                    $actionGroup.find('.update-status-btn').attr('disabled', true).addClass('disabled');
+                    $button.html('<span class="spinner">⏳</span>');
                 },
                 success: function(response) {
                     if (response.success) {
-                        const newStatus = response.new_status;
-                        const $badge = $('#badge-' + adminId);
-                        const statusDisplayText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                        const updatedStatus = response.new_status;
+                        let statusDisplayText = langJS[updatedStatus] || updatedStatus.charAt(0).toUpperCase() + updatedStatus.slice(1);
 
-                        // Update the badge visually
                         $badge.removeClass('status-active status-inactive status-banned')
-                            .addClass('status-' + newStatus)
-                            .text(statusDisplayText);
+                            .addClass('status-' + updatedStatus)
+                            .text(statusDisplayText.charAt(0).toUpperCase() + statusDisplayText.slice(1));
 
-                        // Rebuild and re-enable the action buttons
-                        $actionGroup.html(getActionButtonsHtml(adminId, newStatus));
-                        rebindStatusButtons(); // Crucial: Rebind after DOM update
+                        $actionGroup.html(getActionButtonsHtml(adminId, updatedStatus));
+                        rebindStatusButtons();
 
                         showMessage('success', response.message);
                     } else {
                         showMessage('error', response.message);
-                        // If it fails, restore the original buttons based on the status before the attempted change
-                        const originalStatusClass = $('#badge-' + adminId).attr('class').match(/status-(active|inactive|banned)/)[1];
-                        $actionGroup.html(getActionButtonsHtml(adminId, originalStatusClass));
+                        $actionGroup.html(getActionButtonsHtml(adminId, originalStatus));
                         rebindStatusButtons();
                     }
                 },
                 error: function() {
                     showMessage('error', langJS.ajax_failed);
-                    // Re-enable and restore buttons on AJAX failure
-                    const originalStatusClass = $('#badge-' + adminId).attr('class').match(/status-(active|inactive|banned)/)[1];
-                    $actionGroup.html(getActionButtonsHtml(adminId, originalStatusClass));
+                    $actionGroup.html(getActionButtonsHtml(adminId, originalStatus));
                     rebindStatusButtons();
                 }
             });
@@ -699,11 +702,21 @@ $username = $_SESSION['username'] ?? 'Admin';
 
 
     $(document).ready(function() {
-        const currentUserRole = '<?php echo strtolower(trim($_SESSION["role_name"] ?? "")); ?>'; // lowercase check
+        const currentUserRole = '<?php echo strtolower(trim($current_admin_role ?? "")); ?>';
 
-        // Inline Role Editing
+        // Only initialize buttons if the current user is a master admin
+        if (currentUserRole === 'masteradmin') {
+            $('.action-group-buttons').each(function() {
+                const $group = $(this);
+                const adminId = $group.attr('id').replace('action-group-', '');
+                const initialStatus = $group.data('initial-status');
+                $group.html(getActionButtonsHtml(adminId, initialStatus));
+            });
+            rebindStatusButtons();
+        }
+
+        // Role editing logic (Only available for Master Admin)
         $('.role-display').on('click', function() {
-            // ✅ Permission check (only masteradmin can edit roles)
             if (currentUserRole !== 'masteradmin') {
                 showMessage('error', 'You do not have permission to change roles.');
                 return;
@@ -715,6 +728,11 @@ $username = $_SESSION['username'] ?? 'Admin';
             const currentRoleId = $roleCell.data('role-id');
 
             if ($roleCell.find('.role-select').length) return;
+
+            if (parseInt(adminId) === parseInt('<?php echo $current_admin_id; ?>')) {
+                showMessage('error', 'You cannot change your own role.');
+                return;
+            }
 
             let $select = $('<select class="role-select"></select>');
             $.each(roles, function(id, role) {
@@ -767,58 +785,10 @@ $username = $_SESSION['username'] ?? 'Admin';
             });
 
             $select.on('blur', function() {
-                $select.remove();
-                $displaySpan.show();
-            });
-        });
-
-        // --- Ban / Inactivate Feature ---
-        $('.toggle-status').on('click', function(e) {
-            e.preventDefault();
-
-            // ✅ Permission check (only masteradmin can ban/unban)
-            if (currentUserRole !== 'masteradmin') {
-                showMessage('error', 'You do not have permission to change admin status.');
-                return;
-            }
-
-            const $btn = $(this);
-            const adminId = $btn.data('id');
-            const actionType = $btn.data('action'); // 'ban' or 'activate'
-            const confirmMsg = actionType === 'ban'
-                ? 'Are you sure you want to ban this admin?'
-                : 'Are you sure you want to activate this admin?';
-
-            if (!confirm(confirmMsg)) return;
-
-            $btn.prop('disabled', true);
-            const $spinner = $('<span class="spinner ml-1">⏳</span>');
-            $btn.after($spinner);
-
-            $.ajax({
-                url: 'manage_admins.php',
-                type: 'POST',
-                data: {
-                    action: 'toggle_status',
-                    id: adminId,
-                    toggle_type: actionType
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        showMessage('success', response.message);
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showMessage('error', response.message);
-                    }
-                },
-                error: function() {
-                    showMessage('error', langJS.ajax_failed);
-                },
-                complete: function() {
-                    $spinner.remove();
-                    $btn.prop('disabled', false);
-                }
+                setTimeout(() => {
+                    $select.remove();
+                    $displaySpan.show();
+                }, 100);
             });
         });
     });
@@ -826,17 +796,3 @@ $username = $_SESSION['username'] ?? 'Admin';
 
 </body>
 </html>
-
-<?php
-// --- Helper Function ---
-function getActionButtonsHtml($admin_id, $current_status) {
-    global $lang;
-    $btns = '';
-    $statuses = ['active', 'inactive', 'banned'];
-    foreach ($statuses as $status) {
-        $btn_class = ($status === $current_status) ? 'btn small selected' : 'btn small';
-        $btns .= '<button class="' . $btn_class . '" data-action="update_status" data-id="' . $admin_id . '" data-value="' . $status . '">' . ucfirst($status) . '</button> ';
-    }
-    return $btns;
-}
-?>
