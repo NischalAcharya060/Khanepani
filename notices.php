@@ -275,7 +275,11 @@ $current_filter = isset($_GET['type']) ? $_GET['type'] : 'all';
                     . '</div>';
         }
 
-        if(!$hasNotices){ echo "<div class='no-notices' id='no-notices-message'><i class='fa-regular fa-bell'></i>" . (isset($lang['no_notices']) ? $lang['no_notices'] : 'No notices have been published yet.') . "</div>"; } ?> <div class='no-notices' id='no-results-message' style="display: none;"><i class='fas fa-exclamation-circle'></i><?= (isset($lang['no_results']) ? $lang['no_results'] : 'No results found for your search.') ?></div>
+        ?>
+        <div class='no-notices' id='no-results-message' style="display: none;">
+            <i class='fas fa-exclamation-circle'></i>
+            <?= (isset($lang['no_results']) ? $lang['no_results'] : 'No results found for your search.') ?>
+        </div>
     </ul>
 
 </div>

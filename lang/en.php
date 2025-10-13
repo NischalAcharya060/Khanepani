@@ -48,7 +48,7 @@ $lang = [
     "notice_created" => "Notice Created Successfully",
     "notice_updated" => "Notice Updated Successfully",
     "notice_deleted" => "Notice Deleted Successfully",
-    "no_notices" => "No notices available.",
+    "no_notices" => "No Notices Published Yet.",
     "fill_required" => "Please fill in all required fields!",
     "replace_file" => "Replace File/Image (optional)",
 
@@ -312,4 +312,10 @@ $lang = [
     'time' => 'Time',
     'no_activity' => 'No activities found.',
     'view_all' => 'View All',
+
+    // 404 page
+    '404_title' => '404 - Page Not Found',
+    '404_heading' => 'Oops! Page Not Found.',
+    '404_message' => 'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.',
+    'go_to_dashboard' => 'Go to Dashboard',
 ];
