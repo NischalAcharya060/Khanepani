@@ -51,6 +51,10 @@ $lang = [
     "no_notices" => "No Notices Published Yet.",
     "fill_required" => "Please fill in all required fields!",
     "replace_file" => "Replace File/Image (optional)",
+    'view_notice' => "View Notice",
+    'posted_on' => "Posted on:",
+    'back_to_notices' => "← Back to Notices",
+    'invalid_notice' => "Invalid notice",
 
     // New keys for homepage
     "site_title" => "Khane Pani Office",

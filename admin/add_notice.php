@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (!$error && $title && $content) {
+    if (!$error && $title) {
         $file_paths = !empty($uploaded_files) ? json_encode($uploaded_files) : null;
 
         $stmt = $conn->prepare("INSERT INTO notices (title, content, file, created_at) VALUES (?, ?, ?, NOW())");
@@ -157,8 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="title"><?= $lang['notice_title'] ?? 'Notice Title' ?> <span style="color:var(--error-color)">*</span></label>
         <input type="text" name="title" id="title" required value="<?= htmlspecialchars($_POST['title'] ?? '') ?>">
 
-        <label for="content"><?= $lang['notice_description'] ?? 'Notice Description' ?> <span style="color:var(--error-color)">*</span></label>
-        <textarea name="content" id="content" rows="8" required><?= htmlspecialchars($_POST['content'] ?? '') ?></textarea>
+        <label for="content"><?= $lang['notice_description'] ?? 'Notice Description' ?></label>
+        <textarea name="content" id="content" rows="8"><?= htmlspecialchars($_POST['content'] ?? '') ?></textarea>
 
         <label><?= $lang['notice_file_optional'] ?? 'Upload Images or Files (optional)' ?>:</label>
         <div class="file-input-group">

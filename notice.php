@@ -62,32 +62,30 @@ if (!is_array($attached_files)) {
     $attached_files = [];
 }
 
-$has_files = !empty($attached_files);
-
-// Logic to check and extract the FIRST image for INLINE display
-$inline_image = null;
-$image_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+// --- LOGIC FOR SLIDER/ATTACHMENTS ---
+$image_files = [];
 $other_attachments = [];
+$image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
-if ($has_files) {
-    foreach ($attached_files as $file_name) {
-        $fileExt = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+foreach ($attached_files as $file_name) {
+    $fileExt = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+    $filePath = "assets/uploads/" . $file_name; // Note: user side path is different
 
-        if (in_array($fileExt, $image_extensions) && $inline_image === null) {
-            $inline_image = $file_name;
+    // Check file existence before categorizing
+    if (file_exists($filePath)) {
+        if (in_array($fileExt, $image_extensions)) {
+            $image_files[] = $file_name;
         } else {
             $other_attachments[] = $file_name;
         }
+    } else {
+        // Optionally log or skip files that don't exist
     }
 }
 
-if ($inline_image === null) {
-    $other_attachments = $attached_files;
-} else {
-    // Logic handles separation of first image for inline display vs remaining files for attachment list
-}
-
-$has_other_attachments = !empty($other_attachments);
+$has_images = !empty($image_files);
+$has_multiple_images = count($image_files) > 1;
+$has_attachments_to_list = !empty($other_attachments);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -181,32 +179,95 @@ $has_other_attachments = !empty($other_attachments);
             color: var(--primary);
         }
 
-        /* --- Content & Inline Image (Improved Readability) --- */
+        /* --- Content & Images --- */
         .notice-content {
             font-size: 18px; /* Slightly larger text */
             line-height: 1.8;
             color: var(--text-dark);
             padding-top: 0;
+            /* Added margin-top to separate content from image/slider if present */
+            margin-top: 30px;
         }
         .notice-content p {
             margin-top: 0;
         }
 
-        /* Inline Image Styling */
-        .notice-inline-image {
+        /* --- SLIDER STYLES (New/Modified) --- */
+        .image-display-wrapper {
+            margin: 0 auto 30px auto;
             max-width: 100%;
-            height: auto;
+        }
+
+        /* Single Image Styling */
+        .single-image-display {
             border-radius: 12px;
-            margin: 30px auto; /* Centered */
-            display: block;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             cursor: zoom-in;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Subtle image shadow */
+            border: 1px solid var(--border-color);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .notice-inline-image:hover {
+        .single-image-display:hover {
             transform: scale(1.005);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
+        .single-image-display img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Multiple Image Slider */
+        .image-slider-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #000;
+        }
+        .image-slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slide {
+            min-width: 100%;
+            height: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            cursor: zoom-in;
+        }
+        .slider-nav button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
+            transition: opacity 0.2s, background 0.2s;
+        }
+        .slider-nav button:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .slider-nav .prev { left: 15px; }
+        .slider-nav .next { right: 15px; }
 
         /* --- Attachments Section (Subtle Card Style) --- */
         .attachments-section {
@@ -352,34 +413,63 @@ $has_other_attachments = !empty($other_attachments);
         <i data-feather="calendar"></i> <?= $displayDate ?>
     </div>
 
+    <?php if($has_images): ?>
+        <div class="image-display-wrapper">
+            <?php if ($has_multiple_images): ?>
+                <div class="image-slider-container">
+                    <div class="image-slider" id="image-slider">
+                        <?php foreach ($image_files as $f):
+                            $filePath = "assets/uploads/" . $f;
+                            ?>
+                            <div class="slide">
+                                <img src="<?= $filePath ?>"
+                                     alt="<?= htmlspecialchars($notice['title']) ?>"
+                                     onclick="openPreview('<?= htmlspecialchars($filePath) ?>', 'jpg', '<?= htmlspecialchars($filePath) ?>')"
+                                     title="<?= $lang['click_to_zoom'] ?? 'Click to zoom/preview' ?>">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="slider-nav">
+                        <button class="prev" onclick="moveSlider(-1)">
+                            <i data-feather="chevron-left" style="width:25px; height:25px; stroke-width:3;"></i>
+                        </button>
+                        <button class="next" onclick="moveSlider(1)">
+                            <i data-feather="chevron-right" style="width:25px; height:25px; stroke-width:3;"></i>
+                        </button>
+                    </div>
+                </div>
+            <?php else:
+                // SINGLE IMAGE: Display Image Normally with Lightbox trigger
+                $f = $image_files[0];
+                $filePath = "assets/uploads/" . $f;
+                $fileExt = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
+                $base_uri = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
+                $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $base_uri . $filePath;
+                $url = str_replace('//', '/', $url);
+                ?>
+                <div class="single-image-display">
+                    <img
+                            src="<?= $filePath ?>"
+                            alt="<?= htmlspecialchars($notice['title']) ?>"
+                            onclick="openPreview('<?= htmlspecialchars($filePath) ?>', '<?= htmlspecialchars($fileExt) ?>', '<?= htmlspecialchars($url) ?>')"
+                            title="<?= $lang['click_to_zoom'] ?? 'Click to zoom/preview' ?>"
+                    >
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     <div class="notice-content">
-        <?php if($inline_image):
-            $inline_filePath = "../assets/uploads/".$inline_image;
-            $inline_fileExt = strtolower(pathinfo($inline_image, PATHINFO_EXTENSION));
-
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
-            $base_uri = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
-            $inline_url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $base_uri . $inline_filePath;
-            $inline_url = str_replace('//', '/', $inline_url);
-            ?>
-            <img
-                    src="<?= $inline_filePath ?>"
-                    alt="<?= htmlspecialchars($notice['title']) ?>"
-                    class="notice-inline-image"
-                    onclick="openPreview('<?= htmlspecialchars($inline_filePath) ?>', '<?= htmlspecialchars($inline_fileExt) ?>', '<?= htmlspecialchars($inline_url) ?>')"
-                    title="<?= $lang['click_to_zoom'] ?? 'Click to zoom/preview' ?>"
-            >
-        <?php endif; ?>
-
         <p><?= nl2br(htmlspecialchars($notice['content'])) ?></p>
     </div>
 
-    <?php if($has_files || $has_other_attachments): ?>
+    <?php if($has_attachments_to_list): ?>
         <div class="attachments-section">
             <h3><i data-feather="paperclip" style="width:20px; height:20px; margin-right: 8px;"></i><?= $lang['attachments'] ?? 'Attachments' ?></h3>
             <ul class="attachments-list">
-                <?php foreach($attached_files as $file_name):
-                    $filePath = "../assets/uploads/".$file_name;
+                <?php foreach($other_attachments as $file_name):
+                    $filePath = "assets/uploads/".$file_name;
                     $fileExt = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
                     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
@@ -388,12 +478,14 @@ $has_other_attachments = !empty($other_attachments);
                     $url = str_replace('//', '/', $url);
 
                     $icon = 'file';
-                    $icon_color = 'var(--primary)';
-                    if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) { $icon = 'image'; $icon_color = 'var(--success)'; }
+                    $icon_color = 'var(--secondary)';
+                    $display_name = htmlspecialchars(substr($file_name, strpos($file_name, '_', strpos($file_name, '_') + 1) + 1));
+
+                    if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) { $icon = 'image'; $icon_color = 'var(--success)'; }
                     else if ($fileExt === 'pdf') { $icon = 'file-text'; $icon_color = '#dc3545'; }
                     else if (in_array($fileExt, ['doc', 'docx'])) { $icon = 'file-text'; $icon_color = 'var(--primary-dark)'; }
-                    else if (in_array($fileExt, ['xls', 'xlsx'])) { $icon = 'file-text'; $icon_color = '#1e7e34'; }
-
+                    else if (in_array($fileExt, ['xls', 'xlsx', 'csv'])) { $icon = 'table'; $icon_color = '#1e7e34'; }
+                    else if (in_array($fileExt, ['ppt', 'pptx'])) { $icon = 'monitor'; $icon_color = '#ff6a00'; }
                     ?>
                     <li class="attachment-item"
                         onclick="openPreview('<?= htmlspecialchars($filePath) ?>', '<?= htmlspecialchars($fileExt) ?>', '<?= htmlspecialchars($url) ?>')"
@@ -403,7 +495,7 @@ $has_other_attachments = !empty($other_attachments);
                             <div class="file-icon-wrapper" style="background-color: <?= $icon_color ?>;">
                                 <i data-feather="<?= $icon ?>"></i>
                             </div>
-                            <span class="file-name"><?= htmlspecialchars(basename($file_name)) ?></span>
+                            <span class="file-name"><?= $display_name ?></span>
                         </div>
                         <i data-feather="chevron-right" style="width:18px; height:18px; color:var(--text-light)"></i>
                     </li>
@@ -435,8 +527,8 @@ $has_other_attachments = !empty($other_attachments);
         lightbox.style.display = 'flex';
         caption.innerText = "";
 
-        const imageExtensions = ['jpg','jpeg','png','gif'];
-        const docExtensions = ['pdf','doc','docx','xls','xlsx','ppt','pptx'];
+        const imageExtensions = ['jpg','jpeg','png','gif','webp'];
+        const docExtensions = ['pdf','doc','docx','xls','xlsx','ppt','pptx','csv'];
 
         // Reset both before loading
         lightboxImg.style.display = 'none';
@@ -452,14 +544,14 @@ $has_other_attachments = !empty($other_attachments);
         else if (docExtensions.includes(fileExt)) {
             previewFrame.style.display = 'block';
 
-            // PDFs load directly, others use Google Docs Viewer
             if (fileExt === 'pdf') {
                 previewFrame.src = fullUrl;
+                caption.innerText = "<?= $lang['pdf_preview'] ?? 'PDF Document Preview' ?>";
             } else {
+                // Use Google Docs Viewer for other documents
                 previewFrame.src = "https://docs.google.com/gview?url=" + encodeURIComponent(fullUrl) + "&embedded=true";
+                caption.innerText = "<?= $lang['file_preview'] ?? 'File Preview (Google Viewer)' ?>";
             }
-
-            caption.innerText = "<?= $lang['file_preview'] ?? 'File Preview (may require Google Viewer)' ?>";
         }
         else {
             const downloadConfirm = confirm("<?= $lang['preview_not_supported_download'] ?? 'Preview not available for this file type. Would you like to download it?' ?>");
@@ -482,6 +574,26 @@ $has_other_attachments = !empty($other_attachments);
             closeLightbox();
         }
     });
+
+    // --- Slider (Only runs if multiple images exist) ---
+    <?php if ($has_multiple_images): ?>
+    let currentSlide = 0;
+    const slider = document.getElementById('image-slider');
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    function updateSlider() {
+        if (slider) {
+            const offset = -currentSlide * 100;
+            slider.style.transform = `translateX(${offset}%)`;
+        }
+    }
+
+    function moveSlider(direction) {
+        currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+        updateSlider();
+    }
+    <?php endif; ?>
 </script>
 
 </body>

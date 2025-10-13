@@ -88,6 +88,31 @@ $username = $_SESSION['username'];
         .pagination a { margin: 0 5px; text-decoration: none; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; color: #0056d6; }
         .pagination a.active { background-color: #0056d6; color: white; border-color: #0056d6; }
         .pagination a:hover { background-color: #0056d6; color: white; }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .message i {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -99,6 +124,25 @@ $username = $_SESSION['username'];
     <p class="subtitle"><?= $lang['manage_notices_subtitle'] ?? 'Add, edit, view, or remove notices quickly and efficiently.' ?></p>
 
     <a href="add_notice.php" class="btn">➕ <?= $lang['add_notice'] ?? 'Add New Notice' ?></a>
+
+    <?php
+    // Display Success Message
+    if (isset($_SESSION['success'])): ?>
+        <div class='message success'>
+            <i data-feather="check-circle"></i>
+            <?= $_SESSION['success']; ?>
+        </div>
+        <?php unset($_SESSION['success']);
+    endif;
+
+    if (isset($_SESSION['error_message'])): ?>
+        <div class='message error'>
+            <i data-feather="alert-triangle"></i>
+            <?= $_SESSION['error_message']; ?>
+        </div>
+        <?php unset($_SESSION['error_message']);
+    endif;
+    ?>
 
     <table class="notice-table">
         <thead>
@@ -118,8 +162,12 @@ $username = $_SESSION['username'];
                     <td><?= htmlspecialchars($notice['title']) ?></td>
                     <td><?= format_nepali_date($notice['created_at'], $cal) ?></td>
                     <td>
+                        <a href="view_notice.php?id=<?= $notice['id'] ?>" class="btn small info">👁 <?= $lang['view'] ?? 'View' ?></a>
                         <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ <?= $lang['edit'] ?? 'Edit' ?></a>
-                        <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger" onclick="return confirm('<?= $lang['delete_confirm'] ?? 'Are you sure you want to delete this notice?' ?>');">🗑 <?= $lang['delete'] ?? 'Delete' ?></a>
+                        <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger"
+                           onclick="return confirm('<?= $lang['delete_confirm'] ?? 'Are you sure you want to delete this notice?' ?>');">
+                            🗑 <?= $lang['delete'] ?? 'Delete' ?>
+                        </a>
                     </td>
                 </tr>
             <?php endwhile; ?>
