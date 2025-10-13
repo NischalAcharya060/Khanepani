@@ -10,7 +10,6 @@ include '../config/lang.php';
 $username = $_SESSION['username'];
 
 $roles = [];
-// Assuming $conn is available from db.php
 $roleQuery = mysqli_query($conn, "SELECT id, role_name FROM roles ORDER BY id ASC");
 if ($roleQuery && mysqli_num_rows($roleQuery) > 0) {
     while ($r = mysqli_fetch_assoc($roleQuery)) {
@@ -38,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Hash password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Check if username exists (using prepared statement would be better)
+        // Check if username exists
         $check = mysqli_query($conn, "SELECT * FROM admins WHERE username='$new_username'");
         if(mysqli_num_rows($check) > 0) {
             $error = "Username already exists.";
         } else {
-            // Insert new admin with role (using prepared statement would be better)
-            $sql = "INSERT INTO admins (username, email, password, role_id, created_at) 
-                    VALUES ('$new_username','$email','$hashed_password', $role_id, NOW())";
+            $added_by = mysqli_real_escape_string($conn, $username);
+            $sql = "INSERT INTO admins (username, email, password, role_id, added_by, created_at) 
+                    VALUES ('$new_username','$email','$hashed_password', $role_id, '$added_by', NOW())";
 
             if(mysqli_query($conn, $sql)) {
                 $success = "New admin added successfully!";

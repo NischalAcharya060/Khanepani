@@ -206,6 +206,7 @@ $hasImages = mysqli_num_rows($result) > 0;
                 <th><?= $lang['title'] ?? "Title" ?></th>
                 <th><?= $lang['album'] ?? "Album" ?></th>
                 <th><?= $lang['uploaded_at'] ?? "Uploaded At" ?></th>
+                <th><?= $lang['uploaded_by'] ?? "Uploaded By" ?></th>
                 <th><?= $lang['actions'] ?? "Actions" ?></th>
             </tr>
             </thead>
@@ -218,6 +219,7 @@ $hasImages = mysqli_num_rows($result) > 0;
                     <td><?= $row['title'] ? htmlspecialchars($row['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
                     <td><?= $row['album_name'] ? htmlspecialchars($row['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
                     <td><?= nepali_date_time($row['created_at'], $cal) ?></td>
+                    <td><?= !empty($row['uploaded_by']) ? htmlspecialchars($row['uploaded_by']) : 'N.A.' ?></td>
                     <td>
                         <a href="gallery_edit.php?id=<?= $row['id'] ?>" class="btn btn-edit">✏ <?= $lang['edit'] ?? "Edit" ?></a>
                         <a href="manage_gallery.php?delete=<?= $row['id'] ?>" class="btn btn-delete"

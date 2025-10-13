@@ -321,82 +321,85 @@ for($m=1; $m<=12; $m++){
         }
 
         /* --- Activity Feed --- */
-        .activity-card{
-            background:var(--card-background);
-            border-radius:12px;
-            padding:25px;
-            box-shadow:var(--shadow-light);
-            display:flex;
-            flex-direction:column;
+        .activity-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .activity-card h3{
-            font-size:18px;
-            font-weight:700;
-            margin-bottom:20px;
-            color:var(--primary-color);
-            display:flex;
-            align-items:center;
-            border-bottom:none;
-        }
-        .activity-card h3 svg {
-            margin-right: 8px;
+        .activity-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.12);
         }
 
-        .activity-feed{list-style:none;padding:0;margin:0; flex-grow: 1;}
-        .activity-feed li{
-            padding:12px 0;
-            border-bottom:1px dashed var(--border-color);
-            font-size:15px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            transition: background 0.1s;
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
         }
-        .activity-feed li:last-child{border-bottom:none;}
-        .activity-feed li:hover{
-            background: rgba(0, 123, 255, 0.05);
-            padding-left: 5px;
+        .activity-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .activity-feed li span:first-child{
-            font-weight:500;
-            color:var(--text-dark);
+        .activity-count {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .activity-feed {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .activity-feed li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+        .activity-feed li:last-child {
+            border-bottom: none;
+        }
+        .activity-desc {
+            color: #374151;
+        }
+        .activity-time {
+            color: #9ca3af;
+            font-size: 13px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 10px;
         }
-        .activity-feed li span:last-child{
-            font-size:13px;
-            color:var(--secondary-color);
-            flex-shrink: 0;
+        .no-activity {
+            text-align: center;
+            color: #9ca3af;
+            padding: 15px 0;
         }
 
         .view-all-btn-container {
-            text-align:center;
-            margin-top:20px;
-            padding-top: 10px;
-            border-top: 1px solid var(--border-color);
+            margin-top: 15px;
+            text-align: right;
         }
-        .view-all-btn{
-            display:inline-flex;
-            align-items:center;
-            padding:10px 20px;
-            background:var(--primary-color);
-            color:#fff;
-            border-radius:8px;
-            text-decoration:none;
-            font-weight:600;
-            transition:background 0.3s;
+        .view-all-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4C7AFF;
+            text-decoration: none;
+            transition: color 0.2s;
         }
-        .view-all-btn:hover{
-            background:var(--primary-dark);
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+        .view-all-btn:hover {
+            color: #3b61d3;
         }
-        .view-all-btn svg {
-            width: 16px;
-            height: 16px;
-            margin-left: 8px;
-        }
+
 
         /* --- Quick Actions Card styling --- */
         .quick-actions-card {
@@ -500,15 +503,23 @@ for($m=1; $m<=12; $m++){
             </div>
 
             <div class="activity-card">
-                <h3><i data-feather="clock"></i> <?= $lang['recent_activity'] ?></h3>
+                <div class="activity-header">
+                    <h3><i data-feather="clock"></i> <?= $lang['recent_activity'] ?></h3>
+                    <span class="activity-count"><?= count($activities) ?> <?= $lang['activities'] ?? 'activities' ?></span>
+                </div>
+
                 <ul class="activity-feed">
-                    <?php foreach(array_slice($activities,0,5) as $act): ?>
+                    <?php foreach(array_slice($activities, 0, 5) as $act): ?>
                         <li>
-                            <span><?= htmlspecialchars($act['desc']) ?></span>
-                            <span><?= timeAgo($act['time']) ?></span>
+                            <div class="activity-desc"><?= htmlspecialchars($act['desc']) ?></div>
+                            <div class="activity-time"><?= timeAgo($act['time']) ?></div>
                         </li>
                     <?php endforeach; ?>
+                    <?php if(count($activities) === 0): ?>
+                        <li class="no-activity"><?= $lang['no_activity'] ?? 'No recent activity.' ?></li>
+                    <?php endif; ?>
                 </ul>
+
                 <div class="view-all-btn-container">
                     <a href="activity.php" class="view-all-btn">
                         <?= $lang['view_all'] ?> <i data-feather="arrow-right"></i>

@@ -31,7 +31,6 @@ if (isset($_POST['upload_image'])) {
     $imageTmp = $_FILES['image']['tmp_name'];
     $targetDir = "../assets/uploads/";
 
-    // Sanitize file name to prevent issues and ensure uniqueness
     $uniqueFileName = uniqid() . '-' . time() . '-' . preg_replace("/[^a-zA-Z0-9\.]/", "", basename($imageName));
     $targetFile = $targetDir . $uniqueFileName;
 
@@ -52,8 +51,9 @@ if (isset($_POST['upload_image'])) {
 
     if (in_array($fileExt, $allowedTypes)) {
         if (move_uploaded_file($imageTmp, $targetFile)) {
-            $sql = "INSERT INTO gallery (album_id, title, image, created_at) 
-                    VALUES ('$album_id', '$title', '$uniqueFileName', NOW())"; // Save unique file name
+            $uploaded_by = mysqli_real_escape_string($conn, $username);
+            $sql = "INSERT INTO gallery (album_id, title, image, uploaded_by, created_at) 
+                    VALUES ('$album_id', '$title', '$uniqueFileName', '$uploaded_by', NOW())";
             if (mysqli_query($conn, $sql)) {
                 $success = $lang['image_uploaded_success'] ?? "✅ Image uploaded successfully!";
             } else {

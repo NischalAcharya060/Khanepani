@@ -150,6 +150,7 @@ $username = $_SESSION['username'];
             <th><?= $lang['sn'] ?? 'S.N.' ?></th>
             <th><?= $lang['title'] ?? 'Title' ?></th>
             <th><?= $lang['date'] ?? 'Date' ?></th>
+            <th><?= $lang['created_by'] ?? 'Created By' ?></th>
             <th><?= $lang['actions'] ?? 'Actions' ?></th>
         </tr>
         </thead>
@@ -161,6 +162,7 @@ $username = $_SESSION['username'];
                     <td><?= $sn++ ?></td>
                     <td><?= htmlspecialchars($notice['title']) ?></td>
                     <td><?= format_nepali_date($notice['created_at'], $cal) ?></td>
+                    <td><?= !empty($notice['created_by']) ? htmlspecialchars($notice['created_by']) : 'N.A.' ?></td>
                     <td>
                         <a href="view_notice.php?id=<?= $notice['id'] ?>" class="btn small info">👁 <?= $lang['view'] ?? 'View' ?></a>
                         <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ <?= $lang['edit'] ?? 'Edit' ?></a>

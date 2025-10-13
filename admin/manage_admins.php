@@ -492,6 +492,7 @@ $username = $_SESSION['username'] ?? 'Admin';
             <th><?= $lang['status'] ?? 'Status' ?></th>
             <th><?= $lang['created_at'] ?? 'Created At' ?></th>
             <th><?= $lang['last_login'] ?? 'Last Login' ?></th>
+            <th><?= $lang['added_by'] ?? 'Added By' ?></th>
 
             <?php if ($is_master_admin_session): ?>
                 <th><?= $lang['actions'] ?? 'Actions' ?></th>
@@ -561,6 +562,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         }
                         ?>
                     </td>
+                    <td><?= htmlspecialchars($admin['added_by'] ?? 'N/A') ?></td>
 
                     <?php if ($is_master_admin_session): ?>
                         <td class="action-buttons-cell">

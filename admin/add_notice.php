@@ -63,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$error && $title) {
         $file_paths = !empty($uploaded_files) ? json_encode($uploaded_files) : null;
 
-        $stmt = $conn->prepare("INSERT INTO notices (title, content, file, created_at) VALUES (?, ?, ?, NOW())");
+        $stmt = $conn->prepare("INSERT INTO notices (title, content, file, created_at, created_by) VALUES (?, ?, ?, NOW(), ?)");
         if ($stmt) {
-            $stmt->bind_param("sss", $title, $content, $file_paths);
+            $stmt->bind_param("ssss", $title, $content, $file_paths, $username);
             if ($stmt->execute()) {
                 header("Location: manage_notices.php");
                 exit();
@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="POST" class="notice-form" enctype="multipart/form-data">
-        <label for="title"><?= $lang['notice_title'] ?? 'Notice Title' ?> <span style="color:var(--error-color)">*</span></label>
+        <label for="title"><?= $lang['notice_title'] ?? 'Notice Title' ?> <span style="color:red">*</span></label>
         <input type="text" name="title" id="title" required value="<?= htmlspecialchars($_POST['title'] ?? '') ?>">
 
         <label for="content"><?= $lang['notice_description'] ?? 'Notice Description' ?></label>
