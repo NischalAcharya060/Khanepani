@@ -178,24 +178,30 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     <ul>
         <li><a href="../admin/dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">🏠 <span class="link-text"><?= $lang['dashboard'] ?></span></a></li>
 
-        <li class="sidebar-dropdown">
-            <a href="javascript:void(0)" class="dropdown-toggle <?= in_array($current_page, ['manage_notices.php', 'manage_gallery.php']) ? 'active' : '' ?>">
-                📦 <span class="link-text"><?= $lang['management'] ?? 'Management' ?> ⏷</span>
-                <i class="fa fa-chevron-down dropdown-arrow"></i>
-            </a>
+        <li class="sidebar-group-separator"></li>
 
-            <ul class="dropdown-content">
-                <li>
-                    <a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">
-                        <span class="sub-icon">📢</span> <span class="link-text"><?= $lang['manage_notices'] ?></span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">
-                        <span class="sub-icon">🖼</span> <span class="link-text"><?= $lang['manage_gallery'] ?></span>
-                    </a>
-                </li>
-            </ul>
+        <!--         DropDown-->
+<!--        <li class="sidebar-dropdown">-->
+<!--            <a href="javascript:void(0)" class="dropdown-toggle --><?php //= in_array($current_page, ['manage_notices.php', 'manage_gallery.php']) ? 'active' : '' ?><!--">-->
+<!--                📦 <span class="link-text">--><?php //= $lang['management'] ?? 'Management' ?><!-- ⏷</span>-->
+<!--                <i class="fa fa-chevron-down dropdown-arrow"></i>-->
+<!--            </a>-->
+<!---->
+<!--            <ul class="dropdown-content">-->
+<!--                -->
+<!--            </ul>-->
+<!--        </li>-->
+
+        <li>
+            <a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">
+                <span class="sub-icon">📢</span> <span class="link-text"><?= $lang['manage_notices'] ?></span>
+            </a>
+        </li>
+        <li class="sidebar-group-separator"></li>
+        <li>
+            <a href="../admin/manage_gallery.php" class="<?= $current_page == 'manage_gallery.php' ? 'active' : '' ?>">
+                <span class="sub-icon">📸</span> <span class="link-text"><?= $lang['manage_gallery'] ?></span>
+            </a>
         </li>
 
         <li class="sidebar-group-separator"></li>
@@ -211,8 +217,11 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             <li class="sidebar-group-separator"></li>
         <?php endif; ?>
         <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
+        <li class="sidebar-group-separator"></li>
         <li><a href="../admin/activity.php" class="<?= $current_page == 'activity.php' ? 'active' : '' ?>">🕒 <span class="link-text"><?= $lang['recent_activity'] ?></span></a></li>
+        <li class="sidebar-group-separator"></li>
         <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
+        <li class="sidebar-group-separator"></li>
     </ul>
 </aside>
 

@@ -24,7 +24,9 @@ function format_nepali_date($date_str, $cal) {
         $hourNep  = strtr(sprintf("%02d", $hour), $np_numbers);
         $minNep   = strtr(sprintf("%02d", $minute), $np_numbers);
 
-        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm;
+        $ampm_nep = ($ampm === 'AM' ? ($lang['am'] ?? 'पूर्वाह्न') : ($lang['pm'] ?? 'अपराह्न'));
+
+        return $dayNep . '-' . $monthNep . '-' . $yearNep . ', ' . $hourNep . ':' . $minNep . ' ' . $ampm_nep;
     } else {
         return date("d M Y, h:i A", $timestamp);
     }

@@ -15,6 +15,9 @@ $lang = [
     "logout" => "Logout",
     "unread_messages" => "Unread Messages",
     "no_unread" => "No unread messages.",
+    "uploaded_by" => "Uploaded By",
+    "created_by" => "Created By",
+    "added_by" => "Added By",
 
     // Login
     'admin_login_title' => 'Employee Login Portal - Salakpur KhanePani',
