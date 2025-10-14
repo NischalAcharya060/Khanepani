@@ -40,6 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $imageTmp = $_FILES['image']['tmp_name'];
         $targetDir = "../assets/uploads/";
 
+        if (!is_dir($targetDir)) {
+            if (!mkdir($targetDir, 0755, true)) {
+                $fileError = $lang['dir_creation_failed'] ?? "❌ Failed to create upload directory! Check permissions.";
+                goto end_upload_check;
+            }
+        }
+
         // Sanitize file name and ensure uniqueness
         $uniqueFileName = uniqid() . '-' . time() . '-' . preg_replace("/[^a-zA-Z0-9\.]/", "", basename($_FILES['image']['name']));
         $targetPath = $targetDir . $uniqueFileName;
@@ -57,12 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $filename = $uniqueFileName;
             } else {
-                $fileError = $lang['file_upload_failed'] ?? "❌ Error uploading new file.";
+                $fileError = $lang['file_upload_failed'] ?? "❌ Error uploading new file. (Code: " . $_FILES['image']['error'] . ")";
             }
         } else {
             $fileError = $lang['allowed_types'] ?? "❌ Only JPG, JPEG, PNG, GIF allowed.";
         }
     }
+
+    end_upload_check:
 
     if (!$fileError) {
         $update_sql = "UPDATE gallery SET title='$title', album_id='$album_id', image='$filename' WHERE id=$id";
@@ -72,6 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         } else {
             $error = $lang['db_error'] . ": " . mysqli_error($conn);
+            // Optionally delete the newly uploaded file if DB update failed
+            if ($filename !== $image['image']) {
+                @unlink($targetDir . $filename);
+            }
         }
     } else {
         $error = $fileError;
@@ -279,7 +292,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <main class="main-content">
 
-    <!-- Back Button -->
     <a href="manage_gallery.php" class="back-btn">
         <i data-feather="arrow-left"></i>
         <?= $lang['back'] ?? 'Back to Gallery' ?>
