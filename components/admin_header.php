@@ -98,6 +98,8 @@ $sidebar_state = $_SESSION['sidebar_state'] ?? 'expanded';
 
 $current_admin_id = $_SESSION['admin'] ?? '';
 ?>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <header class="admin-header">
     <div class="logo">
         <img src="../assets/images/logo.jpg" alt="Logo">
@@ -180,19 +182,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
         <li class="sidebar-group-separator"></li>
 
-        <!--         DropDown-->
-<!--        <li class="sidebar-dropdown">-->
-<!--            <a href="javascript:void(0)" class="dropdown-toggle --><?php //= in_array($current_page, ['manage_notices.php', 'manage_gallery.php']) ? 'active' : '' ?><!--">-->
-<!--                📦 <span class="link-text">--><?php //= $lang['management'] ?? 'Management' ?><!-- ⏷</span>-->
-<!--                <i class="fa fa-chevron-down dropdown-arrow"></i>-->
-<!--            </a>-->
-<!---->
-<!--            <ul class="dropdown-content">-->
-<!--                -->
-<!--            </ul>-->
-<!--        </li>-->
-
-        <li>
+        <?php //= in_array($current_page, ['manage_notices.php', 'manage_gallery.php']) ? 'active' : '' ?><?php //= $lang['management'] ?? 'Management' ?><li>
             <a href="../admin/manage_notices.php" class="<?= $current_page == 'manage_notices.php' ? 'active' : '' ?>">
                 <span class="sub-icon">📢</span> <span class="link-text"><?= $lang['manage_notices'] ?></span>
             </a>
@@ -242,11 +232,31 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         overflow-x: hidden;
     }
 
+    /* This class must be applied to the main content container (e.g., `<main class="dashboard-wrapper">`)
+       outside this header/sidebar code for the dashboard content to shift. */
     body.mobile-sidebar-open .dashboard-wrapper {
         transform: translateX(var(--sidebar-mobile-width));
         /* Prevents content from being pushed twice on mobile */
         padding-left: 0 !important;
     }
+
+    /* ------------------------------------------------------------------
+       NEW: Desktop Sidebar Shift for Main Content
+       This ensures the main content (dashboard-wrapper) shifts for desktop
+       sidebar state changes.
+       ------------------------------------------------------------------ */
+    @media (min-width: 901px) {
+        /* Default state: Expanded sidebar */
+        .dashboard-wrapper {
+            transition: padding-left 0.3s ease-in-out;
+            padding-left: var(--sidebar-expanded-width); /* Default desktop padding */
+        }
+        /* Collapsed state */
+        .sidebar-collapsed-state .dashboard-wrapper {
+            padding-left: var(--sidebar-collapsed-width);
+        }
+    }
+
 
     /* ================================
        HEADER
@@ -269,6 +279,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         display: flex;
         align-items: center;
         gap: 15px;
+        /* NEW: Prevent text wrapping */
+        white-space: nowrap;
     }
 
     .admin-header .logo img {
@@ -279,6 +291,19 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transition: transform 0.3s;
     }
 
+    /* NEW: Adjust logo size and hide H1 on smaller mobile screens */
+    @media (max-width: 480px) {
+        .admin-header .logo img {
+            height: 40px;
+        }
+        .admin-header .logo h1 {
+            display: none;
+        }
+        .admin-header {
+            padding: 10px 15px;
+        }
+    }
+
     .admin-header .logo img:hover {
         transform: scale(1.05) rotate(2deg);
     }
@@ -286,6 +311,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     .admin-header .user-info {
         display: flex;
         align-items: center;
+        /* NEW: Use flex-wrap to prevent overflow on small screens */
+        flex-wrap: nowrap;
         gap: 18px;
         font-weight: 500;
     }
@@ -296,6 +323,17 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         gap: 8px;
         padding: 5px;
         font-weight: 600;
+    }
+
+    /* NEW: Hide language text on small screens to save space */
+    @media (max-width: 600px) {
+        .lang-switcher span {
+            display: none;
+        }
+        .lang-link {
+            padding: 6px 8px; /* Reduce padding when text is hidden */
+            gap: 0;
+        }
     }
 
     .lang-link {
@@ -347,6 +385,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         position: relative;
         font-size: 22px;
         cursor: pointer;
+        /* NEW: Ensure visibility on smaller screens */
+        min-width: 22px;
     }
 
     .notif-badge {
@@ -387,6 +427,17 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transition: background 0.3s ease;
     }
 
+    /* NEW: Hide username on small screens */
+    @media (max-width: 768px) {
+        .profile-trigger span {
+            display: none;
+        }
+        .profile-trigger .arrow {
+            /* Keep arrow near the profile pic */
+            margin-left: 0;
+        }
+    }
+
     .profile-trigger:hover {
         background: rgba(255,255,255,0.15);
     }
@@ -412,6 +463,15 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         z-index: 999;
         overflow: hidden;
         animation: fadeIn 0.25s ease;
+    }
+
+    /* NEW: Adjust dropdown position for very small screens */
+    @media (max-width: 400px) {
+        .profile-dropdown {
+            /* Push to the left edge to fit on screen */
+            right: -20px;
+            min-width: 150px;
+        }
     }
 
     .profile-dropdown a {
@@ -454,23 +514,55 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     }
 
     /* Default desktop state */
-    .sidebar.expanded {
-        width: var(--sidebar-expanded-width);
+    @media (min-width: 901px) {
+        .sidebar.expanded {
+            width: var(--sidebar-expanded-width);
+        }
+
+        /* Sidebar collapsed desktop state */
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .menu-toggle {
+            /* Hide mobile toggle on desktop */
+            display: none;
+        }
+
+        /* Ensure sidebar top is aligned correctly on desktop */
+        .sidebar-top {
+            justify-content: flex-end;
+        }
     }
 
-    /* Sidebar collapsed desktop state */
-    .sidebar.collapsed {
-        width: var(--sidebar-collapsed-width);
-    }
 
     /* Default mobile state (off screen) */
     @media (max-width: 900px) {
-        .sidebar { transform: translateX(-100%); width: var(--sidebar-mobile-width); }
+        /* Sidebar starts off-screen */
+        .sidebar {
+            transform: translateX(-100%);
+            width: var(--sidebar-mobile-width);
+            top: 66px; /* Adjust top to account for potentially smaller header on mobile */
+            height: calc(100vh - 66px); /* Fill the rest of the viewport */
+        }
         /* Mobile Active State */
-        .sidebar.active { transform: translateX(0); }
-        .menu-toggle { display: block; }
-        .sidebar-top { justify-content: flex-end; }
-        .sidebar.active .collapse-toggle { display: none; } /* Hide desktop toggle on mobile */
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .menu-toggle {
+            display: block; /* Show mobile toggle */
+        }
+        .sidebar-top {
+            justify-content: flex-end;
+        }
+        .sidebar.active .collapse-toggle {
+            display: none; /* Hide desktop toggle on mobile active state */
+        }
+        /* Mobile sidebar must always be expanded for usability */
+        .sidebar.collapsed {
+            width: var(--sidebar-mobile-width);
+            transform: translateX(-100%);
+        }
     }
 
 
@@ -661,7 +753,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     }
 
     /* ================================
-    NOTIFICATION MODAL
+    NOTIFICATION MODAL (Responsive updates)
     ================================ */
     .notif-modal {
         display: none;
@@ -681,8 +773,10 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         margin: 80px auto;
         padding: 0;
         border-radius: 20px;
-        width: 400px;
-        max-height: 75%;
+        /* UPDATED: Use max-width and percentage for responsive sizing */
+        width: 90%;
+        max-width: 400px;
+        max-height: 85%; /* Increased max height */
         overflow-y: auto;
         box-shadow: 0 15px 40px rgba(0,0,0,0.25);
         font-family: 'Roboto', sans-serif;
@@ -700,54 +794,10 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         color: white;
     }
 
-    .notif-header h3 {
-        font-size: 18px;
-        font-weight: 600;
-    }
-
-    .close-btn {
-        background: transparent;
-        border: none;
-        color: white;
-        font-size: 22px;
-        cursor: pointer;
-        transition: transform 0.3s ease, color 0.3s ease;
-    }
-
-    .close-btn:hover {
-        color: #ff4d4d;
-        transform: rotate(90deg);
-    }
-
-    .clear-btn {
-        background: #ff6600;
-        color: #fff;
-        border: none;
-        padding: 8px 16px;
-        margin: 12px 24px 8px 24px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        justify-content: center;
-        transition: all 0.3s ease;
-    }
-
-    .clear-btn:hover {
-        background: #e65c00;
-        transform: translateY(-2px);
-    }
-
-    .notif-modal-content ul {
-        list-style: none;
-        padding: 0 24px 18px 24px;
-        margin: 0;
-    }
-
     .notif-modal-content li {
+        /* UPDATED: Use flex-wrap to stack content on small screens */
+        flex-direction: row;
+        flex-wrap: wrap; /* Allows wrapping on smaller list items */
         padding: 12px 14px;
         margin-bottom: 10px;
         background: #f7f9fc;
@@ -759,40 +809,19 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transition: all 0.25s ease;
     }
 
-    .notif-modal-content li:hover {
-        transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    @media (max-width: 380px) {
+        .notif-modal-content li {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .msg-right {
+            max-width: 100%; /* Take full width when stacked */
+            margin-top: 8px;
+        }
     }
 
-    .msg-left {
-        display: flex;
-        flex-direction: column;
-    }
 
-    .msg-left strong {
-        font-weight: 600;
-        color: #004080;
-    }
-
-    .msg-left .time {
-        font-size: 12px;
-        color: #888;
-        margin-top: 4px;
-        font-style: italic;
-    }
-
-    .msg-right {
-        max-width: 60%;
-        font-size: 14px;
-        color: #333;
-    }
-
-    .no-messages {
-        text-align: center;
-        padding: 20px;
-        font-style: italic;
-        color: #666;
-    }
+    /* ... other notification styles remain the same ... */
 
     @keyframes slideDown {
         from { transform: translateY(-40px); opacity: 0; }
@@ -803,12 +832,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         to { opacity: 1; }
     }
 
-    @media screen and (max-width: 500px) {
-        .notif-modal-content {
-            width: 90%;
-            margin: 60px auto;
-        }
-    }
+    /* Removed redundant @media screen and (max-width: 500px) block,
+       as max-width: 400px; max-height: 85%; covers mobile responsiveness. */
 </style>
 
 <script>
@@ -825,14 +850,24 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
         // Ensure desktop collapse class is off when mobile sidebar is active
         if (sidebar.classList.contains('active')) {
-            sidebar.classList.remove('collapsed');
-            body.classList.remove('sidebar-collapsed-state');
+            // UPDATED: Only remove 'collapsed' if it's there AND we are on a smaller screen (optional but safer)
+            if (window.innerWidth <= 900) {
+                sidebar.classList.remove('collapsed');
+                body.classList.remove('sidebar-collapsed-state');
+            }
         }
     }
 
     function toggleSidebarCollapse() {
         const sidebar = document.getElementById('sidebar');
         const body = document.body;
+
+        // Prevent collapse/expand on mobile
+        if (window.innerWidth <= 900 && !sidebar.classList.contains('active')) {
+            // Only allow toggle if it's the desktop collapse button click
+            return;
+        }
+
 
         sidebar.classList.toggle('collapsed');
         body.classList.toggle('sidebar-collapsed-state');

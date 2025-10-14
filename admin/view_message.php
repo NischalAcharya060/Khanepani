@@ -72,9 +72,10 @@ $countResult = $conn->query("SELECT COUNT(*) AS unread_count FROM contact_messag
 $unread = $countResult->fetch_assoc()['unread_count'];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $_SESSION['lang'] ?? 'en' ?>">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $lang['view'] ?> <?= $lang['message'] ?> - <?= $lang['logo'] ?></title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
@@ -163,6 +164,7 @@ $unread = $countResult->fetch_assoc()['unread_count'];
         /* --- Metadata Grid --- */
         .metadata-grid {
             display: grid;
+            /* Default: Min width 200px, responsive to fill space */
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
@@ -189,6 +191,8 @@ $unread = $countResult->fetch_assoc()['unread_count'];
             font-size: 16px;
             color: var(--text-dark);
             font-weight: 500;
+            /* Ensure long content (like email) wraps */
+            word-break: break-all;
         }
         .message-value.email { color: var(--primary-color); }
 
@@ -218,17 +222,52 @@ $unread = $countResult->fetch_assoc()['unread_count'];
             color: #495057;
         }
 
-        /* Responsive */
+        /* --- Responsive Refinements --- */
         @media (max-width: 768px) {
-            .main-content { padding: 20px 15px; }
-            .message-card { padding: 25px 20px; }
-            .metadata-grid { grid-template-columns: 1fr; }
+            .main-content {
+                padding: 20px 15px;
+            }
+            .message-card {
+                padding: 25px 20px;
+            }
+            /* Stack fields vertically on mobile */
+            .metadata-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .message-header h2 {
+                font-size: 24px;
+            }
+            .message-header h2 svg {
+                width: 24px;
+                height: 24px;
+            }
+            .message-body-label {
+                font-size: 16px;
+            }
+            .message-body-content {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .message-card {
+                padding: 15px;
+                border-radius: 8px;
+            }
         }
     </style>
 </head>
 <body>
 
-<?php include '../components/admin_header.php'; ?>
+<?php
+// Assuming this component exists and handles its own responsiveness (e.g., sidebar collapse)
+include '../components/admin_header.php';
+?>
 
 <main class="main-content">
 
@@ -268,6 +307,13 @@ $unread = $countResult->fetch_assoc()['unread_count'];
                 <span class="message-label"><i data-feather="tag" style="width:14px; height:14px;"></i> <?= $lang['subject'] ?></span>
                 <div class="message-value"><?= htmlspecialchars($message['subject']) ?></div>
             </div>
+
+            <?php if (isset($message['type'])): ?>
+                <div class="message-field">
+                    <span class="message-label"><i data-feather="bookmark" style="width:14px; height:14px;"></i> <?= $lang['type'] ?? 'Type' ?></span>
+                    <div class="message-value"><?= htmlspecialchars(ucfirst($message['type'])) ?></div>
+                </div>
+            <?php endif; ?>
 
         </div>
 

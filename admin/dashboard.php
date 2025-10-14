@@ -221,6 +221,15 @@ for($m=1; $m<=12; $m++){
             gap:20px;
             margin-bottom:40px;
         }
+
+        /* RESPONSIVE REFINEMENT: Stat Cards on medium screen (tablet portrait) */
+        @media (max-width: 1100px) and (min-width: 769px) {
+            /* Adjust to force 3 columns on larger tablets, 2 columns on smaller ones */
+            .stats{
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
         .stat-card{
             background:var(--card-background);
             padding:25px;
@@ -370,11 +379,14 @@ for($m=1; $m<=12; $m++){
         }
         .activity-desc {
             color: #374151;
+            word-break: break-word;
+            padding-right: 10px;
         }
         .activity-time {
             color: #9ca3af;
             font-size: 13px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .no-activity {
             text-align: center;
@@ -401,7 +413,6 @@ for($m=1; $m<=12; $m++){
         }
 
 
-        /* --- Quick Actions Card styling --- */
         .quick-actions-card {
             background: var(--card-background);
             border-radius: 12px;
@@ -433,7 +444,7 @@ for($m=1; $m<=12; $m++){
             font-weight:500;
             transition:background 0.3s,transform 0.1s;
             border: 1px solid var(--border-color);
-            flex-basis: calc(33.33% - 15px); /* Three items per row */
+            flex-basis: calc(33.33% - 15px);
             min-width: 200px;
         }
         .action-list a:hover{
@@ -445,21 +456,60 @@ for($m=1; $m<=12; $m++){
         .action-list a svg{margin-right:12px;width:18px;height:18px;}
 
 
-        /* Responsive */
+        /* --- GLOBAL RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 900px) {
-            .charts-and-activity{grid-template-columns:1fr;}
-            .charts-row-2 {grid-template-columns: 1fr;}
-            .dashboard{max-width: 95%;}
-            .action-list a {
-                flex-basis: 100%; /* Single column on small screens */
+            /* Charts & Activity Stack Vertically */
+            .charts-and-activity{
+                grid-template-columns:1fr;
+            }
+            /* Chart Row 2 Stack Vertically */
+            .charts-row-2 {
+                grid-template-columns: 1fr;
+            }
+            .dashboard{
+                /* Increase max-width on tablets */
+                max-width: 95%;
             }
         }
+        /* Tablet Portrait / Large Mobile Screens */
         @media (max-width: 768px) {
             .dashboard{padding:20px;}
-            .stats{grid-template-columns:1fr;}
-            .stat-card p{font-size:32px;}
+
+            /* Stat cards go to two columns to save vertical space */
+            .stats{
+                grid-template-columns:repeat(auto-fit,minmax(min(100%, 150px),1fr));
+                gap: 15px;
+            }
+
+            /* Adjust activity list for better readability */
+            .activity-feed li {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .activity-desc {
+                font-weight: 500;
+            }
+            .activity-time {
+                font-size: 12px;
+                margin-top: 2px;
+            }
             .activity-feed li span:first-child {
-                max-width: 60%;
+                max-width: 100%;
+            }
+
+            /* Action list refinement */
+            .action-list a {
+                flex-basis: 100%; /* Single column */
+                min-width: unset;
+            }
+        }
+        /* Small Mobile Screens */
+        @media (max-width: 480px) {
+            .dashboard h2{font-size:24px;}
+            .subtitle{font-size:14px;}
+            .stats{
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -562,7 +612,7 @@ for($m=1; $m<=12; $m++){
         },
         options: {
             responsive: true,
-            aspectRatio: 2.5,
+            aspectRatio: window.innerWidth <= 900 ? 1.5 : 2.5, /* RESPONSIVE CHART FIX */
             plugins: {
                 legend: { display: false }
             },
@@ -592,7 +642,7 @@ for($m=1; $m<=12; $m++){
         },
         options: {
             responsive: true,
-            aspectRatio: 1.5,
+            aspectRatio: window.innerWidth <= 900 ? 1 : 1.5, /* RESPONSIVE CHART FIX */
             plugins: {
                 legend: { position: 'top' }
             },
@@ -617,7 +667,7 @@ for($m=1; $m<=12; $m++){
         },
         options: {
             responsive: true,
-            aspectRatio: 1.5,
+            aspectRatio: window.innerWidth <= 900 ? 1 : 1.5,
             plugins: {
                 legend: { position: 'right', labels: { boxWidth: 15, font: { family: 'Roboto' } } },
                 tooltip: { callbacks: {

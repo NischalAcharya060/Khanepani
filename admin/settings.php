@@ -79,10 +79,6 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9;
-        }
         .main-content {
             padding: 40px;
             max-width: 800px;
@@ -165,7 +161,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
         .map-iframe-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
             height: 0;
             overflow: hidden;
             border-radius: 8px;
@@ -179,6 +175,57 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             height:100%;
             border:0;
         }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 850px) {
+            .main-content {
+                max-width: 95%; /* Use more width on tablets */
+                margin: 20px auto;
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-content {
+                padding: 20px 15px; /* Reduce padding on mobile */
+                margin: 10px auto;
+                border-radius: 0; /* Optional: full width experience */
+                box-shadow: none; /* Optional: remove shadow for cleaner look */
+            }
+            h2 {
+                font-size: 24px; /* Smaller heading */
+            }
+            h2 span {
+                margin-right: 10px; /* Smaller icon margin */
+            }
+            input[type=text],
+            input[type=email],
+            textarea {
+                padding: 12px 15px; /* Smaller input padding */
+                font-size: 15px;
+            }
+            label {
+                font-size: 14px;
+                margin: 15px 0 6px;
+            }
+            .message {
+                font-size: 14px;
+                padding: 15px;
+            }
+            button[type=submit] {
+                width: 100%; /* Full width button on mobile */
+                font-size: 15px;
+                padding: 12px;
+                margin-top: 25px;
+            }
+            .map-preview-container {
+                padding: 10px; /* Smaller padding for map container */
+            }
+            /* Adjust map aspect ratio for better mobile fit if needed, e.g. 4:3 */
+            .map-iframe-wrapper {
+                padding-bottom: 75%; /* 4:3 aspect ratio (100 / 4 * 3 = 75) */
+            }
+        }
     </style>
 </head>
 <body>
@@ -188,7 +235,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
 <div class="main-content">
     <h2><span>⚙️</span> <?= $lang['basic_site_settings'] ?? 'Basic Site Settings' ?></h2>
     <p style="color:#718096;margin-bottom:30px;border-bottom:1px dashed #e2e8f0;padding-bottom:15px;">
-        <?= $lang['admin_settings_desc'] ?? 'Configure the information and social media links.' ?>
+        <?= $lang['admin_settings_desc'] ?? 'Configure the primary contact information and social media links for your website.' ?>
     </p>
 
     <?php if ($msg): ?>
@@ -208,10 +255,13 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
         <input type="text" name="facebook_link" id="facebook_link" placeholder="https://facebook.com/yourpage" value="<?= htmlspecialchars($settings['facebook_link']) ?>">
 
         <label for="map">🗺️ <?= $lang['map_embed'] ?? 'Google Maps Embed Link' ?></label>
-        <textarea name="map" id="map" rows="4" placeholder="Paste your Google Maps embed link here..."><?= htmlspecialchars($settings['map_embed']) ?></textarea>
+        <textarea name="map" id="map" rows="4" placeholder="Paste your Google Maps iframe 'src' URL or the entire iframe code here..."><?= htmlspecialchars($settings['map_embed']) ?></textarea>
 
         <?php if (!empty($settings['map_embed'])): ?>
             <div class="map-preview-container">
+                <p style="font-size:14px; color:#6c757d; margin-bottom:10px;">
+                    <?= $lang['map_preview'] ?? 'Map Preview' ?>:
+                </p>
                 <div class="map-iframe-wrapper">
                     <iframe src="<?= htmlspecialchars($settings['map_embed'], ENT_QUOTES, 'UTF-8') ?>" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
