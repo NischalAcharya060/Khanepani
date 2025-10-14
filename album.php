@@ -45,8 +45,8 @@ $images_result = mysqli_query($conn, $images_sql);
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
 
     <style>
         :root {
@@ -57,14 +57,6 @@ $images_result = mysqli_query($conn, $images_sql);
             --card-background: #ffffff;
             --shadow-light: 0 4px 12px rgba(0,0,0,0.06);
             --shadow-hover: 0 15px 30px rgba(0,0,0,0.15);
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--background-color);
-            margin: 0;
-            padding: 0;
-            color: var(--text-color);
         }
 
         .album-container {
@@ -215,11 +207,8 @@ $images_result = mysqli_query($conn, $images_sql);
                 $imgPath = "assets/uploads/".$row['image'];
                 $title = !empty($row['title']) ? htmlspecialchars($row['title']) : htmlspecialchars($album_name);
 
-                $width = 1200;
-                $height = 800;
-
                 echo "<div class='album-item'>";
-                echo "  <a href='$imgPath' data-pswp-width='$width' data-pswp-height='$height' data-pswp-title='$title'>";
+                echo "  <a href='$imgPath' data-fancybox='album-gallery' data-caption='$title'>";
                 echo "      <img src='$imgPath' alt='$title' loading='lazy'>";
                 echo "      <div class='album-caption'>$title</div>";
                 echo "  </a>";
@@ -234,24 +223,23 @@ $images_result = mysqli_query($conn, $images_sql);
 
 <?php include 'components/footer.php'; ?>
 
-<script type="module">
-    import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 
-    const lightbox = new PhotoSwipeLightbox({
-        gallery: '.album-grid',
-        children: 'a',
-        pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.js'),
-        paddingFn: (viewportSize) => {
-            return {
-                top: 20, bottom: 20, left: 20, right: 20
-            }
-        },
-        initialZoomLevel: 0.75,
-        maxZoomLevel: 3,
-        loop: true
+<script>
+    $(document).ready(function() {
+        $('[data-fancybox="album-gallery"]').fancybox({
+            buttons : [
+                'zoom',
+                'slideShow',
+                'fullScreen',
+                'download',
+                'thumbs',
+                'close'
+            ],
+            loop: true
+        });
     });
-
-    lightbox.init();
 </script>
 
 </body>

@@ -3,3 +3,11 @@
 
 # But keep the folder itself (so it exists in repo, just empty)
 !/assets/uploads/.gitkeep
+
+# Ignore only the db.php file inside config/
+config/db.php
+
+# But still track everything else inside config/
+!config/
+!config/*
+!config/.gitkeep
