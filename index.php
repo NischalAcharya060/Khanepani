@@ -1,7 +1,7 @@
 <?php
 session_start();
 include 'config/db.php';
-include 'config/nepali_calendar.php';
+include 'config/Nepali_calendar.php';
 
 // If no language in session, default to English
 if (!isset($_SESSION['lang'])) {

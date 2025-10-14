@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Include database, language, Nepali calendar
 include 'config/db.php';
 include 'config/lang.php';
-include 'config/nepali_calendar.php';
+include 'config/Nepali_calendar.php';
 $cal = new Nepali_Calendar();
 
 // Function to format date with time (kept unchanged)

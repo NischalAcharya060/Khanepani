@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/../config/nepali_calendar.php';
+require_once __DIR__ . '/../config/Nepali_calendar.php';
 
 // Get current time
 $current_timestamp = time();

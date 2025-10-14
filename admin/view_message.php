@@ -31,7 +31,7 @@ if (!$message) {
     exit();
 }
 
-include '../config/Nepali_Calendar.php';
+include '../config/Nepali_calendar.php';
 $cal = new Nepali_Calendar();
 
 function format_nepali_date($date_str, $cal) {

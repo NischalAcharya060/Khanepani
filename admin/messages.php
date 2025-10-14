@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'], $_POST['
         die("Invalid CSRF token.");
     }
 }
-include '../config/Nepali_Calendar.php';
+include '../config/Nepali_calendar.php';
 $cal = new Nepali_Calendar();
 function format_nepali_date($date_str, $cal) {
     $timestamp = strtotime($date_str);

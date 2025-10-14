@@ -99,7 +99,7 @@ if ($res) {
 }
 
 
- include '../config/nepali_Calendar.php';
+ include '../config/Nepali_calendar.php';
 
 $cal = new Nepali_Calendar();
 
