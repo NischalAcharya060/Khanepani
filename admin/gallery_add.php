@@ -31,13 +31,21 @@ if (isset($_POST['upload_image'])) {
     $imageTmp = $_FILES['image']['tmp_name'];
     $targetDir = "../assets/uploads/";
 
+    // Check and Create Upload Directory
+    if (!is_dir($targetDir)) {
+        if (!mkdir($targetDir, 0755, true)) {
+            $error = $lang['dir_creation_failed'] ?? "❌ Failed to create upload directory! Check parent folder permissions.";
+            goto after_upload_check;
+        }
+    }
+
     $uniqueFileName = uniqid() . '-' . time() . '-' . preg_replace("/[^a-zA-Z0-9\.]/", "", basename($imageName));
     $targetFile = $targetDir . $uniqueFileName;
 
     $allowedTypes = ['jpg','jpeg','png','gif'];
     $fileExt = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-    // ✅ If no album selected, use/create "Unsorted"
+    // ✅ Handle "Unsorted" Album creation/selection if no album chosen
     if ($album_id == 0) {
         $checkDefault = mysqli_query($conn, "SELECT id FROM albums WHERE name='Unsorted' LIMIT 1");
         if (mysqli_num_rows($checkDefault) > 0) {
@@ -49,6 +57,7 @@ if (isset($_POST['upload_image'])) {
         }
     }
 
+    // ✅ File validation and upload/DB insertion (CONSOLIDATED)
     if (in_array($fileExt, $allowedTypes)) {
         if (move_uploaded_file($imageTmp, $targetFile)) {
             $uploaded_by = mysqli_real_escape_string($conn, $username);
@@ -57,14 +66,18 @@ if (isset($_POST['upload_image'])) {
             if (mysqli_query($conn, $sql)) {
                 $success = $lang['image_uploaded_success'] ?? "✅ Image uploaded successfully!";
             } else {
+                // DB insert failed, delete the uploaded file to clean up
+                @unlink($targetFile);
                 $error = $lang['db_error'] . ": " . mysqli_error($conn);
             }
         } else {
-            $error = $lang['file_upload_failed'] ?? "❌ Error uploading file.";
+            $error = $lang['file_upload_failed'] ?? "❌ Error uploading file. Check permissions on $targetDir.";
         }
     } else {
         $error = $lang['allowed_types'] ?? "❌ Only JPG, JPEG, PNG, GIF allowed.";
     }
+
+    after_upload_check:
 }
 
 // ✅ Fetch Albums for dropdown
