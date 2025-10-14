@@ -100,7 +100,8 @@ if ($res) {
 
 
 // Include Nepali Date (Assuming this path is correct)
-include '../config/Nepali_Calendar.php';
+// include '../config/Nepali_Calendar.php';
+include_once __DIR__ . '/../config/Nepali_Calendar.php';
 
 $cal = new Nepali_Calendar();
 
