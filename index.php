@@ -30,6 +30,7 @@ $cal = new Nepali_Calendar();
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
 </head>
 <style>
     /* Hero Carousel */
@@ -63,6 +64,13 @@ $cal = new Nepali_Calendar();
         object-fit: cover;
         border-radius: 10px;
     }
+    /* Updated markup for Fancybox: wrap the image and caption in an anchor tag */
+    .slide a {
+        display: block;
+        width: 100%;
+        height: 100%;
+        text-decoration: none;
+    }
     .caption {
         position: absolute;
         bottom: 40px;
@@ -92,45 +100,8 @@ $cal = new Nepali_Calendar();
     .prev { left: 20px; }
     .next { right: 20px; }
 
-    /* Lightbox */
-    .lightbox {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        padding-top: 60px;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.9);
-    }
-    .lightbox-content {
-        margin: auto;
-        display: block;
-        max-width: 90%;
-        max-height: 80%;
-        border-radius: 10px;
-    }
-    .lightbox-caption {
-        text-align: center;
-        color: #fff;
-        margin-top: 15px;
-        font-size: 18px;
-    }
-    .close {
-        position: absolute;
-        top: 30px;
-        right: 40px;
-        color: #fff;
-        font-size: 40px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    .close:hover {
-        color: #ff6600;
-    }
+    /* --- Lightbox Styles Removed --- */
+
     .clickable {
         cursor: pointer;
         transition: transform 0.3s;
@@ -283,34 +254,31 @@ $cal = new Nepali_Calendar();
 
 <?php include 'components/header.php'; ?>
 
-<!-- Hero Carousel -->
 <section class="hero">
     <div class="carousel">
         <div class="slide active">
-            <img src="assets/images/hero2.jpg" alt="Kanepani building" class="clickable">
-            <div class="caption"><?= $lang['hero_caption1'] ?? 'Our Water Supply Container' ?></div>
+            <a href="assets/images/hero2.jpg" data-fancybox="hero-gallery" data-caption="<?= $lang['hero_caption1'] ?? 'Our Water Supply Container' ?>">
+                <img src="assets/images/hero2.jpg" alt="<?= $lang['hero_caption1'] ?? 'Our Water Supply Container' ?>" class="clickable">
+                <div class="caption"><?= $lang['hero_caption1'] ?? 'Our Water Supply Container' ?></div>
+            </a>
         </div>
         <div class="slide">
-            <img src="assets/images/hero.jpg" alt="Serving the Community" class="clickable">
-            <div class="caption"><?= $lang['hero_caption2'] ?? 'Serving the Community' ?></div>
+            <a href="assets/images/hero.jpg" data-fancybox="hero-gallery" data-caption="<?= $lang['hero_caption2'] ?? 'Serving the Community' ?>">
+                <img src="assets/images/hero.jpg" alt="<?= $lang['hero_caption2'] ?? 'Serving the Community' ?>" class="clickable">
+                <div class="caption"><?= $lang['hero_caption2'] ?? 'Serving the Community' ?></div>
+            </a>
         </div>
         <div class="slide">
-            <img src="assets/images/hero1.jpg" alt="Clean & Safe Drinking Water" class="clickable">
-            <div class="caption"><?= $lang['hero_caption3'] ?? 'Clean & Safe Drinking Water' ?></div>
+            <a href="assets/images/hero1.jpg" data-fancybox="hero-gallery" data-caption="<?= $lang['hero_caption3'] ?? 'Clean & Safe Drinking Water' ?>">
+                <img src="assets/images/hero1.jpg" alt="<?= $lang['hero_caption3'] ?? 'Clean & Safe Drinking Water' ?>" class="clickable">
+                <div class="caption"><?= $lang['hero_caption3'] ?? 'Clean & Safe Drinking Water' ?></div>
+            </a>
         </div>
         <button class="carousel-btn prev">&#10094;</button>
         <button class="carousel-btn next">&#10095;</button>
     </div>
 </section>
 
-<!-- Lightbox Container -->
-<div id="lightbox" class="lightbox">
-    <span class="close">&times;</span>
-    <img class="lightbox-content" id="lightbox-img">
-    <div class="lightbox-caption" id="lightbox-caption"></div>
-</div>
-
-<!-- Latest Notices -->
 <section class="latest-notices container">
     <h2>📢 <?= $lang['latest_notices'] ?? 'Latest Notices' ?></h2>
 
@@ -393,8 +361,11 @@ $cal = new Nepali_Calendar();
 
 <?php include 'components/footer.php'; ?>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
 <script>
-    // Hero Carousel
+    // Hero Carousel Logic
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
 
@@ -404,12 +375,18 @@ $cal = new Nepali_Calendar();
         });
     };
 
-    document.querySelector('.next').addEventListener('click', () => {
+    document.querySelector('.next').addEventListener('click', (e) => {
+        // Stop carousel button click from triggering Fancybox
+        e.preventDefault();
+        e.stopPropagation();
         currentSlide = (currentSlide + 1) % slides.length;
         showSlide(currentSlide);
     });
 
-    document.querySelector('.prev').addEventListener('click', () => {
+    document.querySelector('.prev').addEventListener('click', (e) => {
+        // Stop carousel button click from triggering Fancybox
+        e.preventDefault();
+        e.stopPropagation();
         currentSlide = (currentSlide - 1 + slides.length) % slides.length;
         showSlide(currentSlide);
     });
@@ -431,24 +408,24 @@ $cal = new Nepali_Calendar();
         showSlide(currentSlide);
     });
 
-    // Lightbox for clickable images
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxCaption = document.getElementById('lightbox-caption');
-    const closeBtn = document.querySelector('.lightbox .close');
-
-    document.querySelectorAll('.clickable').forEach(img => {
-        img.addEventListener('click', (e) => {
-            e.preventDefault(); // prevent following card link
-            lightbox.style.display = 'flex';
-            lightboxImg.src = img.src;
-            lightboxCaption.innerText = img.alt;
+    // Initialize Fancybox on the hero carousel links
+    $(document).ready(function() {
+        $('[data-fancybox="hero-gallery"]').fancybox({
+            buttons : [
+                'zoom',
+                'slideShow',
+                'fullScreen',
+                'thumbs',
+                'close'
+            ],
+            loop: true,
+            // Option to start slideshow immediately upon opening the lightbox (optional)
+            // autoStart: true,
+            // slideShow : {
+            //     autoStart : true,
+            //     speed     : 3000
+            // }
         });
-    });
-
-    closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
-    lightbox.addEventListener('click', e => {
-        if(e.target === lightbox) lightbox.style.display = 'none';
     });
 
     // Hamburger menu toggle

@@ -1,13 +1,24 @@
-# Ignore everything inside uploads folder
-/assets/uploads/
+# ========================
+#  Uploads folder
+# ========================
 
-# But keep the folder itself (so it exists in repo, just empty)
+# Ignore everything in uploads
+/assets/uploads/*
+
+# But keep the folder and .gitkeep file
+!/assets/uploads/
 !/assets/uploads/.gitkeep
 
-# Ignore only the db.php file inside config/
+
+# ========================
+#  Config folder
+# ========================
+
+# Ignore only db.php (keep everything else)
 config/db.php
 
-# But still track everything else inside config/
+# Explicitly make sure config folder and others are tracked
 !config/
-!config/*
+!config/**/
+!config/*.*
 !config/.gitkeep
