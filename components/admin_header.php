@@ -10,10 +10,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (isMobile()) {
-    header("Location: ../mobile-block.php");
-    exit();
-}
+//if (isMobile()) {
+//    header("Location: ../mobile-block.php");
+//    exit();
+//}
 
 include '../config/db.php';
 

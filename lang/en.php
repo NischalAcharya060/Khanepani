@@ -325,4 +325,9 @@ $lang = [
     '404_heading' => 'Oops! Page Not Found.',
     '404_message' => 'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.',
     'go_to_dashboard' => 'Go to Dashboard',
+
+    //500 page
+    '500_title' => '500 - Server Error',
+    '500_heading' => 'Internal Server Error (500)',
+    '500_message' => 'Something went wrong on the server. We are currently working hard to fix this. Please try refreshing or check back in a few minutes.',
 ];
