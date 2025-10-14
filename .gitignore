@@ -17,8 +17,3 @@
 # Ignore only db.php (keep everything else)
 config/db.php
 
-# Explicitly make sure config folder and others are tracked
-!config/
-!config/**/
-!config/*.*
-!config/.gitkeep
