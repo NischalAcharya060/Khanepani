@@ -16,3 +16,5 @@
 
 # Ignore only db.php (keep everything else)
 config/database/*
+!/config/database
+!/config/database/.gitkeep
