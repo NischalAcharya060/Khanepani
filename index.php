@@ -24,13 +24,34 @@ $cal = new Nepali_Calendar();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="developer" content="Developed by Nischal Acharya">
-    <title><?= $lang['logo'] ?? 'Khane Pani Office' ?></title>
+
+    <!-- SEO Meta Tags -->
+    <title><?= $lang['logo'] ?? 'Salakpur KhanePani Office' ?></title>
+    <meta name="description" content="Official website of Salakpur KhanePani Office — providing reliable water services, online payments, notices, and updates for the local community.">
+    <meta name="keywords" content="Salakpur, KhanePani, Water Supply, Office, Nepal, Online Payment, Drinking Water">
+    <meta name="author" content="Nischal Acharya">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://khanepani-86760.wasmer.app/">
+
+    <!-- Windows & Browser Colors -->
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/images/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg">
+    <link rel="shortcut icon" href="assets/images/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Salakpur KhanePani Office">
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest">
 </head>
 <style>
     /* Hero Carousel */
