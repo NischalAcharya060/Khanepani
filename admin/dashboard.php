@@ -511,11 +511,67 @@ for($m=1; $m<=12; $m++){
                 grid-template-columns: 1fr;
             }
         }
+
+        #mobileOptimizationBanner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background-color: var(--warning-color); /* Yellow background for warning */
+            color: var(--text-dark); /* Ensure text is readable */
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000; /* High z-index to ensure visibility */
+            font-size: 14px;
+        }
+
+        #mobileOptimizationBanner p {
+            margin: 0;
+            line-height: 1.4;
+            padding-right: 15px;
+        }
+
+        #dismissBannerBtn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0 5px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        #dismissBannerBtn:hover {
+            color: var(--danger-color);
+        }
+
+        /* Ensure banner does not show on large screens */
+        @media (min-width: 901px) {
+            #mobileOptimizationBanner {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body <?php echo 'class="sidebar-expanded-state"' ?>>
 
 <?php include '../components/admin_header.php'; ?>
+
+<div id="mobileOptimizationBanner" style="display:none;">
+    <p>
+        <strong><?= $lang['mobile_warning_title'] ?? 'Mobile View Alert' ?>:</strong>
+        <?= $lang['mobile_warning_text'] ?? 'For the best experience, especially with detailed charts and tables, please use this dashboard on a desktop or laptop device.' ?>
+    </p>
+    <button id="dismissBannerBtn" aria-label="<?= $lang['dismiss'] ?? 'Dismiss' ?>">&times;</button>
+</div>
 
 <div class="dashboard-wrapper">
     <div class="dashboard">
@@ -682,6 +738,36 @@ for($m=1; $m<=12; $m++){
             }
         }
     });
+</script>
+
+<script>
+    // --- Persistent Dismissal Script using localStorage ---
+    const banner = document.getElementById('mobileOptimizationBanner');
+    const dismissBtn = document.getElementById('dismissBannerBtn');
+    const mobileBreakpoint = 900; // Matches your existing CSS breakpoint
+
+    // 1. Check if the dismissal flag exists in the browser's storage
+    const isDismissed = localStorage.getItem('dashboardMobileBannerDismissed') === 'true';
+
+    function checkScreenSize() {
+        // 2. Only show the banner if the screen is small AND the user hasn't dismissed it
+        if (window.innerWidth <= mobileBreakpoint && !isDismissed) {
+            banner.style.display = 'flex';
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    // 3. Set the persistent flag when the button is clicked
+    dismissBtn.addEventListener('click', () => {
+        // Set the flag to 'true' in the user's local storage
+        localStorage.setItem('dashboardMobileBannerDismissed', 'true');
+        banner.style.display = 'none'; // Hide it instantly
+    });
+
+    // Initial check and check on resize
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
 </script>
 
 </body>

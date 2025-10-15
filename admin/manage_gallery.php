@@ -161,14 +161,26 @@ $username = $_SESSION['username'];
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
 
-        .gallery-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 20px;
+        /* --- New Wrapper for responsive table styling --- */
+        .gallery-table-container {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             border-radius: 12px;
-            overflow: hidden;
+            overflow: hidden; /* Contains the border-radius */
+            margin-top: 20px;
+        }
+
+        .table-responsive {
+            overflow-x: auto; /* Enables horizontal scroll on small screens */
+            width: 100%;
+        }
+        /* --- End New Wrapper --- */
+
+        .gallery-table {
+            width: 100%;
+            min-width: 700px; /* Ensure table is wide enough to scroll horizontally on mobile */
+            border-collapse: separate;
+            border-spacing: 0;
+            /* box-shadow and border-radius moved to .gallery-table-container */
         }
 
         .gallery-table th {
@@ -291,6 +303,43 @@ $username = $_SESSION['username'];
         .pagination a.active { background-color: #1e3a8a; color: white; border-color: #1e3a8a; }
         .pagination a:hover:not(.active) { background-color: #e0f2fe; color: #1e3a8a; }
 
+        @media (max-width: 900px) {
+            .main-content {
+                padding: 15px; /* Less padding on small screens */
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            .subtitle {
+                font-size: 1em;
+            }
+            .btn-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .action-group-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .btn-edit, .btn-delete {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 8px; /* Slightly smaller padding */
+                font-size: 0.8em;
+            }
+            .gallery-img {
+                width: 60px;
+                height: 45px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -312,52 +361,55 @@ $username = $_SESSION['username'];
         </div>
     <?php endif; ?>
 
-    <table class="gallery-table">
-        <thead>
-        <tr>
-            <th><?= $lang['sn'] ?? "S.N." ?></th>
-            <th><?= $lang['image'] ?? "Image" ?></th>
-            <th><?= $lang['title'] ?? "Title" ?></th>
-            <th><?= $lang['album'] ?? "Album" ?></th>
-            <th><?= $lang['uploaded_at'] ?? "Uploaded At" ?></th>
-            <th><?= $lang['uploaded_by'] ?? "Uploaded By" ?></th>
-            <th><?= $lang['actions'] ?? "Actions" ?></th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        if ($images && $images->num_rows > 0):
-            ?>
-            <?php $sn = $offset + 1; ?>
-            <?php
-            while ($image = $images->fetch_assoc()):
-                $uploadedPath = "../assets/uploads/" . htmlspecialchars($image['image']);
-                $imageSrc = file_exists($uploadedPath) ? $uploadedPath : "../assets/images/placeholder.png";
-                ?>
+    <div class="gallery-table-container">
+        <div class="table-responsive">
+            <table class="gallery-table">
+                <thead>
                 <tr>
-                    <td><?= $sn++ ?></td>
-                    <td style="text-align: center;"><img src="<?= $imageSrc ?>" class="gallery-img" alt="<?= htmlspecialchars($image['title'] ?? 'Image') ?>"></td>
-                    <td><?= $image['title'] ? htmlspecialchars($image['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
-                    <td><?= $image['album_name'] ? htmlspecialchars($image['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
-                    <td><?= nepali_date_time($image['created_at'], $cal) ?></td>
-                    <td><?= $image['uploaded_by'] ? htmlspecialchars($image['uploaded_by']) : 'N.A' ?></td>
-                    <td>
-                        <div class="action-group-buttons">
-                            <a href="gallery_edit.php?id=<?= $image['id'] ?>" class="btn btn-edit">✏ <?= $lang['edit'] ?? "Edit" ?></a>
-                            <a href="manage_gallery.php?delete=<?= $image['id'] ?>" class="btn btn-delete"
-                               onclick="return confirm('<?= $lang['delete_confirm_image'] ?? "Are you sure you want to delete this image?" ?>')">🗑 <?= $lang['delete'] ?? "Delete" ?></a>
-                        </div>
-                    </td>
+                    <th><?= $lang['sn'] ?? "S.N." ?></th>
+                    <th><?= $lang['image'] ?? "Image" ?></th>
+                    <th><?= $lang['title'] ?? "Title" ?></th>
+                    <th><?= $lang['album'] ?? "Album" ?></th>
+                    <th><?= $lang['uploaded_at'] ?? "Uploaded At" ?></th>
+                    <th><?= $lang['uploaded_by'] ?? "Uploaded By" ?></th>
+                    <th><?= $lang['actions'] ?? "Actions" ?></th>
                 </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="6" style="text-align:center; padding:20px; font-style: italic; color: #a0a0a0;"><?= $lang['no_images'] ?? 'No images found in the gallery.' ?></td>
-            </tr>
-        <?php endif; ?>
-        </tbody>
-    </table>
-
+                </thead>
+                <tbody>
+                <?php
+                if ($images && $images->num_rows > 0):
+                    ?>
+                    <?php $sn = $offset + 1; ?>
+                    <?php
+                    while ($image = $images->fetch_assoc()):
+                        $uploadedPath = "../assets/uploads/" . htmlspecialchars($image['image']);
+                        $imageSrc = file_exists($uploadedPath) ? $uploadedPath : "../assets/images/placeholder.png";
+                        ?>
+                        <tr>
+                            <td><?= $sn++ ?></td>
+                            <td style="text-align: center;"><img src="<?= $imageSrc ?>" class="gallery-img" alt="<?= htmlspecialchars($image['title'] ?? 'Image') ?>"></td>
+                            <td><?= $image['title'] ? htmlspecialchars($image['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
+                            <td><?= $image['album_name'] ? htmlspecialchars($image['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
+                            <td><?= nepali_date_time($image['created_at'], $cal) ?></td>
+                            <td><?= $image['uploaded_by'] ? htmlspecialchars($image['uploaded_by']) : 'N.A' ?></td>
+                            <td>
+                                <div class="action-group-buttons">
+                                    <a href="gallery_edit.php?id=<?= $image['id'] ?>" class="btn btn-edit">✏ <?= $lang['edit'] ?? "Edit" ?></a>
+                                    <a href="manage_gallery.php?delete=<?= $image['id'] ?>" class="btn btn-delete"
+                                       onclick="return confirm('<?= $lang['delete_confirm_image'] ?? "Are you sure you want to delete this image?" ?>')">🗑 <?= $lang['delete'] ?? "Delete" ?></a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:20px; font-style: italic; color: #a0a0a0;"><?= $lang['no_images'] ?? 'No images found in the gallery.' ?></td>
+                    </tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <div class="pagination">
         <?php if($page > 1): ?>
             <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?? '« Previous' ?></a>

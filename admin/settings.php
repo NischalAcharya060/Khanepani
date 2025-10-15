@@ -33,6 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $facebook_link = trim($_POST['facebook_link'] ?? '');
     $map_embed = trim($_POST['map'] ?? '');
 
+    // Simple sanitization for map_embed: extract only the src URL if full iframe is pasted
+    if (preg_match('/src="([^"]+)"/i', $map_embed, $matches)) {
+        $map_embed = $matches[1];
+    }
+
     if (empty($email)) {
         $msg = $lang['email_required'] ?? "❌ Email is required!";
     } else {
@@ -46,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ? ($lang['settings_updated'] ?? "✅ Settings updated successfully!")
                         : ($lang['no_changes'] ?? "⚠ No changes detected or row does not exist. (Ensure row with id=1 exists)");
 
+                // Update $settings array with new values to display on success
                 $settings['email'] = $email;
                 $settings['phone'] = $phone;
                 $settings['facebook_link'] = $facebook_link;
@@ -78,6 +84,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
     <title>Settings - सलकपुर खानेपानी</title>
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
         .main-content {
             padding: 40px;
@@ -117,6 +124,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             background-color: #f7f9fb;
             transition: 0.3s;
             resize: vertical;
+            box-sizing: border-box; /* Crucial for responsive width */
         }
         input:focus, textarea:focus {
             border-color: #007bff;
@@ -161,7 +169,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
         .map-iframe-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            padding-bottom: 56.25%; /* 16:9 aspect ratio (Desktop Default) */
             height: 0;
             overflow: hidden;
             border-radius: 8px;
@@ -176,7 +184,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             border:0;
         }
 
-        /* --- Responsive Adjustments --- */
+        /* --- Responsive Adjustments (The Fix) --- */
         @media (max-width: 850px) {
             .main-content {
                 max-width: 95%; /* Use more width on tablets */
@@ -189,8 +197,8 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             .main-content {
                 padding: 20px 15px; /* Reduce padding on mobile */
                 margin: 10px auto;
-                border-radius: 0; /* Optional: full width experience */
-                box-shadow: none; /* Optional: remove shadow for cleaner look */
+                border-radius: 0;
+                box-shadow: none;
             }
             h2 {
                 font-size: 24px; /* Smaller heading */
@@ -221,9 +229,9 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             .map-preview-container {
                 padding: 10px; /* Smaller padding for map container */
             }
-            /* Adjust map aspect ratio for better mobile fit if needed, e.g. 4:3 */
+            /* Adjust map aspect ratio for better mobile fit (4:3) */
             .map-iframe-wrapper {
-                padding-bottom: 75%; /* 4:3 aspect ratio (100 / 4 * 3 = 75) */
+                padding-bottom: 75%;
             }
         }
     </style>
@@ -245,16 +253,16 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
     <?php endif; ?>
 
     <form method="POST">
-        <label for="email">📧 <?= $lang['contact_email'] ?? 'Contact Email' ?></label>
+        <label for="email"><i data-feather="mail"></i> <?= $lang['contact_email'] ?? 'Contact Email' ?></label>
         <input type="email" name="email" id="email" value="<?= htmlspecialchars($settings['email']) ?>" required>
 
-        <label for="phone">📞 <?= $lang['contact_phone'] ?? 'Contact Phone' ?></label>
+        <label for="phone"><i data-feather="phone"></i> <?= $lang['contact_phone'] ?? 'Contact Phone' ?></label>
         <input type="text" name="phone" id="phone" value="<?= htmlspecialchars($settings['phone']) ?>" placeholder="<?= $lang['phone_placeholder'] ?? '+977-XXXXXXXXXX' ?>">
 
-        <label for="facebook_link">📘 <?= $lang['facebook_link'] ?? 'Facebook Page Link' ?></label>
+        <label for="facebook_link"><i data-feather="facebook"></i> <?= $lang['facebook_link'] ?? 'Facebook Page Link' ?></label>
         <input type="text" name="facebook_link" id="facebook_link" placeholder="https://facebook.com/yourpage" value="<?= htmlspecialchars($settings['facebook_link']) ?>">
 
-        <label for="map">🗺️ <?= $lang['map_embed'] ?? 'Google Maps Embed Link' ?></label>
+        <label for="map"><i data-feather="map"></i> <?= $lang['map_embed'] ?? 'Google Maps Embed Link' ?></label>
         <textarea name="map" id="map" rows="4" placeholder="Paste your Google Maps iframe 'src' URL or the entire iframe code here..."><?= htmlspecialchars($settings['map_embed']) ?></textarea>
 
         <?php if (!empty($settings['map_embed'])): ?>
@@ -268,9 +276,13 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             </div>
         <?php endif; ?>
 
-        <button type="submit">💾 <?= $lang['save_settings'] ?? 'Save Settings' ?></button>
+        <button type="submit"><i data-feather="save"></i> <?= $lang['save_settings'] ?? 'Save Settings' ?></button>
     </form>
 </div>
+
+<script>
+    feather.replace();
+</script>
 
 </body>
 </html>
