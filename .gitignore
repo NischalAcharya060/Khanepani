@@ -15,5 +15,5 @@
 # ========================
 
 # Ignore only db.php (keep everything else)
-config/db.php
+config/database/db.php
 
