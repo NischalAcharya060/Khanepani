@@ -14,7 +14,9 @@
 #  Config folder
 # ========================
 
-# Ignore only db.php (keep everything else)
+# Ignore everything inside config/database/
 config/database/*
-!/config/database
-!/config/database/.gitkeep
+
+# But keep the folder itself
+!config/database/
+!config/database/.gitkeep
