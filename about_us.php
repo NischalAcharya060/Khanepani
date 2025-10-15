@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Include database & language
-include 'config/db.php';
+include 'config/database/db.php';
 include 'config/lang.php';
 ?>
 <!DOCTYPE html>

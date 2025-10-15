@@ -10,12 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-//if (isMobile()) {
-//    header("Location: ../mobile-block.php");
-//    exit();
-//}
-
-include '../config/db.php';
+include '../config/database/db.php';
 
 $generic_db_error = "An unrecoverable database error occurred. Please contact support.";
 

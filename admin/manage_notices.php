@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../config/db.php';
+include '../config/database/db.php';
 
 include '../config/Nepali_calendar.php';
 $cal = new Nepali_Calendar();

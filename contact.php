@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-include 'config/db.php';
+include 'config/database/db.php';
 if (!isset($_SESSION['lang'])) {
     $_SESSION['lang'] = 'en';
 }

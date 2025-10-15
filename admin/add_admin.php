@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-include '../config/db.php';
+include '../config/database/db.php';
 include '../config/lang.php';
 $username = $_SESSION['username'];
 

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/database/db.php';
 $settings = [
         'email' => 'info@salakpurkhanepani.com',
         'phone' => '+977-1-4117356',

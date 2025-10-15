@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../config/db.php'; // safer path
+require_once __DIR__ . '/../config/database/db.php';
 
 // --- Language Handling ---
 if (!isset($_SESSION['lang'])) {

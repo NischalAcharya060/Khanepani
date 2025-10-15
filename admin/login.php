@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../config/db.php';
+include '../config/database/db.php';
 
 // --- Language Handling ---
 if (!isset($_SESSION['lang'])) {

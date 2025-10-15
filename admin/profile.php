@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../config/db.php';
+include '../config/database/db.php';
 include '../config/lang.php'; // Assuming lang.php sets up the $lang array
 
 // Check database connection immediately

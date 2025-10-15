@@ -7,7 +7,7 @@ if (!isset($_SESSION['admin'])) {
 $username = $_SESSION['username'];
 
 // Include DB connection (Assuming this path is correct)
-include '../config/db.php';
+include '../config/database/db.php';
 
 // --- Language handling ---
 $allowed_langs = ['en','np'];

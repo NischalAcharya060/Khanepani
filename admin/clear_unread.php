@@ -1,5 +1,5 @@
 <?php
-include '../config/db.php';
+include '../config/database/db.php';
 session_start();
 
 // Ensure only admin can clear

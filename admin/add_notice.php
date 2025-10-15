@@ -13,7 +13,7 @@ if (isset($_GET['lang'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
 include "../lang/" . $_SESSION['lang'] . ".php";
-include '../config/db.php';
+include '../config/database/db.php';
 
 $username = $_SESSION['username'];
 

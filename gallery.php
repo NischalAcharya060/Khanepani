@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Include database and language
-include 'config/db.php';
+include 'config/database/db.php';
 
 // Language handling
 if (!isset($_SESSION['lang'])) {
