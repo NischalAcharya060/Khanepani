@@ -38,6 +38,18 @@ if (!$result || $result->num_rows === 0) {
 $notice = $result->fetch_assoc();
 $stmt->close();
 
+// Define the notice types using language strings for display
+$notice_type_labels = [
+        'General'       => $lang['type_general'] ?? 'General Notice',
+        'Operational'   => $lang['type_operational'] ?? 'Operational Update',
+        'Maintenance'   => $lang['type_maintenance'] ?? 'Maintenance Schedule',
+        'Financial'     => $lang['type_financial'] ?? 'Financial Report',
+];
+
+// Determine the display label for the notice type
+$notice_type_key = $notice['type'] ?? 'General';
+$display_type = $notice_type_labels[$notice_type_key] ?? $notice_type_key;
+
 // --- PRE-PROCESS FILES FOR SLIDER ---
 $files = $notice['file'] ? json_decode($notice['file'], true) : [];
 $image_files = [];
@@ -87,6 +99,7 @@ $has_multiple_images = count($image_files) > 1;
             --border-color: #e5e7eb;
             --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
             --error-color: #dc3545;
+            --type-color: #3b82f6; /* Blue for the Type tag */
         }
 
         body { background-color: var(--bg-light); }
@@ -118,6 +131,23 @@ $has_multiple_images = count($image_files) > 1;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .notice-meta-date {
+            color: var(--text-color-light);
+            font-weight: 500;
+        }
+        /* Style for the Type tag */
+        .notice-type-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 13px;
+            background-color: var(--type-color);
+            color: #fff;
         }
         .notice-content {
             font-size: 16px;
@@ -134,7 +164,7 @@ $has_multiple_images = count($image_files) > 1;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             margin-bottom: 30px;
-            background: #000; /* Black background for images */
+            background: #000;
         }
         .image-slider {
             display: flex;
@@ -212,7 +242,7 @@ $has_multiple_images = count($image_files) > 1;
             font-weight: 500;
         }
         .file-download:hover {
-            background: #e0f2f1; /* Light hover color based on primary */
+            background: #e0f2f1;
             border-color: var(--primary-color);
         }
         .file-download i {
@@ -225,6 +255,14 @@ $has_multiple_images = count($image_files) > 1;
         .back-btn { display: inline-flex; align-items: center; padding: 8px 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-color-light); font-weight: 500; transition: all 0.2s ease; }
         .back-btn:hover { border-color: var(--secondary-color); color: var(--secondary-color); box-shadow: var(--shadow-subtle); }
         .back-btn i { width: 20px; height: 20px; margin-right: 8px; }
+
+        @media (max-width: 600px) {
+            .notice-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -246,7 +284,12 @@ $has_multiple_images = count($image_files) > 1;
         <h3 class="notice-title"><?= htmlspecialchars($notice['title']) ?></h3>
 
         <div class="notice-meta">
-            <?= $lang['posted_on'] ?? 'Posted on:' ?> <?= date('F j, Y, g:i a', strtotime($notice['created_at'])) ?>
+            <span class="notice-meta-date">
+                <?= $lang['posted_on'] ?? 'Posted on:' ?> <?= date('F j, Y, g:i a', strtotime($notice['created_at'])) ?>
+            </span>
+            <span class="notice-type-tag">
+                <?= htmlspecialchars($display_type) ?>
+            </span>
         </div>
 
         <div class="notice-content"><?= nl2br(htmlspecialchars($notice['content'])) ?></div>

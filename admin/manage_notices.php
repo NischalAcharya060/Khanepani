@@ -272,6 +272,7 @@ $username = $_SESSION['username'];
         <tr>
             <th><?= $lang['sn'] ?? 'S.N.' ?></th>
             <th><?= $lang['title'] ?? 'Title' ?></th>
+            <th><?= $lang['notice_type'] ?? 'Notice Type' ?></th>
             <th><?= $lang['date'] ?? 'Date' ?></th>
             <th><?= $lang['created_by'] ?? 'Created By' ?></th>
             <th><?= $lang['actions'] ?? 'Actions' ?></th>
@@ -284,6 +285,7 @@ $username = $_SESSION['username'];
                 <tr>
                     <td data-label="<?= $lang['sn'] ?? 'S.N.' ?>"><?= $sn++ ?></td>
                     <td data-label="<?= $lang['title'] ?? 'Title' ?>"><?= htmlspecialchars($notice['title']) ?></td>
+                    <td data-label="<?= $lang['notice_type'] ?? 'Notice Type' ?>"><?= htmlspecialchars($notice['type']) ?></td>
                     <td data-label="<?= $lang['date'] ?? 'Date' ?>"><?= format_nepali_date($notice['created_at'], $cal) ?></td>
                     <td data-label="<?= $lang['created_by'] ?? 'Created By' ?>"><?= !empty($notice['created_by']) ? htmlspecialchars($notice['created_by']) : 'N.A.' ?></td>
                     <td data-label="<?= $lang['actions'] ?? 'Actions' ?>">

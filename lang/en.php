@@ -239,6 +239,20 @@ $lang = [
     'doc_preview' => 'Document Preview',
     'preview_not_supported' => 'Preview not supported for this file type. Please download.',
 
+    // Filters & Search
+    'search_notices' => 'Search notices by title...',
+    'filter_all' => 'All Types',
+    'date_from' => 'Date From',
+    'date_to' => 'Date To',
+    'clear_filters' => 'Clear all search and filters',
+    'clear_btn' => 'Clear',
+
+    // Notice Types (matching the PHP array keys)
+    'type_general' => 'General Notice',
+    'type_operational' => 'Operational Update',
+    'type_maintenance' => 'Maintenance Schedule',
+    'type_financial' => 'Financial Report',
+
     // --- NEW KEYS ADDED FOR AESTHETICS/FILE HANDLING ---
     'attachments' => 'Attachments',
     'file_preview' => 'File Preview',

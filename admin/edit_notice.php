@@ -16,6 +16,7 @@ if (isset($_GET['lang'])) {
 include "../lang/" . $_SESSION['lang'] . ".php";
 
 $username = $_SESSION['username'];
+$current_lang = $_SESSION['lang'] ?? 'en';
 
 if (!isset($_GET['id'])) {
     header("Location: manage_notices.php");
@@ -24,6 +25,15 @@ if (!isset($_GET['id'])) {
 
 $id = intval($_GET['id']);
 
+// Define the notice types using language strings
+$notice_type_options = [
+        'General'       => $lang['type_general'] ?? 'General Notice',
+        'Operational'   => $lang['type_operational'] ?? 'Operational Update',
+        'Maintenance'   => $lang['type_maintenance'] ?? 'Maintenance Schedule',
+        'Financial'     => $lang['type_financial'] ?? 'Financial Report',
+];
+
+// Fetch existing notice data
 $stmt = $conn->prepare("SELECT * FROM notices WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -42,6 +52,7 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $content = trim($_POST['content'] ?? '');
+    $type = trim($_POST['type'] ?? 'General'); // Capture the selected type
 
     $upload_dir = '../assets/uploads/';
     $allowed_types = [
@@ -53,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $files_to_keep = [];
     $new_file_list = [];
 
+    // 1. Handle file deletions
     if (is_array($existing_files)) {
         foreach ($existing_files as $file_name) {
             if (!in_array($file_name, $_POST['delete_files'] ?? [])) {
@@ -65,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $new_file_list = $files_to_keep;
 
+    // 2. Handle new file uploads
     if (isset($_FILES['file']) && count($_FILES['file']['name']) > 0) {
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
         foreach ($_FILES['file']['name'] as $index => $filename) {
@@ -89,16 +102,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$error && $title && $content) {
         $final_file_path = !empty($new_file_list) ? json_encode($new_file_list) : null;
-        $stmt = $conn->prepare("UPDATE notices SET title = ?, content = ?, file = ? WHERE id = ?");
-        $stmt->bind_param("sssi", $title, $content, $final_file_path, $id);
-        $stmt->execute();
-        $_SESSION['success'] = $lang['notice_updated'] ?? "Notice Updated Successfully";
-        header("Location: manage_notices.php");
-        exit();
+
+        // UPDATED: Added `type` column to the UPDATE query
+        $stmt = $conn->prepare("UPDATE notices SET title = ?, content = ?, type = ?, file = ? WHERE id = ?");
+        $stmt->bind_param("ssssi", $title, $content, $type, $final_file_path, $id);
+
+        if ($stmt->execute()) {
+            $_SESSION['success'] = $lang['notice_updated'] ?? "Notice Updated Successfully";
+            header("Location: manage_notices.php");
+            exit();
+        } else {
+            $error = $lang['database_update_error'] ?? "Database error: " . $stmt->error;
+        }
     } elseif (!$error) {
         $error = $lang['fill_required'] ?? "Please fill in all required fields!";
     }
 
+    // Re-fetch data on error to display the last successful state + any new files kept
     if ($error) {
         $stmt = $conn->prepare("SELECT * FROM notices WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -107,11 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notice = $result->fetch_assoc();
         $stmt->close();
         $existing_files = $notice['file'] ? json_decode($notice['file'], true) : [];
+        // Override notice content/title/type with POST values to keep user input visible
+        $notice['title'] = $title;
+        $notice['content'] = $content;
+        $notice['type'] = $type;
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $current_lang ?>">
 <head>
     <meta charset="UTF-8">
     <title><?= $lang['edit_notice'] ?? 'Edit Notice' ?> - Admin</title>
@@ -142,8 +166,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .back-btn i { width: 20px; height: 20px; margin-right: 8px; }
         .notice-form { background: var(--card-bg); padding: 30px 40px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid var(--border-color); }
         .notice-form label { display: block; margin-top: 15px; margin-bottom: 8px; font-weight: 600; color: var(--text-color-dark); font-size: 15px; }
-        .notice-form input[type="text"], .notice-form textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 16px; color: var(--text-color-dark); background-color: var(--bg-light); transition: border-color 0.3s, box-shadow 0.3s; resize: vertical; }
-        .notice-form input:focus, .notice-form textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); outline: none; }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row > div {
+            flex: 1;
+        }
+
+        .notice-form input[type="text"],
+        .notice-form textarea,
+        .notice-form select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            color: var(--text-color-dark);
+            background-color: var(--bg-light);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .notice-form input:focus, .notice-form textarea:focus, .notice-form select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+            outline: none;
+        }
         .current-file-group { border: 1px solid var(--border-color); padding: 15px; border-radius: 6px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
         .current-file-group h4 { margin: 0 0 5px 0; color: var(--text-color-dark); font-size: 16px; }
         .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--border-color); font-size: 15px; }
@@ -167,6 +217,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .message { padding: 15px 20px; border-radius: 8px; font-size: 15px; font-weight: 500; display: flex; align-items: center; margin-bottom: 0; }
         .message i { margin-right: 10px; width: 20px; height: 20px; }
         .error { background-color: #f8d7da; color: var(--error-color); border: 1px solid #f5c6cb; }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -185,10 +241,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class='message error'><i data-feather="alert-triangle"></i><?= $error ?></div>
     <?php endif; ?>
     <form method="POST" class="notice-form" enctype="multipart/form-data">
-        <label for="title"><?= $lang['notice_title'] ?? 'Notice Title' ?> <span style="color:var(--error-color)">*</span></label>
-        <input type="text" name="title" id="title" value="<?= htmlspecialchars($notice['title']) ?>" required>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="title"><?= $lang['notice_title'] ?? 'Notice Title' ?> <span style="color:var(--error-color)">*</span></label>
+                <input type="text" name="title" id="title" value="<?= htmlspecialchars($notice['title']) ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="type"><?= $lang['notice_type'] ?? 'Notice Type' ?> <span style="color:var(--error-color)">*</span></label>
+                <select name="type" id="type" required>
+                    <?php
+                    $current_type = $notice['type'] ?? 'General';
+                    foreach ($notice_type_options as $value => $label):
+                        ?>
+                        <option value="<?= $value ?>" <?= ($current_type === $value) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($label) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
         <label for="content"><?= $lang['notice_description'] ?? 'Notice Description' ?> <span style="color:var(--error-color)">*</span></label>
         <textarea name="content" id="content" rows="8" required><?= htmlspecialchars($notice['content']) ?></textarea>
+
         <?php if (!empty($existing_files) && is_array($existing_files)): ?>
             <div class="current-file-group">
                 <h4><i data-feather="archive" style="width:18px; height:18px; margin-right:5px; color:var(--text-color-dark);"></i> <?= $lang['current_files'] ?? 'Current Attached Files' ?> (<?= count($existing_files) ?>)</h4>
@@ -208,6 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+
         <label><?= $lang['add_or_replace_files'] ?? 'Add or Replace Files/Images (optional)' ?>:</label>
         <div class="file-input-group">
             <input type="file" name="file[]" id="file" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx" onchange="updateFileName(this)">
@@ -216,6 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span id="file-name-display"><?= $lang['click_to_upload'] ?? 'Click here to upload new file(s)' ?></span>
             </label>
         </div>
+
         <div class="button-group">
             <button type="submit" class="btn btn-primary">
                 <i data-feather="refresh-cw" style="width:18px; height:18px; margin-right:5px; vertical-align:middle;"></i>
@@ -229,18 +308,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </main>
 <script>
     feather.replace();
+
+    // JS for language support in file input
+    const currentLang = '<?= $current_lang ?>';
+
+    const langStrings = {
+        en: {
+            upload_prompt: 'Click here to upload new file(s)',
+            files_selected: 'files selected'
+        },
+        np: {
+            upload_prompt: 'नयाँ फाइल(हरू) अपलोड गर्न यहाँ क्लिक गर्नुहोस्',
+            files_selected: 'फाइलहरू चयन गरिए'
+        }
+    };
+
+    function getLangString(key) {
+        // Use 'upload_prompt' for the main message
+        if (key === 'upload_prompt') {
+            return langStrings[currentLang]['upload_prompt'] || langStrings['en']['upload_prompt'];
+        }
+        // Use 'files_selected' for the file count message
+        if (key === 'files_selected') {
+            return langStrings[currentLang]['files_selected'] || langStrings['en']['files_selected'];
+        }
+    }
+
     function updateFileName(input) {
         const fileNameDisplay = document.getElementById('file-name-display');
         const fileCount = input.files ? input.files.length : 0;
+
         if (fileCount > 0) {
-            if (fileCount === 1) fileNameDisplay.textContent = input.files[0].name;
-            else fileNameDisplay.textContent = `${fileCount} files selected`;
+            if (fileCount === 1) {
+                fileNameDisplay.textContent = input.files[0].name;
+            } else {
+                fileNameDisplay.textContent = `${fileCount} ${getLangString('files_selected')}`;
+            }
             fileNameDisplay.style.color = 'var(--text-color-dark)';
         } else {
-            fileNameDisplay.textContent = '<?= $lang['click_to_upload'] ?? 'Click here to upload new file(s)' ?>';
+            fileNameDisplay.textContent = getLangString('upload_prompt');
             fileNameDisplay.style.color = 'var(--text-color-light)';
         }
     }
+
+    // Set initial display text
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileNameDisplay = document.getElementById('file-name-display');
+        fileNameDisplay.textContent = getLangString('upload_prompt');
+    });
 </script>
 </body>
 </html>

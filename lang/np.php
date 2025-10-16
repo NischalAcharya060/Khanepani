@@ -244,6 +244,20 @@ $lang = [
     'doc_preview' => 'कागजात पूर्वावलोकन',
     'preview_not_supported' => 'यस फाइल प्रकारका लागि पूर्वावलोकन समर्थित छैन। कृपया डाउनलोड गर्नुहोस्।',
 
+    // Filters & Search
+    'search_notices' => 'शीर्षक अनुसार सूचना खोज्नुहोस्...',
+    'filter_all' => 'सबै प्रकार',
+    'date_from' => 'मिति देखि',
+    'date_to' => 'मिति सम्म',
+    'clear_filters' => 'सबै खोज र फिल्टरहरू हटाउनुहोस्',
+    'clear_btn' => 'हटाउनुहोस्',
+
+    // Notice Types (matching the PHP array keys)
+    'type_general' => 'सामान्य सूचना',
+    'type_operational' => 'सञ्चालन अद्यावधिक',
+    'type_maintenance' => 'मर्मत तालिका',
+    'type_financial' => 'वित्तीय प्रतिवेदन',
+
     // --- NEW KEYS ADDED FOR AESTHETICS/FILE HANDLING ---
     'attachments' => 'संलग्न फाइलहरू',
     'file_preview' => 'फाइल पूर्वावलोकन',
