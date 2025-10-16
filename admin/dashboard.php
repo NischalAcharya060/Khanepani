@@ -6,20 +6,15 @@ if (!isset($_SESSION['admin'])) {
 }
 $username = $_SESSION['username'];
 
-// Include DB connection (Assuming this path is correct)
 include '../config/database/db.php';
 
-// --- Language handling ---
 $allowed_langs = ['en','np'];
 $lang_code = in_array($_GET['lang'] ?? '', $allowed_langs) ? $_GET['lang'] : ($_SESSION['lang'] ?? 'en');
 $_SESSION['lang'] = $lang_code;
 
-// Load language file (Assuming this path is correct)
 include "../lang/{$lang_code}.php";
 
-// --- Fetch stats safely ---
 function fetchCount($conn, $table) {
-    // Check if connection is valid before querying
     if (!$conn) return 0;
     $res = $conn->query("SELECT COUNT(*) AS c FROM {$table}");
     return $res ? $res->fetch_assoc()['c'] : 0;
@@ -32,11 +27,9 @@ $total_admins = fetchCount($conn, 'admins');
 $total_active_admins = $conn->query("SELECT COUNT(*) AS c FROM admins WHERE status='active'")->fetch_assoc()['c'] ?? 0;
 
 
-// --- Fetch recent records ---
 function fetchRecent($conn, $table, $columns=['*'], $limit=5){
     if (!$conn) return [];
     $cols = implode(',', $columns);
-    // Note: Assuming 'created_at' column exists for sorting
     $res = $conn->query("SELECT {$cols} FROM {$table} ORDER BY created_at DESC LIMIT {$limit}");
     return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 }
@@ -46,18 +39,15 @@ $recent_gallery = fetchRecent($conn, 'gallery', ['title','created_at']);
 $recent_admins = fetchRecent($conn, 'admins', ['username','created_at']);
 $recent_messages = fetchRecent($conn, 'contact_messages', ['name','created_at']);
 
-// --- Merge activities ---
 $activities = [];
 foreach($recent_notices as $n) $activities[] = ['type'=>'Notice','desc'=>$n['title'],'time'=>$n['created_at']];
 foreach($recent_gallery as $g) $activities[] = ['type'=>'Gallery','desc'=>$g['title'],'time'=>$g['created_at']];
 foreach($recent_admins as $a) $activities[] = ['type'=>'Admin','desc'=>htmlspecialchars($a['username']).' registered','time'=>$a['created_at']];
 foreach($recent_messages as $m) $activities[] = ['type'=>'Message','desc'=>'Message from '.htmlspecialchars($m['name']),'time'=>$m['created_at']];
 
-// Sort by latest
 usort($activities, fn($a,$b) => strtotime($b['time']) - strtotime($a['time']));
 $activities = array_slice($activities,0,10);
 
-// --- Helper: Time ago ---
 function timeAgo($datetime){
     $time = strtotime($datetime);
     $diff = time() - $time;
@@ -71,7 +61,6 @@ function timeAgo($datetime){
     return date('d M Y', $time);
 }
 
-// --- Notices per month (Bar Chart Data) ---
 $notices_per_month = [];
 $current_year = date('Y');
 for($i=1;$i<=12;$i++){
@@ -79,19 +68,16 @@ for($i=1;$i<=12;$i++){
     $notices_per_month[$i] = $res ? $res->fetch_assoc()['c'] : 0;
 }
 
-// --- NEW CHART DATA: Gallery Uploads per month (Line Chart Data) ---
 $gallery_per_month = [];
 for($i=1;$i<=12;$i++){
     $res = $conn->query("SELECT COUNT(*) AS c FROM gallery WHERE MONTH(created_at)={$i} AND YEAR(created_at)={$current_year}");
     $gallery_per_month[$i] = $res ? $res->fetch_assoc()['c'] : 0;
 }
 
-// --- Messages count by type (Doughnut Chart Data) ---
 $messages_count = ['general'=>0,'complaint'=>0,'suggestion'=>0];
 $res = $conn->query("SELECT type, COUNT(*) AS c FROM contact_messages GROUP BY type");
 if ($res) {
     while($row = $res->fetch_assoc()){
-        // Ensure the type is one of the expected keys
         if (isset($messages_count[$row['type']])) {
             $messages_count[$row['type']] = $row['c'];
         }
@@ -99,7 +85,7 @@ if ($res) {
 }
 
 
- include '../config/Nepali_calendar.php';
+include '../config/Nepali_calendar.php';
 
 $cal = new Nepali_Calendar();
 
@@ -145,9 +131,8 @@ for($m=1; $m<=12; $m++){
             --border-color: #e9ecef;
             --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
             --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
-            /* NEW COLORS */
-            --active-admin-color: #6f42c1; /* Purple */
-            --chart-gallery-color: #17a2b8; /* Info/Teal */
+            --active-admin-color: #6f42c1;
+            --chart-gallery-color: #17a2b8;
         }
         body{
             font-family:'Roboto',sans-serif;
@@ -157,39 +142,32 @@ for($m=1; $m<=12; $m++){
             overflow-x: hidden;
         }
 
-        /* --- SLIDING EFFECT FIX FOR MOBILE --- */
         .dashboard-wrapper {
             transition: transform 0.3s ease, padding-left 0.3s ease;
             position: relative;
             z-index: 10;
-            padding-left: var(--sidebar-expanded-width); /* Default desktop offset */
+            padding-left: var(--sidebar-expanded-width);
             min-height: 100vh;
         }
 
-        /* Desktop: Collapsed State */
         .sidebar-collapsed-state .dashboard-wrapper {
-            padding-left: 70px; /* Offset for collapsed sidebar */
+            padding-left: 70px;
         }
 
-        /* Mobile View (max-width: 900px) */
         @media (max-width: 900px) {
             .dashboard-wrapper {
-                padding-left: 0; /* Important: Clear desktop offset on mobile */
-                width: 100%; /* Ensure it spans full width */
+                padding-left: 0;
+                width: 100%;
             }
             body.mobile-sidebar-open .dashboard-wrapper {
-                /* Shifts the entire content wrapper to the right */
                 transform: translateX(var(--sidebar-mobile-width));
             }
         }
-        /* Desktop View (min-width: 901px) */
         @media (min-width: 901px) {
             body.mobile-sidebar-open .dashboard-wrapper {
-                /* Prevents accidental transform on desktop */
                 transform: translateX(0);
             }
         }
-        /* --- END SLIDING FIX --- */
 
         .dashboard{
             padding:30px;
@@ -212,18 +190,14 @@ for($m=1; $m<=12; $m++){
             font-size:16px;
         }
 
-        /* --- Stat Cards --- */
         .stats{
             display:grid;
-            /* Adjust grid to fit 5 items elegantly, responsive minimum 200px */
             grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
             gap:20px;
             margin-bottom:40px;
         }
 
-        /* RESPONSIVE REFINEMENT: Stat Cards on medium screen (tablet portrait) */
         @media (max-width: 1100px) and (min-width: 769px) {
-            /* Adjust to force 3 columns on larger tablets, 2 columns on smaller ones */
             .stats{
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
@@ -279,14 +253,12 @@ for($m=1; $m<=12; $m++){
         .stat-card.admins::before{background:var(--danger-color);}
         .stat-card.admins .icon-box{color:var(--danger-color);}
 
-        /* New Stat Card */
         .stat-card.active-admins::before{background:var(--active-admin-color);}
         .stat-card.active-admins .icon-box{color:var(--active-admin-color);}
 
         .stat-card h3{font-size:14px;margin-bottom:5px;color:var(--secondary-color);font-weight:600;text-transform:uppercase;}
         .stat-card p{font-size:36px;font-weight:900;margin:0;color:var(--text-dark);}
 
-        /* --- Layout Grid (Charts & Activity) --- */
         .charts-and-activity{
             display:grid;
             grid-template-columns:3fr 1fr;
@@ -294,7 +266,6 @@ for($m=1; $m<=12; $m++){
             margin-bottom:40px;
         }
 
-        /* New Chart Row (Gallery & Messages) */
         .charts-row-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -302,7 +273,6 @@ for($m=1; $m<=12; $m++){
             margin-bottom: 40px;
         }
 
-        /* --- Chart Card --- */
         .chart-card{
             background:var(--card-background);
             border-radius:12px;
@@ -328,7 +298,6 @@ for($m=1; $m<=12; $m++){
             height:300px !important;
         }
 
-        /* --- Activity Feed --- */
         .activity-card {
             background: #fff;
             border-radius: 12px;
@@ -428,7 +397,6 @@ for($m=1; $m<=12; $m++){
         }
         .action-list{
             list-style: none; padding: 0; margin: 0;
-            /* Flex layout for multi-column quick actions */
             display:flex; flex-wrap: wrap; gap: 15px;
         }
         .action-list a{
@@ -455,32 +423,25 @@ for($m=1; $m<=12; $m++){
         .action-list a svg{margin-right:12px;width:18px;height:18px;}
 
 
-        /* --- GLOBAL RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 900px) {
-            /* Charts & Activity Stack Vertically */
             .charts-and-activity{
                 grid-template-columns:1fr;
             }
-            /* Chart Row 2 Stack Vertically */
             .charts-row-2 {
                 grid-template-columns: 1fr;
             }
             .dashboard{
-                /* Increase max-width on tablets */
                 max-width: 95%;
             }
         }
-        /* Tablet Portrait / Large Mobile Screens */
         @media (max-width: 768px) {
             .dashboard{padding:20px;}
 
-            /* Stat cards go to two columns to save vertical space */
             .stats{
                 grid-template-columns:repeat(auto-fit,minmax(min(100%, 150px),1fr));
                 gap: 15px;
             }
 
-            /* Adjust activity list for better readability */
             .activity-feed li {
                 flex-direction: column;
                 align-items: flex-start;
@@ -497,13 +458,11 @@ for($m=1; $m<=12; $m++){
                 max-width: 100%;
             }
 
-            /* Action list refinement */
             .action-list a {
-                flex-basis: 100%; /* Single column */
+                flex-basis: 100%;
                 min-width: unset;
             }
         }
-        /* Small Mobile Screens */
         @media (max-width: 480px) {
             .dashboard h2{font-size:24px;}
             .subtitle{font-size:14px;}
@@ -519,15 +478,15 @@ for($m=1; $m<=12; $m++){
             transform: translateX(-50%);
             width: 90%;
             max-width: 500px;
-            background-color: var(--warning-color); /* Yellow background for warning */
-            color: var(--text-dark); /* Ensure text is readable */
+            background-color: var(--warning-color);
+            color: var(--text-dark);
             padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            z-index: 1000; /* High z-index to ensure visibility */
+            z-index: 1000;
             font-size: 14px;
         }
 
@@ -553,7 +512,6 @@ for($m=1; $m<=12; $m++){
             color: var(--danger-color);
         }
 
-        /* Ensure banner does not show on large screens */
         @media (min-width: 901px) {
             #mobileOptimizationBanner {
                 display: none !important;
@@ -651,7 +609,6 @@ for($m=1; $m<=12; $m++){
 <script>
     feather.replace();
 
-    // --- CHART 1: Notices Per Month (Bar Chart) ---
     const noticesChart = new Chart(document.getElementById('noticesChart'), {
         type: 'bar',
         data: {
@@ -667,7 +624,7 @@ for($m=1; $m<=12; $m++){
         },
         options: {
             responsive: true,
-            aspectRatio: window.innerWidth <= 900 ? 1.5 : 2.5, /* RESPONSIVE CHART FIX */
+            aspectRatio: window.innerWidth <= 900 ? 1.5 : 2.5,
             plugins: {
                 legend: { display: false }
             },
@@ -678,7 +635,6 @@ for($m=1; $m<=12; $m++){
         }
     });
 
-    // --- CHART 2: Gallery Uploads Per Month (Line Chart) ---
     const galleryChart = new Chart(document.getElementById('galleryChart'), {
         type: 'line',
         data: {
@@ -697,7 +653,7 @@ for($m=1; $m<=12; $m++){
         },
         options: {
             responsive: true,
-            aspectRatio: window.innerWidth <= 900 ? 1 : 1.5, /* RESPONSIVE CHART FIX */
+            aspectRatio: window.innerWidth <= 900 ? 1 : 1.5,
             plugins: {
                 legend: { position: 'top' }
             },
@@ -708,7 +664,6 @@ for($m=1; $m<=12; $m++){
         }
     });
 
-    // --- CHART 3: Messages By Type (Doughnut Chart) ---
     const messagesChart = new Chart(document.getElementById('messagesChart'), {
         type: 'doughnut',
         data: {
@@ -741,16 +696,13 @@ for($m=1; $m<=12; $m++){
 </script>
 
 <script>
-    // --- Persistent Dismissal Script using localStorage ---
     const banner = document.getElementById('mobileOptimizationBanner');
     const dismissBtn = document.getElementById('dismissBannerBtn');
-    const mobileBreakpoint = 900; // Matches your existing CSS breakpoint
+    const mobileBreakpoint = 900;
 
-    // 1. Check if the dismissal flag exists in the browser's storage
     const isDismissed = localStorage.getItem('dashboardMobileBannerDismissed') === 'true';
 
     function checkScreenSize() {
-        // 2. Only show the banner if the screen is small AND the user hasn't dismissed it
         if (window.innerWidth <= mobileBreakpoint && !isDismissed) {
             banner.style.display = 'flex';
         } else {
@@ -758,14 +710,11 @@ for($m=1; $m<=12; $m++){
         }
     }
 
-    // 3. Set the persistent flag when the button is clicked
     dismissBtn.addEventListener('click', () => {
-        // Set the flag to 'true' in the user's local storage
         localStorage.setItem('dashboardMobileBannerDismissed', 'true');
-        banner.style.display = 'none'; // Hide it instantly
+        banner.style.display = 'none';
     });
 
-    // Initial check and check on resize
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
 </script>

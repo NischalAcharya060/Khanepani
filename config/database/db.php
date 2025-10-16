@@ -1,10 +1,10 @@
 <?php
 // LocalHost
-  // $host = "localhost";
-  // $port = 3306;
-  // $user = "root";
-  // $pass = "";
-  // $db   = "khaneapani";
+// $host = "localhost";
+// $port = 3306;
+// $user = "root";
+// $pass = "";
+// $db   = "khaneapani";
 
 // Infinity Host
 // $host = "sql313.infinityfree.com";

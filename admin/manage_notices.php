@@ -84,6 +84,7 @@ $username = $_SESSION['username'];
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* Existing Styles */
         .notice-table th, .notice-table td { padding: 12px 8px; }
         .notice-table tr:hover { background: #f1f1f1; }
         .pagination { text-align: center; margin-top: 20px; }
@@ -115,6 +116,126 @@ $username = $_SESSION['username'];
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* --- START Responsive Table CSS Fix --- */
+        @media screen and (max-width: 768px) {
+
+            .main-content {
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+            }
+
+            /* Force table to not be like a table */
+            .notice-table {
+                border: 0;
+                box-shadow: none;
+                border-radius: 0;
+                margin-top: 20px;
+            }
+
+            .notice-table thead {
+                display: none; /* Hide table headers */
+            }
+
+            .notice-table tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .notice-table tr:hover {
+                background: #ffffff; /* Keep card background white on hover */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .notice-table td {
+                display: block;
+                text-align: right !important;
+                border-bottom: 1px solid #f0f0f0;
+                position: relative;
+                padding-left: 45% !important; /* Make room for the label */
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            .notice-table tr:last-child td {
+                border-bottom: 1px solid #f0f0f0; /* Ensure all rows have a separator */
+            }
+
+            .notice-table td:before {
+                /* The data label/header from the original table */
+                position: absolute;
+                left: 12px;
+                width: 40%;
+                text-align: left;
+                font-weight: 600;
+                color: #34495e; /* A clear color for labels */
+                text-transform: capitalize;
+                content: attr(data-label);
+            }
+
+            /* S.N. and Title handling for a card header feel */
+            .notice-table tr td:nth-child(1) { /* S.N. */
+                text-align: left !important;
+                font-weight: 700;
+                background-color: #f8f9fa;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+            .notice-table tr td:nth-child(1):before {
+                content: 'S.N.'; /* Use a fixed label for S.N. as it's a number */
+                color: #212529;
+            }
+
+            .notice-table tr td:nth-child(2) { /* Title */
+                font-weight: 500;
+            }
+
+            /* Actions column */
+            .notice-table td:last-child {
+                border-bottom: none;
+                text-align: center !important;
+                padding: 15px 10px !important;
+                display: flex;
+                flex-direction: column;
+                gap: 8px; /* Space out the action buttons */
+            }
+            .notice-table td:last-child a.btn {
+                flex-grow: 1;
+                width: 100%; /* Make buttons full width */
+            }
+
+            /* Use data-label attribute for all columns */
+            .notice-table tr td:nth-child(1) { /* S.N. */
+                text-align: center !important;
+                padding-left: 10px !important;
+            }
+            .notice-table tr td:nth-child(1):before { content: '<?= $lang['sn'] ?? 'S.N.' ?>'; position: initial; width: auto; }
+            .notice-table tr td:nth-child(2):before { content: '<?= $lang['title'] ?? 'Title' ?>'; }
+            .notice-table tr td:nth-child(3):before { content: '<?= $lang['date'] ?? 'Date' ?>'; }
+            .notice-table tr td:nth-child(4):before { content: '<?= $lang['created_by'] ?? 'Created By' ?>'; }
+            .notice-table tr td:nth-child(5):before { content: '<?= $lang['actions'] ?? 'Actions' ?>'; position: initial; width: auto; }
+        }
+
+        /* Further optimization for small phones */
+        @media screen and (max-width: 480px) {
+            .notice-table td {
+                padding-left: 50% !important;
+            }
+            .notice-table td:before {
+                width: 45%;
+                font-size: 0.9em;
+            }
+            .notice-table td:last-child {
+                flex-direction: column;
+            }
+        }
+        /* --- END Responsive Table CSS Fix --- */
     </style>
 </head>
 <body>
@@ -161,11 +282,11 @@ $username = $_SESSION['username'];
             <?php $sn = $offset + 1; ?>
             <?php while ($notice = $notices->fetch_assoc()): ?>
                 <tr>
-                    <td><?= $sn++ ?></td>
-                    <td><?= htmlspecialchars($notice['title']) ?></td>
-                    <td><?= format_nepali_date($notice['created_at'], $cal) ?></td>
-                    <td><?= !empty($notice['created_by']) ? htmlspecialchars($notice['created_by']) : 'N.A.' ?></td>
-                    <td>
+                    <td data-label="<?= $lang['sn'] ?? 'S.N.' ?>"><?= $sn++ ?></td>
+                    <td data-label="<?= $lang['title'] ?? 'Title' ?>"><?= htmlspecialchars($notice['title']) ?></td>
+                    <td data-label="<?= $lang['date'] ?? 'Date' ?>"><?= format_nepali_date($notice['created_at'], $cal) ?></td>
+                    <td data-label="<?= $lang['created_by'] ?? 'Created By' ?>"><?= !empty($notice['created_by']) ? htmlspecialchars($notice['created_by']) : 'N.A.' ?></td>
+                    <td data-label="<?= $lang['actions'] ?? 'Actions' ?>">
                         <a href="view_notice.php?id=<?= $notice['id'] ?>" class="btn small info">👁 <?= $lang['view'] ?? 'View' ?></a>
                         <a href="edit_notice.php?id=<?= $notice['id'] ?>" class="btn small">✏ <?= $lang['edit'] ?? 'Edit' ?></a>
                         <a href="manage_notices.php?delete=<?= $notice['id'] ?>" class="btn small danger"
@@ -177,13 +298,12 @@ $username = $_SESSION['username'];
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="4" style="text-align:center; padding:20px;"><?= $lang['no_notices'] ?? 'No notices found.' ?></td>
+                <td colspan="5" style="text-align:center; padding:20px;"><?= $lang['no_notices'] ?? 'No notices found.' ?></td>
             </tr>
         <?php endif; ?>
         </tbody>
     </table>
 
-    <!-- Pagination -->
     <div class="pagination">
         <?php if($page > 1): ?>
             <a href="?page=<?= $page-1 ?>"><?= $lang['previous'] ?? '« Previous' ?></a>

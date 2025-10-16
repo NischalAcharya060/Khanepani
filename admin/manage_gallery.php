@@ -161,26 +161,23 @@ $username = $_SESSION['username'];
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
 
-        /* --- New Wrapper for responsive table styling --- */
         .gallery-table-container {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             border-radius: 12px;
-            overflow: hidden; /* Contains the border-radius */
+            overflow: hidden;
             margin-top: 20px;
         }
 
         .table-responsive {
-            overflow-x: auto; /* Enables horizontal scroll on small screens */
+            overflow-x: auto;
             width: 100%;
         }
-        /* --- End New Wrapper --- */
 
         .gallery-table {
             width: 100%;
-            min-width: 700px; /* Ensure table is wide enough to scroll horizontally on mobile */
+            min-width: 700px;
             border-collapse: separate;
             border-spacing: 0;
-            /* box-shadow and border-radius moved to .gallery-table-container */
         }
 
         .gallery-table th {
@@ -305,7 +302,7 @@ $username = $_SESSION['username'];
 
         @media (max-width: 900px) {
             .main-content {
-                padding: 15px; /* Less padding on small screens */
+                padding: 15px;
             }
             h2 {
                 font-size: 1.8em;
@@ -322,22 +319,126 @@ $username = $_SESSION['username'];
                 width: 100%;
                 justify-content: center;
             }
+
+            .gallery-table-container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .table-responsive {
+                overflow-x: hidden;
+            }
+            .gallery-table {
+                min-width: 100%;
+                border-collapse: collapse;
+            }
+
+            .gallery-table thead {
+                display: none;
+            }
+
+            .gallery-table tr {
+                display: block;
+                margin-bottom: 20px;
+                border: 1px solid #dcdcdc;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            }
+            .gallery-table tr:hover {
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+                background: #ffffff;
+            }
+
+            .gallery-table td {
+                display: block;
+                text-align: right !important;
+                border-bottom: 1px solid #f0f0f0;
+                position: relative;
+                padding: 14px 15px !important;
+                padding-left: 55% !important;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            .gallery-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                width: 40%;
+                text-align: left;
+                font-weight: 700;
+                color: #1e3a8a;
+                text-transform: uppercase;
+                font-size: 0.85em;
+            }
+
+            .gallery-table tr td:nth-child(1) {
+                text-align: left !important;
+                background-color: #e6f3ff;
+                color: #1e3a8a;
+                font-size: 1.1em;
+                padding-left: 15px !important;
+                border-bottom: 2px solid #cce0f0;
+            }
+            .gallery-table tr td:nth-child(1):before {
+                content: '';
+                display: none;
+            }
+
+            .gallery-table tr td:nth-child(2) {
+                padding-left: 15px !important;
+                text-align: center !important;
+            }
+            .gallery-table tr td:nth-child(2):before {
+                display: none;
+            }
+
+            .gallery-table tr td:last-child {
+                border-bottom: none;
+                padding: 15px !important;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-evenly;
+                gap: 10px;
+            }
+
+            .gallery-table tr td:last-child:before {
+                display: none;
+            }
+
+            .action-group-buttons {
+                width: 100%;
+                justify-content: space-evenly;
+            }
+            .btn-edit, .btn-delete {
+                flex-grow: 1;
+                max-width: 48%;
+            }
         }
+
 
         @media (max-width: 480px) {
             .action-group-buttons {
                 flex-direction: column;
-                gap: 5px;
+                gap: 8px;
             }
             .btn-edit, .btn-delete {
                 width: 100%;
+                max-width: 100%;
                 box-sizing: border-box;
-                padding: 8px; /* Slightly smaller padding */
+                padding: 8px;
                 font-size: 0.8em;
             }
             .gallery-img {
                 width: 60px;
                 height: 45px;
+            }
+            .gallery-table td {
+                padding-left: 55% !important;
+            }
+            .gallery-table td:before {
+                width: 40%;
+                font-size: 0.8em;
             }
         }
     </style>
@@ -386,13 +487,13 @@ $username = $_SESSION['username'];
                         $imageSrc = file_exists($uploadedPath) ? $uploadedPath : "../assets/images/placeholder.png";
                         ?>
                         <tr>
-                            <td><?= $sn++ ?></td>
-                            <td style="text-align: center;"><img src="<?= $imageSrc ?>" class="gallery-img" alt="<?= htmlspecialchars($image['title'] ?? 'Image') ?>"></td>
-                            <td><?= $image['title'] ? htmlspecialchars($image['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
-                            <td><?= $image['album_name'] ? htmlspecialchars($image['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
-                            <td><?= nepali_date_time($image['created_at'], $cal) ?></td>
-                            <td><?= $image['uploaded_by'] ? htmlspecialchars($image['uploaded_by']) : 'N.A' ?></td>
-                            <td>
+                            <td data-label="<?= $lang['sn'] ?? "S.N." ?>"><?= $sn++ ?></td>
+                            <td data-label="<?= $lang['image'] ?? "Image" ?>" style="text-align: center;"><img src="<?= $imageSrc ?>" class="gallery-img" alt="<?= htmlspecialchars($image['title'] ?? 'Image') ?>"></td>
+                            <td data-label="<?= $lang['title'] ?? "Title" ?>"><?= $image['title'] ? htmlspecialchars($image['title']) : '<em>' . ($lang['no_title'] ?? "No Title") . '</em>' ?></td>
+                            <td data-label="<?= $lang['album'] ?? "Album" ?>"><?= $image['album_name'] ? htmlspecialchars($image['album_name']) : '<em>' . ($lang['uncategorized'] ?? "Uncategorized") . '</em>' ?></td>
+                            <td data-label="<?= $lang['uploaded_at'] ?? "Uploaded At" ?>"><?= nepali_date_time($image['created_at'], $cal) ?></td>
+                            <td data-label="<?= $lang['uploaded_by'] ?? "Uploaded By" ?>"><?= $image['uploaded_by'] ? htmlspecialchars($image['uploaded_by']) : 'N.A' ?></td>
+                            <td data-label="<?= $lang['actions'] ?? "Actions" ?>">
                                 <div class="action-group-buttons">
                                     <a href="gallery_edit.php?id=<?= $image['id'] ?>" class="btn btn-edit">✏ <?= $lang['edit'] ?? "Edit" ?></a>
                                     <a href="manage_gallery.php?delete=<?= $image['id'] ?>" class="btn btn-delete"
