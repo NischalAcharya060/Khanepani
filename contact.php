@@ -50,6 +50,15 @@ if ($result && $result->num_rows > 0) {
             --radius: 18px;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
+        body {
+            /* Ensures proper mobile rendering */
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.6;
+        }
+
         .contact-section {
             padding: 80px 20px;
             max-width: 1200px;
@@ -61,6 +70,7 @@ if ($result && $result->num_rows > 0) {
             font-weight: 700;
             margin-bottom: 20px;
             animation: slideInUp 0.8s ease-out;
+            color: var(--text-dark); /* Ensure h2 color is consistent */
         }
         .contact-section h2::after {
             content: '';
@@ -90,6 +100,7 @@ if ($result && $result->num_rows > 0) {
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             transition: all 0.4s ease;
+            box-sizing: border-box; /* Crucial for flexible widths */
         }
         .contact-info {
             border-left: 5px solid var(--secondary-teal);
@@ -105,7 +116,7 @@ if ($result && $result->num_rows > 0) {
         }
         .contact-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Aligns text correctly if it wraps */
             margin: 20px 0;
             font-size: 16px;
             line-height: 1.5;
@@ -115,10 +126,41 @@ if ($result && $result->num_rows > 0) {
             margin-right: 15px;
             font-size: 20px;
             width: 25px;
+            flex-shrink: 0; /* Prevents icon from shrinking */
             animation: pulse 2s infinite ease-in-out;
+        }
+        .contact-item p {
+            margin: 0; /* Remove default paragraph margin */
+            word-break: break-word; /* Allows long content to wrap */
         }
         .contact-item:nth-child(2) i { animation-delay: 0.2s; }
         .contact-item:nth-child(3) i { animation-delay: 0.4s; }
+
+        .map iframe {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            border: 0;
+            margin-top: 30px;
+        }
+
+        .social-links { margin-top: 25px; text-align: center; }
+        .social-links a {
+            display: inline-block; /* Ensure they respond to width/height */
+            width: 40px; height: 40px; line-height: 40px;
+            margin: 0 6px;
+            background: var(--border-color);
+            color: var(--text-dark);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+        .social-links a:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: scale(1.15) rotate(5deg);
+        }
+
         .contact-form form input,
         .contact-form form select,
         .contact-form form textarea {
@@ -136,84 +178,77 @@ if ($result && $result->num_rows > 0) {
             border-color: var(--primary-blue);
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
-        .map iframe {
-            width: 100%;
-            height: 300px;
-            border-radius: 10px;
-            border: 0;
-            margin-top: 30px;
-        }
-        .social-links { margin-top: 25px; text-align: center; }
-        .social-links a {
-            width: 40px; height: 40px; line-height: 40px;
-            margin: 0 6px;
-            background: var(--border-color);
-            color: var(--text-dark);
-            border-radius: 50%;
-            transition: transform 0.3s ease;
-        }
-        .social-links a:hover {
-            background: var(--primary-blue);
-            color: white;
-            transform: scale(1.15) rotate(5deg);
-        }
+
         .contact-form button {
             background: linear-gradient(45deg, var(--primary-blue), var(--secondary-teal));
             color: #fff;
             padding: 14px 30px;
+            border: none; /* Make sure button has no default border */
             border-radius: 10px;
             font-size: 17px;
             font-weight: 600;
             box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
             transition: all 0.3s;
             overflow: hidden;
+            cursor: pointer;
+            width: auto; /* Allow button to size naturally */
         }
         .contact-form button:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(23, 162, 184, 0.4);
         }
-        .contact-form button.loading {
-            background: #adb5bd;
-            pointer-events: none;
-            position: relative;
-        }
+
+        /* Loading state styles remain the same */
+        .contact-form button.loading { background: #adb5bd; pointer-events: none; position: relative; }
         .contact-form button.loading i { display: none; }
         .contact-form button.loading::after {
-            content: "";
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s linear infinite;
-            transform: translateY(-50%);
+            content: ""; position: absolute; right: 15px; top: 50%; width: 18px; height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.5); border-radius: 50%; border-top-color: #fff;
+            animation: spin 0.8s linear infinite; transform: translateY(-50%);
         }
         .contact-form button.loading span { opacity: 0; }
         .contact-form button.loading::before {
-            content: "<?= $lang['sending'] ?? 'SENDING...' ?>";
-            color: white;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            content: "<?= $lang['sending'] ?? 'SENDING...' ?>"; color: white;
+            position: absolute; left: 50%; transform: translateX(-50%);
         }
+
         .hidden { display: none !important; }
+
+        /* Animation Keyframes (remain the same) */
         @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes spin { 0% { transform: translateY(-50%) rotate(0deg); } 100% { transform: translateY(-50%) rotate(360deg); } }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); color: var(--primary-blue); } 100% { transform: scale(1); } }
+
         @media screen and (max-width: 900px) {
             .contact-content { flex-direction: column; gap: 25px; }
-            .contact-info, .contact-form { min-width: 100%; padding: 30px; }
+            .contact-info, .contact-form { min-width: 100%; padding: 30px; flex: 1 1 100%; }
             .contact-section h2 { font-size: 34px; }
+            .map iframe { height: 250px; }
         }
+
+        /* Small Devices/Mobile (max-width: 500px) */
         @media screen and (max-width: 500px) {
             .contact-section { padding: 40px 15px; }
-            .contact-info, .contact-form { padding: 25px; }
+            .contact-info, .contact-form { padding: 25px 20px; border-radius: 12px; }
             .contact-section h2 { font-size: 28px; }
+            .contact-info h3, .contact-form h3 { font-size: 20px; }
+            .contact-item { margin: 15px 0; font-size: 15px; }
+            .contact-item i { font-size: 18px; margin-right: 10px; }
+
+            .contact-form form input,
+            .contact-form form select,
+            .contact-form form textarea {
+                padding: 12px 15px;
+                font-size: 15px;
+            }
+            .map iframe { height: 200px; }
+            .g-recaptcha {
+                width: 100% !important;
+                overflow-x: auto;
+                transform-origin: 0 0;
+            }
         }
     </style>
 </head>

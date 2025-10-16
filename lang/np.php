@@ -251,6 +251,8 @@ $lang = [
     'date_to' => 'मिति सम्म',
     'clear_filters' => 'सबै खोज र फिल्टरहरू हटाउनुहोस्',
     'clear_btn' => 'हटाउनुहोस्',
+    'toggle_filters' => 'खोज र फिल्टरहरू देखाउनुहोस्',
+    'hide_filters' => 'खोज र फिल्टरहरू लुकाउनुहोस्',
 
     // Notice Types (matching the PHP array keys)
     'type_general' => 'सामान्य सूचना',

@@ -246,6 +246,8 @@ $lang = [
     'date_to' => 'Date To',
     'clear_filters' => 'Clear all search and filters',
     'clear_btn' => 'Clear',
+    'toggle_filters' => 'Show Search & Filters',
+    'hide_filters' => 'Hide Search & Filters',
 
     // Notice Types (matching the PHP array keys)
     'type_general' => 'General Notice',

@@ -44,7 +44,6 @@ $notice_type_options = [
         'Financial'     => $lang['type_financial'] ?? 'Financial Report',
 ];
 
-// CORRECTED SQL QUERY: Fetch the actual `type` column from the database.
 $sql = "SELECT id, title, created_at, type FROM notices ORDER BY created_at DESC";
 $result = mysqli_query($conn, $sql);
 $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -99,9 +98,38 @@ $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
             font-weight: 700;
         }
 
+        .filter-toggle-wrapper {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        #filter-toggle-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+            transition: background-color 0.3s ease;
+        }
+        #filter-toggle-btn i {
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+        #filter-toggle-btn.active i {
+            transform: rotate(180deg);
+        }
+        #filter-toggle-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
         .controls-bar {
             display: grid;
-            grid-template-columns: 1fr repeat(3, 180px) auto;
+            grid-template-columns: repeat(5, 1fr);
             gap: 20px;
             margin-bottom: 35px;
             align-items: center;
@@ -109,7 +137,17 @@ $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
             padding: 20px;
             border-radius: 12px;
             box-shadow: var(--shadow-light);
+            transition: max-height 0.4s ease-out, opacity 0.4s ease-out, padding 0.4s ease-out;
+            overflow: hidden;
         }
+        @media (min-width: 901px) {
+            .controls-bar {
+                grid-template-columns: 1fr repeat(3, 180px) auto;
+                max-height: 300px;
+                opacity: 1;
+            }
+        }
+
 
         .search-wrapper, .date-wrapper {
             position: relative;
@@ -211,12 +249,14 @@ $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
             color: var(--accent-color);
             font-size: 20px;
             margin-right: 20px;
+            flex-shrink: 0;
         }
         .notice-title {
             font-size: 18px;
             font-weight: 600;
             margin: 0;
             line-height: 1.4;
+            word-break: break-word;
         }
 
         .notice-date-box {
@@ -231,6 +271,8 @@ $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
             border-radius: 8px;
             min-width: 110px;
             line-height: 1.3;
+            flex-shrink: 0;
+            margin-left: 15px;
         }
         .notice-date-box .notice-time {
             display: block;
@@ -271,19 +313,64 @@ $notices = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 grid-template-columns: 1fr 1fr;
                 padding: 15px;
             }
-            .controls-bar > :nth-child(5) {
-                grid-column: span 2;
+            .search-wrapper { grid-column: 1 / 3; }
+            .date-wrapper:nth-of-type(3) { grid-column: 1 / 2; }
+            .date-wrapper:nth-of-type(4) { grid-column: 2 / 3; }
+            #clear-filters { grid-column: 1 / 3; }
+
+            .filter-toggle-wrapper {
+                display: block;
             }
         }
+
         @media (max-width: 600px) {
             .notice-container { padding: 15px 10px; }
             .notice-container h2 { font-size: 32px; }
-            .notice-item { padding: 15px; flex-wrap: wrap; }
-            .notice-info { width: 100%; margin-bottom: 10px; }
-            .notice-date-box { min-width: auto; padding: 6px 12px; }
+
             .controls-bar {
                 grid-template-columns: 1fr;
                 gap: 10px;
+                max-height: 0;
+                padding: 0 15px;
+                margin-bottom: 0;
+                opacity: 0;
+            }
+            .controls-bar.expanded {
+                max-height: 400px;
+                padding: 15px;
+                margin-bottom: 20px;
+                opacity: 1;
+            }
+            .search-wrapper, .filter-select, .date-wrapper, #clear-filters {
+                grid-column: auto !important;
+            }
+
+            .notice-item {
+                padding: 15px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .notice-info {
+                width: 100%;
+                margin-bottom: 10px;
+                padding-right: 0;
+            }
+            .notice-date-box {
+                align-self: flex-end;
+                min-width: auto;
+                padding: 6px 12px;
+                margin-left: 0;
+            }
+
+            .notice-title {
+                font-size: 16px;
+            }
+            .notice-icon {
+                margin-right: 10px;
+            }
+
+            .filter-toggle-wrapper {
+                display: block;
             }
         }
     </style>
@@ -297,7 +384,14 @@ include 'components/header.php';
 <div class="notice-container">
     <h2><?= $lang['all_notices'] ?? 'Notices' ?></h2>
 
-    <div class="controls-bar">
+    <div class="filter-toggle-wrapper">
+        <button id="filter-toggle-btn" aria-expanded="false" aria-controls="controls-bar">
+            <i class="fas fa-filter"></i> <span><?= $lang['toggle_filters'] ?? 'Show Filters' ?></span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <div class="controls-bar" id="controls-bar">
         <div class="search-wrapper">
             <i class="fas fa-search"></i>
             <input type="text" id="search-input" placeholder="<?= $lang['search_notices'] ?? 'Search titles...' ?>">
@@ -331,7 +425,6 @@ include 'components/header.php';
         if ($hasInitialNotices) {
             foreach($notices as $row){
                 $displayDate = format_date($row['created_at'], $cal, $lang);
-                // Use $row['type'] which is now correctly fetched from the DB
                 $notice_type = $row['type'] ?? 'General';
                 ?>
                 <a
@@ -386,6 +479,34 @@ include 'components/footer.php';
         const noResultsMessage = document.getElementById('no-results-message');
         const noNoticesMessage = document.getElementById('no-notices-message');
         const hasInitialNotices = noticeItems.length > 0;
+
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        const controlsBar = document.getElementById('controls-bar');
+        const toggleBtnSpan = filterToggleBtn.querySelector('span');
+
+        const isMobile = window.matchMedia('(max-width: 600px)').matches;
+        const langStrings = {
+            showFilters: "<?= addslashes($lang['toggle_filters'] ?? 'Show Filters') ?>",
+            hideFilters: "<?= addslashes($lang['hide_filters'] ?? 'Hide Filters') ?>"
+        };
+
+        if (isMobile) {
+            controlsBar.classList.remove('expanded');
+            filterToggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtnSpan.textContent = langStrings.showFilters;
+        } else {
+            controlsBar.classList.add('expanded');
+            filterToggleBtn.setAttribute('aria-expanded', 'true');
+        }
+
+        if (filterToggleBtn) {
+            filterToggleBtn.addEventListener('click', function() {
+                const isExpanded = controlsBar.classList.toggle('expanded');
+                filterToggleBtn.classList.toggle('active', isExpanded);
+                filterToggleBtn.setAttribute('aria-expanded', isExpanded);
+                toggleBtnSpan.textContent = isExpanded ? langStrings.hideFilters : langStrings.showFilters;
+            });
+        }
 
         function applyFilters() {
             const query = searchInput.value.toLowerCase().trim();
