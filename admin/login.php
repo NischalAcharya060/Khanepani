@@ -172,6 +172,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            /* Animation for background */
+            animation: backgroundPan 60s linear infinite;
+        }
+
+        /* New Keyframe for Background Pan */
+        @keyframes backgroundPan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         body::before {
@@ -219,7 +228,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             justify-content: center;
             padding: 20px;
             position: relative;
+            /* Initial state for right panel animation */
+            transform: translateX(100%);
+            opacity: 0;
+            animation: slideInRight 1s ease-out 0.3s forwards; /* Delayed animation */
         }
+
+        /* New Keyframe for right panel slide in */
+        @keyframes slideInRight {
+            to { transform: translateX(0); opacity: 1; }
+        }
+
 
         .right img {
             max-width: 100%;
@@ -240,12 +259,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-weight: 700;
             margin-bottom: 10px;
             font-size: 2em;
+            /* Animation */
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease-out 0.8s forwards;
         }
 
         .left > p:not(.error) {
             color: #777;
             margin-bottom: 30px;
             font-size: 1em;
+            /* Animation */
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease-out 0.9s forwards;
+        }
+
+        @keyframes slideInLeft {
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .error {
@@ -273,7 +304,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .input-group {
             position: relative;
             margin-bottom: 25px;
+            /* Animation: start hidden */
+            opacity: 0;
+            transform: translateY(10px);
+            /* Staggered delay for inputs */
         }
+
+        .login-form .input-group:nth-child(1) {
+            animation: fadeInUp 0.5s ease-out 1.1s forwards;
+        }
+
+        .login-form .input-group:nth-child(2) {
+            animation: fadeInUp 0.5s ease-out 1.2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
 
         .input-group .icon {
             position: absolute;
@@ -282,6 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transform: translateY(-50%);
             color: var(--primary-color);
             font-size: 1.1em;
+            transition: color 0.3s; /* Transition for icon color */
         }
 
         .input-group input {
@@ -299,6 +348,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             outline: none;
         }
 
+        .input-group input:focus ~ .icon { /* Changed to use general sibling selector for correct targeting */
+            color: var(--secondary-color); /* Change icon color on focus */
+        }
+
+
         .input-group .toggle-password {
             position: absolute;
             right: 15px;
@@ -314,6 +368,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .btn {
+            position: relative; /* Needed for positioning the spinner */
+            overflow: hidden;
             background: var(--primary-color);
             color: var(--white);
             border: none;
@@ -322,18 +378,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s, transform 0.1s;
+            transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
             letter-spacing: 1px;
             margin-top: 10px;
+            /* Animation */
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 1.3s forwards;
         }
 
         .btn:hover {
             background: var(--secondary-color);
+            box-shadow: 0 5px 15px rgba(42, 111, 219, 0.4);
         }
 
         .btn:active {
-            transform: scale(0.99);
+            transform: scale(0.98);
         }
+
+
+        .btn.loading {
+            pointer-events: none; /* Disable multiple clicks */
+            background: #4a8cd6; /* Slightly darker color when loading */
+            color: transparent !important; /* Hide button text */
+            box-shadow: none;
+        }
+
+        .btn.loading .btn-text {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        /* The Spinner */
+        .btn .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px;
+            height: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--white);
+            border-radius: 50%;
+            display: none; /* Hidden by default */
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn.loading .spinner {
+            display: block; /* Show spinner when loading */
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* --- End New CSS for Loading State --- */
+
 
         .back-btn {
             display: inline-block;
@@ -342,6 +441,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s, transform 0.3s;
+            /* Animation */
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.5s ease-out 1.4s forwards;
         }
 
         .back-btn:hover {
@@ -355,6 +458,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             top: 20px;
             right: 20px;
             z-index: 20;
+            transition: transform 0.3s ease-out;
+            /* Animation */
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: dropdownFadeIn 0.5s ease-out 1.5s forwards;
+        }
+
+        /* New Keyframe for dropdown */
+        @keyframes dropdownFadeIn {
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .language-selector select {
@@ -365,6 +478,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: var(--text-color);
             cursor: pointer;
             font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .language-selector select:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(42, 111, 219, 0.1);
         }
 
         /* Media Queries for Responsiveness */
@@ -411,7 +530,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <p class="error"><?= htmlspecialchars($error) ?></p>
         <?php endif; ?>
 
-        <form method="POST" class="login-form">
+        <form method="POST" class="login-form" id="login-form">
             <div class="input-group">
                 <span class="icon"><i class="fas fa-user"></i></span>
                 <input type="text" name="login" placeholder="<?= $lang['placeholder_username_email'] ?>" required>
@@ -425,7 +544,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </span>
             </div>
 
-            <button type="submit" class="btn"><?= $lang['login_button'] ?></button>
+            <button type="submit" class="btn" id="login-btn">
+                <span class="btn-text"><?= $lang['login_button'] ?></span>
+                <div class="spinner"></div>
+            </button>
         </form>
 
         <a href="../index.php" class="back-btn">
@@ -452,6 +574,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             toggle.classList.add('fa-eye');
         }
     }
+
+    document.getElementById('login-form').addEventListener('submit', function(event) {
+        const loginButton = document.getElementById('login-btn');
+
+        const loginInput = this.elements['login'];
+        const passwordInput = this.elements['password'];
+
+        if (loginInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+            loginButton.classList.add('loading');
+        }
+    });
 </script>
 </body>
 </html>

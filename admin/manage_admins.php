@@ -205,11 +205,12 @@ $username = $_SESSION['username'] ?? 'Admin';
 <html lang="<?= $_SESSION['lang'] ?>">
 <head>
     <meta charset="UTF-8">
-    <title><?= $lang['manage_admins'] ?? 'Manage Admins' ?> - सलकपुर खानेपानी</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title><?= $lang['manage_admins'] ?? 'Manage Admins' ?> - सलकपुर खानेपानी</title>
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
+        /* Base styles from original CSS */
         h2 {
             color: #1e3a8a;
             font-weight: 700;
@@ -293,6 +294,7 @@ $username = $_SESSION['username'] ?? 'Admin';
         .admin-table td:nth-child(1), .admin-table th:nth-child(1) { text-align: center; width: 4%; }
         .admin-table td:nth-child(2), .admin-table th:nth-child(2) { text-align: center; width: 6%; }
         .admin-table td:nth-child(5), .admin-table th:nth-child(5) { width: 12%; }
+
         /* Adjusted width for last column based on master admin visibility */
         <?php if ($is_master_admin_session): ?>
         .admin-table td:nth-child(6), .admin-table th:nth-child(6) { text-align: center; width: 8%; } /* Status */
@@ -471,6 +473,112 @@ $username = $_SESSION['username'] ?? 'Admin';
         .pagination a { margin: 0 5px; text-decoration: none; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; color: #0056d6; }
         .pagination a.active { background-color: #0056d6; color: white; border-color: #0056d6; }
         .pagination a:hover { background-color: #0056d6; color: white; }
+
+        /* --- START Responsive Table CSS --- */
+
+        /* Max width before table transformation (e.g., small tablets and phones) */
+        @media screen and (max-width: 900px) {
+
+            /* General padding adjustment for smaller screens */
+            .main-content {
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+            }
+
+            /* Force table to not be like a table */
+            .admin-table {
+                border: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .admin-table thead {
+                display: none; /* Hide table headers (but not display: none;, or its data will be lost) */
+            }
+
+            .admin-table tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .admin-table tbody tr:hover {
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .admin-table td {
+                display: block;
+                text-align: right !important;
+                border-bottom: 1px dotted #e9ecef;
+                position: relative;
+                padding-left: 50% !important; /* Make room for the pseudo-element label */
+            }
+
+            .admin-table td:before {
+                /* The data label/header from the original table */
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: 600;
+                color: #1e3a8a; /* Primary color for labels */
+                text-transform: capitalize;
+            }
+
+            /* Special handling for certain columns */
+            .admin-table td:nth-child(1) { /* S.N. */
+                text-align: left !important;
+                font-weight: 700;
+                background-color: #f0f4f8;
+                border-top: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .admin-table td:nth-child(2) { /* Profile Pic */
+                text-align: right !important;
+                padding-left: 15px !important;
+                border-bottom: none;
+            }
+            .admin-table td:nth-child(2):before {
+                content: ''; /* Hide label for profile pic */
+            }
+
+            .admin-table td:last-child {
+                border-bottom: none;
+                text-align: center !important;
+                padding-top: 15px;
+                padding-bottom: 15px;
+            }
+
+            .action-group-buttons {
+                justify-content: center;
+            }
+
+            .btn.action-button {
+                flex-grow: 1; /* Allow buttons to grow to fill space */
+                max-width: 48%; /* Limit to 2 per row */
+            }
+        }
+
+        /* Further optimization for very small screens (phones) */
+        @media screen and (max-width: 450px) {
+            .btn.action-button {
+                max-width: 100%; /* Stack buttons fully on small phones */
+            }
+            .admin-table td {
+                font-size: 0.9em;
+            }
+            .admin-table td:before {
+                width: 40%;
+                font-size: 0.9em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -509,8 +617,8 @@ $username = $_SESSION['username'] ?? 'Admin';
                 <?php $is_self = ($admin['id'] == $current_admin_id); ?>
                 <?php $is_master = ($admin['role_id_fk'] == 1); ?>
                 <tr>
-                    <td><?= $sn++ ?></td>
-                    <td>
+                    <td data-label="<?= $lang['sn'] ?? 'S.N.' ?>"><?= $sn++ ?></td>
+                    <td data-label="<?= $lang['profile'] ?? 'Profile' ?>">
                         <?php
                         $admin_profile_pic = $admin['profile_pic'] ?? '';
                         $uploadedPath = "../assets/uploads/profile/" . htmlspecialchars($admin_profile_pic);
@@ -522,10 +630,10 @@ $username = $_SESSION['username'] ?? 'Admin';
                         }
                         ?>
                     </td>
-                    <td><?= htmlspecialchars($admin['username'] ?? 'N/A') ?></td>
-                    <td><?= htmlspecialchars($admin['email'] ?? 'N/A') ?></td>
+                    <td data-label="<?= $lang['username'] ?? 'Username' ?>"><?= htmlspecialchars($admin['username'] ?? 'N/A') ?></td>
+                    <td data-label="<?= $lang['email'] ?? 'Email' ?>"><?= htmlspecialchars($admin['email'] ?? 'N/A') ?></td>
 
-                    <td data-role-id="<?= $admin['role_id_fk'] ?>" data-admin-id="<?= $admin['id'] ?>" class="role-cell">
+                    <td data-label="<?= $lang['role'] ?? 'Role' ?>" data-role-id="<?= $admin['role_id_fk'] ?>" data-admin-id="<?= $admin['id'] ?>" class="role-cell">
                         <?php if ($is_self && $is_master): ?>
                             <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?></span> (<?= $lang['you'] ?? 'You' ?>)
                         <?php elseif ($current_admin_role === 'masteradmin'): ?>
@@ -533,11 +641,11 @@ $username = $_SESSION['username'] ?? 'Admin';
                                 <?= htmlspecialchars($admin['role_name'] ?? '—') ?>
                             </span>
                         <?php else: ?>
-                            <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?>
-                        <?php endif; ?>
+                        <span class="role-static"><?= htmlspecialchars($admin['role_name'] ?? '—') ?>
+                            <?php endif; ?>
                     </td>
 
-                    <td class="status-cell">
+                    <td data-label="<?= $lang['status'] ?? 'Status' ?>" class="status-cell">
                         <?php
                         $status_class = 'status-' . strtolower($admin['status'] ?? 'inactive');
                         $status_text = ucfirst($admin['status'] ?? 'Inactive');
@@ -545,8 +653,8 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <span id="badge-<?= $admin['id'] ?>" class="status-badge <?= $status_class ?>"><?= $status_text ?></span>
                     </td>
 
-                    <td><?= format_nepali_date($admin['created_at'], $cal) ?></td>
-                    <td>
+                    <td data-label="<?= $lang['created_at'] ?? 'Created At' ?>"><?= format_nepali_date($admin['created_at'], $cal) ?></td>
+                    <td data-label="<?= $lang['last_login'] ?? 'Last Login' ?>">
                         <?php
                         $last_login_str = $admin['last_login'] ?? null;
                         $is_active_now = $is_self || is_admin_active_now($last_login_str);
@@ -565,10 +673,10 @@ $username = $_SESSION['username'] ?? 'Admin';
                         }
                         ?>
                     </td>
-                    <td><?= htmlspecialchars($admin['added_by'] ?? 'N/A') ?></td>
+                    <td data-label="<?= $lang['added_by'] ?? 'Added By' ?>"><?= htmlspecialchars($admin['added_by'] ?? 'N/A') ?></td>
 
                     <?php if ($is_master_admin_session): ?>
-                        <td class="action-buttons-cell">
+                        <td data-label="<?= $lang['actions'] ?? 'Actions' ?>" class="action-buttons-cell">
                             <?php
                             $you_text = $lang['you'] ?? 'You';
 
