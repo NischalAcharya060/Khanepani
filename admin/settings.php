@@ -32,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = trim($_POST['phone'] ?? '');
     $facebook_link = trim($_POST['facebook_link'] ?? '');
     $map_embed = trim($_POST['map'] ?? '');
+    $site_title = trim($_POST['site_title'] ?? '');
+    $site_description = trim($_POST['site_description'] ?? '');
 
     // Simple sanitization for map_embed: extract only the src URL if full iframe is pasted
     if (preg_match('/src="([^"]+)"/i', $map_embed, $matches)) {
@@ -41,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($email)) {
         $msg = $lang['email_required'] ?? "❌ Email is required!";
     } else {
-        $stmt = $conn->prepare("UPDATE settings SET email=?, phone=?, facebook_link=?, map_embed=?, updated_at=NOW() WHERE id=1");
+        $stmt = $conn->prepare("UPDATE settings SET email=?, phone=?, facebook_link=?, map_embed=?, site_title=?, site_description=?, updated_at=NOW() WHERE id=1");
         if ($stmt === false) {
             $msg = ($lang['db_prepare_error'] ?? "❌ Database prepare error: ") . $conn->error;
         } else {
-            $stmt->bind_param("ssss", $email, $phone, $facebook_link, $map_embed);
+            $stmt->bind_param("ssssss", $email, $phone, $facebook_link, $map_embed, $site_title, $site_description);
             if ($stmt->execute()) {
                 $msg = ($stmt->affected_rows > 0)
                         ? ($lang['settings_updated'] ?? "✅ Settings updated successfully!")
@@ -56,6 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $settings['phone'] = $phone;
                 $settings['facebook_link'] = $facebook_link;
                 $settings['map_embed'] = $map_embed;
+                $settings['site_title'] = $site_title;
+                $settings['site_description'] = $site_description;
             } else {
                 $msg = ($lang['update_failed'] ?? "❌ Failed to update settings: ") . $stmt->error;
             }
@@ -68,7 +72,9 @@ $settings = [
         'email' => 'contact@example.com',
         'phone' => '+977-123456789',
         'facebook_link' => 'https://facebook.com/khanepani',
-        'map_embed' => ''
+        'map_embed' => '',
+        'site_title' => 'सलकपुर खानेपानी',
+        'site_description' => 'Community Water Management System'
 ];
 
 $result = mysqli_query($conn, "SELECT * FROM settings WHERE id=1");
@@ -85,96 +91,286 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <script src="https://unpkg.com/feather-icons"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --secondary-color: #4cc9a7;
+            --accent-color: #7209b7;
+            --text-dark: #1a202c;
+            --text-light: #6c757d;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --success-color: #4cc9a7;
+            --error-color: #f94144;
+            --warning-color: #f9c74f;
+            --shadow-light: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Sidebar Variables */
+            --sidebar-expanded-width: 240px;
+            --sidebar-collapsed-width: 70px;
+        }
+
+        .dark-mode {
+            --text-dark: #e2e8f0;
+            --text-light: #94a3b8;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #475569;
+            --shadow-light: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Main Content Wrapper */
+        .content-wrapper {
+            transition: transform 0.3s ease, padding-left 0.3s ease;
+            position: relative;
+            z-index: 10;
+            padding-left: var(--sidebar-expanded-width);
+            min-height: 100vh;
+        }
+
+        .sidebar-collapsed-state .content-wrapper {
+            padding-left: var(--sidebar-collapsed-width);
+        }
+
+        @media (max-width: 900px) {
+            .content-wrapper {
+                padding-left: 0;
+                width: 100%;
+            }
+            body.mobile-sidebar-open .content-wrapper {
+                transform: translateX(var(--sidebar-expanded-width));
+            }
+        }
+
         .main-content {
             padding: 40px;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 40px auto;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e0e0e0;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
         }
-        h2 {
-            font-size: 30px;
-            margin-bottom: 20px;
-            color: #1a202c;
-            font-weight: 700;
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
         }
-        h2 span {
-            margin-right: 15px;
-            color: #007bff;
+
+        .header-content h2 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
         }
+
+        .header-content p {
+            color: var(--text-light);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
         label {
             display: block;
-            margin: 20px 0 8px;
+            margin-bottom: 8px;
             font-weight: 600;
-            color: #4a5568;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        input[type=text],
-        input[type=email],
-        textarea {
+
+        label .icon {
+            width: 18px;
+            height: 18px;
+            color: var(--primary-color);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        textarea,
+        select {
             width: 100%;
-            padding: 14px 18px;
+            padding: 14px 16px;
             border-radius: 10px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             font-size: 16px;
-            background-color: #f7f9fb;
-            transition: 0.3s;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            transition: var(--transition);
             resize: vertical;
-            box-sizing: border-box; /* Crucial for responsive width */
         }
-        input:focus, textarea:focus {
-            border-color: #007bff;
-            background-color: #ffffff;
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            background-color: var(--card-bg);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
         }
-        button[type=submit] {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: #fff;
-            padding: 14px 30px;
+
+        textarea {
+            min-height: 120px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-with-preview {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .input-with-preview input {
+            flex: 1;
+        }
+
+        .preview-button {
+            padding: 12px 16px;
+            background: var(--secondary-color);
+            color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 35px;
-            font-weight: 700;
-            font-size: 16px;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            white-space: nowrap;
         }
-        button[type=submit]:hover {
-            background: linear-gradient(135deg, #0056b3, #007bff);
-            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+
+        .preview-button:hover {
+            background: #3aa58a;
             transform: translateY(-2px);
         }
-        .message {
-            margin-bottom: 25px;
-            padding: 18px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        .success { background-color: #e6ffed; color: #2f855a; border: 1px solid #a8dadc; }
-        .error { background-color: #fff0f3; color: #c53030; border: 1px solid #f68c9f; }
+
         .map-preview-container {
-            margin-top: 30px;
+            margin-top: 20px;
             padding: 20px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            background-color: #f7f9fb;
+            background-color: rgba(0, 0, 0, 0.02);
         }
+
         .map-iframe-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio (Desktop Default) */
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
+
         .map-iframe-wrapper iframe {
             position: absolute;
             top:0;
@@ -184,104 +380,635 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             border:0;
         }
 
-        /* --- Responsive Adjustments (The Fix) --- */
-        @media (max-width: 850px) {
-            .main-content {
-                max-width: 95%; /* Use more width on tablets */
-                margin: 20px auto;
-                padding: 30px;
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        button[type="submit"],
+        .reset-button {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button[type="submit"] {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+            box-shadow: 0 6px 20px rgba(76, 201, 167, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .reset-button {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid var(--border-color);
+        }
+
+        .reset-button:hover {
+            background: var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .message {
+            margin-bottom: 25px;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
-        @media (max-width: 600px) {
+        .success {
+            background-color: rgba(76, 201, 167, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+        .error {
+            background-color: rgba(249, 65, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .setting-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .setting-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
             .main-content {
-                padding: 20px 15px; /* Reduce padding on mobile */
+                max-width: 95%;
+                margin: 30px auto;
+                padding: 30px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 15px;
+                margin: 20px auto;
+                border-radius: 12px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .header-content h2 {
+                font-size: 26px;
+            }
+
+            .settings-tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 1;
+                min-width: 120px;
+                justify-content: center;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            button[type="submit"],
+            .reset-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .input-with-preview {
+                flex-direction: column;
+            }
+
+            .map-iframe-wrapper {
+                padding-bottom: 75%; /* Better mobile aspect ratio */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
                 margin: 10px auto;
+                padding: 15px;
                 border-radius: 0;
                 box-shadow: none;
             }
-            h2 {
-                font-size: 24px; /* Smaller heading */
+
+            .header-content h2 {
+                font-size: 22px;
             }
-            h2 span {
-                margin-right: 10px; /* Smaller icon margin */
+
+            .section-title {
+                font-size: 16px;
             }
-            input[type=text],
-            input[type=email],
-            textarea {
-                padding: 12px 15px; /* Smaller input padding */
+
+            input[type="text"],
+            input[type="email"],
+            input[type="url"],
+            textarea,
+            select {
+                padding: 12px 14px;
                 font-size: 15px;
             }
-            label {
-                font-size: 14px;
-                margin: 15px 0 6px;
-            }
-            .message {
-                font-size: 14px;
-                padding: 15px;
-            }
-            button[type=submit] {
-                width: 100%; /* Full width button on mobile */
-                font-size: 15px;
-                padding: 12px;
-                margin-top: 25px;
-            }
-            .map-preview-container {
-                padding: 10px; /* Smaller padding for map container */
-            }
-            /* Adjust map aspect ratio for better mobile fit (4:3) */
-            .map-iframe-wrapper {
-                padding-bottom: 75%;
-            }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Advanced Settings */
+        .advanced-settings {
+            background: rgba(67, 97, 238, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .copy-button {
+            padding: 8px 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .copy-button:hover {
+            background: var(--primary-light);
         }
     </style>
 </head>
-<body>
+<body <?php echo 'class="sidebar-expanded-state"' ?>>
 
 <?php include '../components/admin_header.php'; ?>
 
-<div class="main-content">
-    <h2><span>⚙️</span> <?= $lang['basic_site_settings'] ?? 'Basic Site Settings' ?></h2>
-    <p style="color:#718096;margin-bottom:30px;border-bottom:1px dashed #e2e8f0;padding-bottom:15px;">
-        <?= $lang['admin_settings_desc'] ?? 'Configure the primary contact information and social media links for your website.' ?>
-    </p>
+<!--<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">-->
+<!--    <i data-feather="moon"></i>-->
+<!--</button>-->
 
-    <?php if ($msg): ?>
-        <div class="message <?= strpos($msg, '✅') === 0 ? 'success' : 'error' ?>">
-            <?= htmlspecialchars($msg) ?>
+<div class="content-wrapper">
+    <div class="main-content">
+        <div class="page-header">
+            <div class="header-content">
+                <h2><?= $lang['site_settings'] ?? 'Site Settings' ?></h2>
+                <p><?= $lang['admin_settings_desc'] ?? 'Configure your website settings and contact information' ?></p>
+            </div>
         </div>
-    <?php endif; ?>
 
-    <form method="POST">
-        <label for="email"><i data-feather="mail"></i> <?= $lang['contact_email'] ?? 'Contact Email' ?></label>
-        <input type="email" name="email" id="email" value="<?= htmlspecialchars($settings['email']) ?>" required>
-
-        <label for="phone"><i data-feather="phone"></i> <?= $lang['contact_phone'] ?? 'Contact Phone' ?></label>
-        <input type="text" name="phone" id="phone" value="<?= htmlspecialchars($settings['phone']) ?>" placeholder="<?= $lang['phone_placeholder'] ?? '+977-XXXXXXXXXX' ?>">
-
-        <label for="facebook_link"><i data-feather="facebook"></i> <?= $lang['facebook_link'] ?? 'Facebook Page Link' ?></label>
-        <input type="text" name="facebook_link" id="facebook_link" placeholder="https://facebook.com/yourpage" value="<?= htmlspecialchars($settings['facebook_link']) ?>">
-
-        <label for="map"><i data-feather="map"></i> <?= $lang['map_embed'] ?? 'Google Maps Embed Link' ?></label>
-        <textarea name="map" id="map" rows="4" placeholder="Paste your Google Maps iframe 'src' URL or the entire iframe code here..."><?= htmlspecialchars($settings['map_embed']) ?></textarea>
-
-        <?php if (!empty($settings['map_embed'])): ?>
-            <div class="map-preview-container">
-                <p style="font-size:14px; color:#6c757d; margin-bottom:10px;">
-                    <?= $lang['map_preview'] ?? 'Map Preview' ?>:
-                </p>
-                <div class="map-iframe-wrapper">
-                    <iframe src="<?= htmlspecialchars($settings['map_embed'], ENT_QUOTES, 'UTF-8') ?>" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
+        <?php if ($msg): ?>
+            <div class="message <?= strpos($msg, '✅') === 0 ? 'success' : 'error' ?>">
+                <i data-feather="<?= strpos($msg, '✅') === 0 ? 'check-circle' : 'alert-circle' ?>"></i>
+                <?= htmlspecialchars($msg) ?>
             </div>
         <?php endif; ?>
 
-        <button type="submit"><i data-feather="save"></i> <?= $lang['save_settings'] ?? 'Save Settings' ?></button>
-    </form>
+        <div class="settings-tabs">
+            <button class="tab-button active" data-tab="general">
+                <i data-feather="settings"></i>
+                <?= $lang['general_settings'] ?? 'General' ?>
+            </button>
+            <button class="tab-button" data-tab="contact">
+                <i data-feather="mail"></i>
+                <?= $lang['contact_info'] ?? 'Contact' ?>
+            </button>
+            <button class="tab-button" data-tab="social">
+                <i data-feather="share-2"></i>
+                <?= $lang['social_media'] ?? 'Social' ?>
+            </button>
+            <button class="tab-button" data-tab="advanced">
+                <i data-feather="tool"></i>
+                <?= $lang['advanced'] ?? 'Advanced' ?>
+            </button>
+        </div>
+
+        <form method="POST" id="settingsForm">
+            <!-- General Settings Tab -->
+            <div class="tab-content active" id="general-tab">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i data-feather="globe"></i>
+                        <?= $lang['site_info'] ?? 'Site Information' ?>
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="site_title">
+                            <i data-feather="type"></i>
+                            <?= $lang['site_title'] ?? 'Site Title' ?>
+                        </label>
+                        <input type="text" name="site_title" id="site_title"
+                               value="<?= htmlspecialchars($settings['site_title']) ?>"
+                               placeholder="<?= $lang['site_title_placeholder'] ?? 'Enter your site title' ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="site_description">
+                            <i data-feather="file-text"></i>
+                            <?= $lang['site_description'] ?? 'Site Description' ?>
+                        </label>
+                        <textarea name="site_description" id="site_description"
+                                  placeholder="<?= $lang['site_description_placeholder'] ?? 'Brief description of your website' ?>"><?= htmlspecialchars($settings['site_description']) ?></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Settings Tab -->
+            <div class="tab-content" id="contact-tab">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i data-feather="phone"></i>
+                        <?= $lang['contact_info'] ?? 'Contact Information' ?>
+                    </h3>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email">
+                                <i data-feather="mail"></i>
+                                <?= $lang['contact_email'] ?? 'Contact Email' ?>
+                            </label>
+                            <input type="email" name="email" id="email"
+                                   value="<?= htmlspecialchars($settings['email']) ?>"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">
+                                <i data-feather="phone"></i>
+                                <?= $lang['contact_phone'] ?? 'Contact Phone' ?>
+                            </label>
+                            <input type="text" name="phone" id="phone"
+                                   value="<?= htmlspecialchars($settings['phone']) ?>"
+                                   placeholder="<?= $lang['phone_placeholder'] ?? '+977-XXXXXXXXXX' ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="map">
+                            <i data-feather="map-pin"></i>
+                            <?= $lang['map_embed'] ?? 'Location Map' ?>
+                        </label>
+                        <div class="input-with-preview">
+                            <textarea name="map" id="map" rows="3"
+                                      placeholder="<?= $lang['map_placeholder'] ?? 'Paste Google Maps embed URL or iframe code...' ?>"><?= htmlspecialchars($settings['map_embed']) ?></textarea>
+                            <button type="button" class="preview-button" onclick="previewMap()">
+                                <i data-feather="eye"></i>
+                                <?= $lang['preview'] ?? 'Preview' ?>
+                            </button>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($settings['map_embed'])): ?>
+                        <div class="map-preview-container" id="mapPreview">
+                            <p style="font-size:14px; color:var(--text-light); margin-bottom:10px;">
+                                <i data-feather="map"></i>
+                                <?= $lang['map_preview'] ?? 'Map Preview' ?>:
+                            </p>
+                            <div class="map-iframe-wrapper">
+                                <iframe src="<?= htmlspecialchars($settings['map_embed'], ENT_QUOTES, 'UTF-8') ?>"
+                                        allowfullscreen="" loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Social Media Tab -->
+            <div class="tab-content" id="social-tab">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i data-feather="share-2"></i>
+                        <?= $lang['social_media'] ?? 'Social Media Links' ?>
+                    </h3>
+
+                    <div class="form-group">
+                        <label for="facebook_link">
+                            <i data-feather="facebook"></i>
+                            <?= $lang['facebook_link'] ?? 'Facebook Page' ?>
+                        </label>
+                        <input type="url" name="facebook_link" id="facebook_link"
+                               value="<?= htmlspecialchars($settings['facebook_link']) ?>"
+                               placeholder="https://facebook.com/yourpage">
+                    </div>
+
+                    <div class="setting-card">
+                        <h4 style="margin-bottom: 15px; color: var(--text-dark);">
+                            <i data-feather="info"></i>
+                            <?= $lang['social_tips'] ?? 'Social Media Tips' ?>
+                        </h4>
+                        <p style="color: var(--text-light); font-size: 14px; line-height: 1.5;">
+                            <?= $lang['social_tips_desc'] ?? 'Add your social media links to help visitors connect with your organization. More platforms can be added in the future.' ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Settings Tab -->
+            <div class="tab-content" id="advanced-tab">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i data-feather="tool"></i>
+                        <?= $lang['advanced_settings'] ?? 'Advanced Settings' ?>
+                    </h3>
+
+                    <div class="setting-card advanced-settings">
+                        <h4 style="margin-bottom: 10px; color: var(--primary-color);">
+                            <i data-feather="database"></i>
+                            <?= $lang['system_info'] ?? 'System Information' ?>
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+                            <div>
+                                <strong>PHP Version:</strong> <?= phpversion() ?>
+                            </div>
+                            <div>
+                                <strong>MySQL Version:</strong> <?= mysqli_get_server_info($conn) ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <h4 style="margin-bottom: 15px; color: var(--text-dark);">
+                            <i data-feather="download"></i>
+                            <?= $lang['export_settings'] ?? 'Export Settings' ?>
+                        </h4>
+                        <p style="color: var(--text-light); margin-bottom: 15px; font-size: 14px;">
+                            <?= $lang['export_desc'] ?? 'Download your current settings as a backup file.' ?>
+                        </p>
+                        <button type="button" class="copy-button" onclick="exportSettings()">
+                            <i data-feather="download"></i>
+                            <?= $lang['export'] ?? 'Export Settings' ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="reset-button" onclick="resetForm()">
+                    <i data-feather="refresh-cw"></i>
+                    <?= $lang['reset'] ?? 'Reset' ?>
+                </button>
+                <button type="submit" id="submitButton">
+                    <i data-feather="save"></i>
+                    <?= $lang['save_settings'] ?? 'Save Settings' ?>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
     feather.replace();
+
+    // Tab Switching
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+    });
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const currentTheme = localStorage.getItem('theme') ||
+        (prefersDarkScheme.matches ? 'dark' : 'light');
+
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.innerHTML = '<i data-feather="sun"></i>';
+        feather.replace();
+    }
+
+    darkModeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            darkModeToggle.innerHTML = '<i data-feather="sun"></i>';
+        } else {
+            localStorage.setItem('theme', 'light');
+            darkModeToggle.innerHTML = '<i data-feather="moon"></i>';
+        }
+
+        feather.replace();
+    });
+
+    // Map Preview Function
+    function previewMap() {
+        const mapInput = document.getElementById('map');
+        const mapPreview = document.getElementById('mapPreview');
+        let mapUrl = mapInput.value.trim();
+
+        // Extract src URL if full iframe is provided
+        if (mapUrl.includes('<iframe')) {
+            const match = mapUrl.match(/src="([^"]+)"/i);
+            if (match) mapUrl = match[1];
+        }
+
+        if (mapUrl) {
+            if (!mapPreview) {
+                const previewContainer = document.createElement('div');
+                previewContainer.className = 'map-preview-container';
+                previewContainer.id = 'mapPreview';
+                previewContainer.innerHTML = `
+                    <p style="font-size:14px; color:var(--text-light); margin-bottom:10px;">
+                        <i data-feather="map"></i>
+                        <?= $lang['map_preview'] ?? 'Map Preview' ?>:
+                    </p>
+                    <div class="map-iframe-wrapper">
+                        <iframe src="${mapUrl}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                `;
+                mapInput.parentNode.parentNode.appendChild(previewContainer);
+            } else {
+                const iframe = mapPreview.querySelector('iframe');
+                iframe.src = mapUrl;
+            }
+            feather.replace();
+        }
+    }
+
+    // Form Reset
+    function resetForm() {
+        if (confirm('<?= $lang['confirm_reset'] ?? 'Are you sure you want to reset all changes?' ?>')) {
+            document.getElementById('settingsForm').reset();
+        }
+    }
+
+    // Export Settings
+    function exportSettings() {
+        const settings = {
+            site_title: document.getElementById('site_title').value,
+            site_description: document.getElementById('site_description').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            facebook_link: document.getElementById('facebook_link').value,
+            map_embed: document.getElementById('map').value,
+            export_date: new Date().toISOString()
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "settings_backup_" + new Date().toISOString().split('T')[0] + ".json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+    }
+
+    // Form Submission Loading
+    document.getElementById('settingsForm').addEventListener('submit', function() {
+        const submitButton = document.getElementById('submitButton');
+        submitButton.innerHTML = '<div class="loading-spinner"></div> Saving...';
+        submitButton.disabled = true;
+    });
+
+    // Sidebar State Management
+    function updateLayoutForSidebar() {
+        const body = document.body;
+        const mainContent = document.querySelector('.main-content');
+
+        if (body.classList.contains('sidebar-collapsed-state')) {
+            // Adjust layout for collapsed sidebar
+            if (mainContent) {
+                mainContent.style.maxWidth = '1100px';
+            }
+        } else {
+            // Reset to normal layout for expanded sidebar
+            if (mainContent) {
+                mainContent.style.maxWidth = '1000px';
+            }
+        }
+    }
+
+    // Initialize sidebar state
+    document.addEventListener('DOMContentLoaded', function() {
+        updateLayoutForSidebar();
+
+        // Listen for sidebar state changes
+        const sidebarToggle = document.querySelector('.sidebar-toggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                setTimeout(updateLayoutForSidebar, 300);
+            });
+        }
+
+        // Also update on window resize
+        window.addEventListener('resize', updateLayoutForSidebar);
+    });
+
+    // Add animation to cards
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe all setting cards for animation
+    document.querySelectorAll('.setting-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
 </script>
 
 </body>

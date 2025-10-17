@@ -18,6 +18,7 @@ $lang = [
     "uploaded_by" => "Uploaded By",
     "created_by" => "Created By",
     "added_by" => "Added By",
+    "today" => "Today",
 
     // Login
     'admin_login_title' => 'Employee Login Portal - Salakpur KhanePani',
@@ -74,6 +75,7 @@ $lang = [
     "gallery" => "Gallery",
     "add_image" => "Add New Image",
     "edit_image" => "Edit Image",
+    "add_gallery_photo" => "Add Gallery Photo",
     "delete_image" => "Delete Image",
     "image_title" => "Title",
     "image_album" => "Album",
@@ -101,6 +103,7 @@ $lang = [
 
     // Messages
     "messages_subtitle" => "View messages sent from the contact form.",
+    'view_messages' => 'View Messages',
     "mark_read" => "✔ Read",
     "mark_unread" => "✉ Unread",
     "delete_confirm_message" => "Delete this message?",

@@ -18,6 +18,7 @@ $lang = [
     "uploaded_by" => "द्वारा अपलोड गरिएको",
     "created_by" => "द्वारा बनाईएको",
     "added_by" => "द्वारा थपियो",
+    "today" => "आज",
 
     // Login
     'admin_login_title' => 'कर्मचारी लगइन पोर्टल - सलकपुर खानेपानी',
@@ -76,6 +77,7 @@ $lang = [
     "gallery" => "ग्यालरी",
     "add_image" => "नयाँ छवि थप्नुहोस्",
     "edit_image" => "छवि सम्पादन गर्नुहोस्",
+    "add_gallery_photo" => "ग्यालरी फोटो थप्नुहोस्",
     "delete_image" => "छवि मेटाउनुहोस्",
     "image_title" => "शीर्षक",
     "image_album" => "एल्बम",
@@ -115,6 +117,7 @@ $lang = [
 
     // Messages
     "messages_subtitle" => "सम्पर्क फारमबाट पठाइएका सन्देशहरू हेर्नुहोस्।",
+    'view_messages' => 'सन्देशहरू हेर्नुहोस्',
     "mark_read" => "✔ पढियो",
     "mark_unread" => "✉ नपढिएको",
     "delete_confirm_message" => "यो सन्देश मेटाउने निश्चित हुनुहुन्छ?",

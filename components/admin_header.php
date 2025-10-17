@@ -121,15 +121,44 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
         <div class="profile-menu">
             <div class="profile-trigger" onclick="toggleProfileMenu()">
-                <img src="<?= htmlspecialchars($profile_pic_path, ENT_QUOTES, 'UTF-8') ?>"
-                     alt="Profile" class="profile-pic">
-                <span><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></span>
-                <i class="arrow">&#9662;</i>
+                <div class="profile-avatar">
+                    <img src="<?= htmlspecialchars($profile_pic_path, ENT_QUOTES, 'UTF-8') ?>"
+                         alt="Profile" class="profile-pic">
+                    <div class="online-indicator"></div>
+                </div>
+                <div class="profile-info">
+                    <span class="username"><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="user-role">
+                        <?= $current_admin_id === 'master' ? 'Master Admin' : ($current_role_id == 1 ? 'Super Admin' : 'Admin') ?>
+                    </span>
+                </div>
+                <i class="dropdown-arrow" data-feather="chevron-down"></i>
             </div>
 
             <div class="profile-dropdown" id="profileDropdown">
-                <a href="../admin/profile.php">👤 <?= htmlspecialchars($lang['my_profile'] ?? 'My Profile', ENT_QUOTES, 'UTF-8') ?></a>
-                <a href="../admin/logout.php" class="logout-link">🚪 <?= htmlspecialchars($lang['logout'] ?? 'Logout', ENT_QUOTES, 'UTF-8') ?></a>
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar">
+                        <img src="<?= htmlspecialchars($profile_pic_path, ENT_QUOTES, 'UTF-8') ?>" alt="Profile">
+                    </div>
+                    <div class="dropdown-user-info">
+                        <strong><?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?></strong>
+                        <span><?= $current_admin_id === 'master' ? 'Master Admin' : ($current_role_id == 1 ? 'Super Admin' : 'Admin') ?></span>
+                    </div>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="../admin/profile.php" class="dropdown-item">
+                    <i data-feather="user"></i>
+                    <span><?= htmlspecialchars($lang['my_profile'] ?? 'My Profile', ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <a href="../admin/settings.php" class="dropdown-item">
+                    <i data-feather="settings"></i>
+                    <span><?= htmlspecialchars($lang['settings'] ?? 'Settings', ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="../admin/logout.php" class="dropdown-item logout-link">
+                    <i data-feather="log-out"></i>
+                    <span><?= htmlspecialchars($lang['logout'] ?? 'Logout', ENT_QUOTES, 'UTF-8') ?></span>
+                </a>
             </div>
         </div>
 
@@ -408,85 +437,245 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     ================================ */
     .profile-menu {
         position: relative;
-        display: flex;
-        align-items: center;
     }
 
     .profile-trigger {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         cursor: pointer;
-        padding: 6px 12px;
-        border-radius: 6px;
-        transition: background 0.3s ease;
-    }
-
-    /* NEW: Hide username on small screens */
-    @media (max-width: 768px) {
-        .profile-trigger span {
-            display: none;
-        }
-        .profile-trigger .arrow {
-            /* Keep arrow near the profile pic */
-            margin-left: 0;
-        }
+        padding: 8px 12px;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255,255,255,0.05);
     }
 
     .profile-trigger:hover {
-        background: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.1);
+        transform: translateY(-1px);
+    }
+
+    .profile-avatar {
+        position: relative;
     }
 
     .profile-pic {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #fff;
+        border: 2px solid rgba(255,255,255,0.8);
+        transition: all 0.3s ease;
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        background: #4cc9a7;
+        border: 2px solid white;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .username {
+        font-weight: 600;
+        font-size: 14px;
+        color: white;
+    }
+
+    .user-role {
+        font-size: 11px;
+        opacity: 0.8;
+        font-weight: 500;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .dropdown-arrow {
+        width: 16px;
+        height: 16px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .profile-trigger:hover .dropdown-arrow {
+        transform: rotate(180deg);
     }
 
     .profile-dropdown {
         position: absolute;
-        top: 110%;
+        top: 100%;
         right: 0;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         display: none;
         flex-direction: column;
-        min-width: 180px;
-        z-index: 999;
+        min-width: 240px;
+        z-index: 1001;
         overflow: hidden;
-        animation: fadeIn 0.25s ease;
+        animation: dropdownSlide 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.1);
+        margin-top: 8px;
     }
 
-    /* NEW: Adjust dropdown position for very small screens */
-    @media (max-width: 400px) {
-        .profile-dropdown {
-            /* Push to the left edge to fit on screen */
-            right: -20px;
-            min-width: 150px;
+    @keyframes dropdownSlide {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
     }
 
-    .profile-dropdown a {
-        padding: 12px 16px;
-        color: #333;
-        text-decoration: none;
-        font-size: 14px;
+    .dropdown-header {
+        padding: 20px;
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        color: white;
         display: flex;
         align-items: center;
-        gap: 8px;
-        transition: background 0.2s;
+        gap: 12px;
     }
 
-    .profile-dropdown a:hover {
-        background: #f5f5f5;
+    .dropdown-avatar img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.3);
+        object-fit: cover;
+    }
+
+    .dropdown-user-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dropdown-user-info strong {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .dropdown-user-info span {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: rgba(0,0,0,0.1);
+        margin: 8px 0;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        color: #1a202c;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .dropdown-item:hover {
+        background: #f8fafc;
+        padding-left: 24px;
+    }
+
+    .dropdown-item i {
+        width: 18px;
+        height: 18px;
+        stroke-width: 2;
+        color: #6c757d;
+    }
+
+    .dropdown-item:hover i {
+        color: #4361ee;
     }
 
     .logout-link {
-        color: #d9534f !important;
-        font-weight: bold;
+        color: #f94144 !important;
+        font-weight: 600;
+    }
+
+    .logout-link:hover {
+        background: #fff0f0 !important;
+    }
+
+    /* Dark mode support */
+    .dark-mode .profile-dropdown {
+        background: #1e293b;
+        border-color: #475569;
+    }
+
+    .dark-mode .dropdown-item {
+        color: #e2e8f0;
+    }
+
+    .dark-mode .dropdown-item:hover {
+        background: #334155;
+    }
+
+    .dark-mode .dropdown-divider {
+        background: #475569;
+    }
+
+    .dark-mode .dropdown-item i {
+        color: #94a3b8;
+    }
+
+    .dark-mode .dropdown-item:hover i {
+        color: #4895ef;
+    }
+
+    .dark-mode .logout-link:hover {
+        background: #2d1b1b !important;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .profile-info {
+            display: none;
+        }
+
+        .profile-trigger {
+            padding: 6px 8px;
+        }
+
+        .profile-dropdown {
+            min-width: 200px;
+            right: -10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-dropdown {
+            min-width: 180px;
+            right: -15px;
+        }
+
+        .dropdown-header {
+            padding: 16px;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+        }
     }
 
     /* ================================
