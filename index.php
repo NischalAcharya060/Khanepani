@@ -49,22 +49,18 @@ function format_date($date_str, $cal, $lang) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="developer" content="Developed by Nischal Acharya">
-
     <title><?= $lang['logo'] ?? 'Salakpur KhanePani Office' ?></title>
     <meta name="description" content="Official website of Salakpur KhanePani Office — providing reliable water services, online payments, notices, and updates for the local community.">
     <meta name="keywords" content="Salakpur, KhanePani, Water Supply, Office, Nepal, Online Payment, Drinking Water">
     <meta name="author" content="Nischal Acharya">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://khanepani-86760.wasmer.app/">
-
     <meta name="msapplication-TileColor" content="#2b5797">
     <meta name="theme-color" content="#ffffff">
-
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
-
     <link rel="icon" type="image/png" sizes="96x96" href="assets/images/favicon/favicon-96x96.png">
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg">
     <link rel="shortcut icon" href="assets/images/favicon/favicon.ico">
@@ -74,16 +70,37 @@ function format_date($date_str, $cal, $lang) {
 </head>
 <style>
     :root {
-        --primary-color: #0056d6;
-        --secondary-color: #0a2a66;
-        --accent-color: #ff3366;
-        --text-dark: #333;
-        --text-light: #555;
-        --bg-light: #f9f9f9;
-        --shadow-subtle: 0 4px 10px rgba(0, 0, 0, 0.05);
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #0f172a;
+        --accent: #f59e0b;
+        --success: #10b981;
+        --danger: #ef4444;
+        --light: #f8fafc;
+        --dark: #1e293b;
+        --gray: #64748b;
+        --border: #e2e8f0;
+        --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+        --gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        line-height: 1.6;
+        color: var(--dark);
+        background: var(--light);
+        overflow-x: hidden;
+    }
+
     .container {
-        max-width: 1200px;
+        max-width: 1280px;
         margin: 0 auto;
         padding: 0 20px;
     }
@@ -93,15 +110,18 @@ function format_date($date_str, $cal, $lang) {
         overflow: hidden;
         aspect-ratio: 16 / 7;
         max-height: 700px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        box-shadow: var(--shadow-subtle);
+        border-radius: 20px;
+        margin: 30px auto;
+        box-shadow: var(--shadow-lg);
+        background: var(--secondary);
     }
+
     .carousel {
         position: relative;
         width: 100%;
         height: 100%;
     }
+
     .slide {
         position: absolute;
         top: 0;
@@ -109,19 +129,24 @@ function format_date($date_str, $cal, $lang) {
         width: 100%;
         height: 100%;
         opacity: 0;
-        transition: opacity 1s ease-in-out;
+        transform: scale(1.1);
+        transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .slide.active {
         opacity: 1;
+        transform: scale(1);
         z-index: 1;
     }
+
     .slide img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: 20px;
         display: block;
     }
+
     .slide a {
         display: block;
         width: 100%;
@@ -129,97 +154,184 @@ function format_date($date_str, $cal, $lang) {
         text-decoration: none;
         position: relative;
     }
+
+    .slide::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
+        z-index: 1;
+        border-radius: 20px;
+    }
+
     .caption {
         position: absolute;
         bottom: 0;
         left: 0;
         width: 100%;
-        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
         color: #fff;
-        padding: 60px 20px 20px;
-        font-size: 1.2rem;
+        padding: 80px 40px 30px;
+        font-size: 1.5rem;
+        font-weight: 600;
         text-align: center;
-        border-radius: 0 0 10px 10px;
+        z-index: 2;
+        border-radius: 0 0 20px 20px;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.8s ease 0.3s;
+    }
+
+    .slide.active .caption {
+        transform: translateY(0);
+        opacity: 1;
     }
 
     .carousel-btn {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.2);
-        color: #fff;
-        border: 2px solid rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary);
+        border: none;
         font-size: 24px;
-        padding: 10px 18px;
+        width: 60px;
+        height: 60px;
         cursor: pointer;
         border-radius: 50%;
-        z-index: 2;
+        z-index: 3;
         transition: all 0.3s ease;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+
     .carousel-btn:hover {
-        background: rgba(255, 255, 255, 0.4);
-        border-color: #fff;
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: var(--shadow-lg);
     }
-    .prev { left: 20px; }
-    .next { right: 20px; }
+
+    .prev { left: 30px; }
+    .next { right: 30px; }
 
     .carousel-indicators {
         position: absolute;
-        bottom: 10px;
+        bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 2;
+        z-index: 3;
         display: flex;
-        gap: 8px;
+        gap: 12px;
     }
+
     .indicator-dot {
-        width: 10px;
-        height: 10px;
-        background-color: rgba(255, 255, 255, 0.5);
+        width: 14px;
+        height: 14px;
+        background-color: rgba(255, 255, 255, 0.6);
         border-radius: 50%;
         cursor: pointer;
-        transition: background-color 0.3s, transform 0.3s;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
     }
+
     .indicator-dot.active {
-        background-color: var(--primary-color);
-        transform: scale(1.2);
-        border: 2px solid #fff;
+        background-color: var(--accent);
+        transform: scale(1.3);
+        border-color: white;
     }
 
     .quick-links {
-        margin-bottom: 50px;
+        margin: 80px auto;
     }
+
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--secondary);
+        margin-bottom: 50px;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient);
+        border-radius: 2px;
+    }
+
     .quick-links-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
+        gap: 30px;
     }
+
     .quick-link-card {
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
+        background: white;
+        padding: 40px 30px;
+        border-radius: 20px;
         text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-subtle);
-        border: 1px solid #eee;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow);
+        border: 2px solid transparent;
         text-decoration: none;
-        color: var(--secondary-color);
+        color: var(--secondary);
+        position: relative;
+        overflow: hidden;
     }
+
+    .quick-link-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--gradient);
+        opacity: 0.05;
+        transition: left 0.6s ease;
+    }
+
     .quick-link-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        border-color: var(--primary-color);
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
     }
+
+    .quick-link-card:hover::before {
+        left: 0;
+    }
+
     .quick-link-card i {
-        font-size: 3rem;
-        color: var(--primary-color);
-        margin-bottom: 15px;
+        font-size: 3.5rem;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
         display: block;
+        transition: transform 0.3s ease;
     }
+
+    .quick-link-card:hover i {
+        transform: scale(1.1) rotate(5deg);
+    }
+
     .quick-link-card h3 {
-        font-size: 1.25rem;
-        font-weight: 700;
+        font-size: 1.4rem;
+        font-weight: 600;
         margin: 0;
+        position: relative;
+        z-index: 1;
     }
 
     .latest-notices {
@@ -339,13 +451,91 @@ function format_date($date_str, $cal, $lang) {
         color: #003d99;
     }
 
-    @media (max-width: 900px) {
+    .floating-buttons {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        z-index: 1000;
+    }
+
+    .floating-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--gradient);
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    .floating-btn.show {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .floating-btn:hover {
+        transform: scale(1.1) rotate(10deg);
+    }
+
+    @media (max-width: 1024px) {
         .notice-grid {
             grid-template-columns: 1fr;
+            gap: 30px;
         }
 
         .notice-separator {
             display: none;
+        }
+
+        .hero {
+            aspect-ratio: 16 / 9;
+        }
+
+        .caption {
+            font-size: 1.2rem;
+            padding: 60px 20px 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .quick-links-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .carousel-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        .prev { left: 15px; }
+        .next { right: 15px; }
+
+        .floating-buttons {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1rem;
         }
 
         .read-more {
@@ -358,12 +548,33 @@ function format_date($date_str, $cal, $lang) {
             text-align: center;
         }
     }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
 </style>
 <body>
 
 <?php include 'components/header.php'; ?>
 
-<section class="hero">
+<div class="floating-buttons">
+    <button class="floating-btn" onclick="scrollToTop()" title="Scroll to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
+<section class="hero animate-fade-in-up">
     <div class="carousel">
         <div class="slide active" data-index="0">
             <a href="assets/images/hero2.jpg" data-fancybox="hero-gallery" data-caption="<?= $lang['hero_caption1'] ?? 'Our Water Supply Container' ?>">
@@ -391,7 +602,8 @@ function format_date($date_str, $cal, $lang) {
     </div>
 </section>
 
-<section class="quick-links container">
+<section class="quick-links container animate-fade-in-up">
+    <h2 class="section-title"><?= $lang['quick_links'] ?? 'Quick Access' ?></h2>
     <div class="quick-links-grid">
         <a href="#" class="quick-link-card">
             <i class="fas fa-money-bill-wave"></i>
@@ -464,7 +676,7 @@ function format_date($date_str, $cal, $lang) {
         </div>
         <?php
     } else {
-        echo "<p class='no-notices'>".$lang['user_no_notices'] ?? 'No latest notices at the moment.'."</p>";
+        echo "<p class='no-notices'>".($lang['user_no_notices'] ?? 'No latest notices at the moment.')."</p>";
     }
     ?>
 </section>
@@ -480,6 +692,7 @@ function format_date($date_str, $cal, $lang) {
     const indicatorsContainer = document.querySelector('.carousel-indicators');
     const totalSlides = slides.length;
     let currentSlide = 0;
+    let autoSlideInterval;
 
     for (let i = 0; i < totalSlides; i++) {
         const dot = document.createElement('div');
@@ -498,41 +711,58 @@ function format_date($date_str, $cal, $lang) {
         });
     };
 
+    const nextSlide = () => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide(currentSlide);
+    };
+
+    const prevSlide = () => {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        showSlide(currentSlide);
+    };
+
     showSlide(currentSlide);
 
     document.querySelector('.next').addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        currentSlide = (currentSlide + 1) % totalSlides;
-        showSlide(currentSlide);
+        nextSlide();
+        resetAutoSlide();
     });
 
     document.querySelector('.prev').addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-        showSlide(currentSlide);
+        prevSlide();
+        resetAutoSlide();
     });
 
     indicatorDots.forEach(dot => {
         dot.addEventListener('click', () => {
             currentSlide = parseInt(dot.dataset.index);
             showSlide(currentSlide);
+            resetAutoSlide();
         });
     });
 
-    setInterval(() => {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        showSlide(currentSlide);
-    }, 10000);
+    const startAutoSlide = () => {
+        autoSlideInterval = setInterval(nextSlide, 8000);
+    };
+
+    const resetAutoSlide = () => {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    };
+
+    startAutoSlide();
 
     let startX = 0;
     carousel.addEventListener('touchstart', e => startX = e.touches[0].clientX);
     carousel.addEventListener('touchend', e => {
         let diffX = e.changedTouches[0].clientX - startX;
-        if(diffX > 50) currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-        if(diffX < -50) currentSlide = (currentSlide + 1) % totalSlides;
-        showSlide(currentSlide);
+        if(diffX > 50) prevSlide();
+        if(diffX < -50) nextSlide();
+        resetAutoSlide();
     });
 
     $(document).ready(function() {
@@ -557,6 +787,35 @@ function format_date($date_str, $cal, $lang) {
         });
     }
 
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const scrollBtn = document.querySelector('.floating-btn');
+        if (window.scrollY > 500) {
+            scrollBtn.classList.add('show');
+        } else {
+            scrollBtn.classList.remove('show');
+        }
+    });
+
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+        observer.observe(el);
+    });
 </script>
 </body>
 </html>

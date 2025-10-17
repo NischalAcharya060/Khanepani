@@ -13,40 +13,40 @@ if ($result && $result->num_rows > 0) {
     $settings = $result->fetch_assoc();
 }
 ?>
-<footer>
-    <div class="footer-container">
-        <div class="footer-section">
-            <h4 class="footer-title"><?= $lang['resources'] ?? 'RESOURCES' ?></h4>
-            <ul class="footer-links">
+<footer class="skp-footer">
+    <div class="skp-footer-container">
+        <div class="skp-footer-section">
+            <h4 class="skp-footer-title"><?= $lang['resources'] ?? 'RESOURCES' ?></h4>
+            <ul class="skp-footer-links">
                 <li><a href="../gallery.php"><?= $lang['user_gallery'] ?? 'Photo Gallery' ?></a></li>
                 <li><a href="#"><?= $lang['privacy_policy'] ?? 'Privacy Policy' ?></a></li>
             </ul>
         </div>
 
-        <div class="footer-section">
-            <h4 class="footer-title"><?= $lang['quick_links'] ?? 'QUICK LINKS' ?></h4>
-            <ul class="footer-links">
+        <div class="skp-footer-section">
+            <h4 class="skp-footer-title"><?= $lang['quick_links'] ?? 'QUICK LINKS' ?></h4>
+            <ul class="skp-footer-links">
                 <li><a href="../our_services.php"><?= $lang['our_services'] ?? 'Our Services' ?></a></li>
                 <li><a href="../about_us.php"><?= $lang['about_us'] ?? 'About Us' ?></a></li>
                 <li><a href="../faqs.php"><?= $lang['faqs'] ?? 'FAQs' ?></a></li>
             </ul>
         </div>
 
-        <div class="footer-section footer-contact">
-            <h4 class="footer-title"><?= $lang['contact_us'] ?? 'CONTACT US' ?></h4>
-            <p class="contact-item">
-                <i class="fas fa-phone-alt footer-icon"></i>
-                <span class="contact-label"><?= $lang['phone'] ?? 'Phone' ?>:</span>
+        <div class="skp-footer-section skp-footer-contact">
+            <h4 class="skp-footer-title"><?= $lang['contact_us'] ?? 'CONTACT US' ?></h4>
+            <p class="skp-contact-item">
+                <i class="fas fa-phone-alt skp-footer-icon"></i>
+                <span class="skp-contact-label"><?= $lang['phone'] ?? 'Phone' ?>:</span>
                 <a href="tel:<?= htmlspecialchars($settings['phone']) ?>"><?= htmlspecialchars($settings['phone']) ?></a>
             </p>
-            <p class="contact-item">
-                <i class="fas fa-envelope footer-icon"></i>
-                <span class="contact-label"><?= $lang['email'] ?? 'Email' ?>:</span>
+            <p class="skp-contact-item">
+                <i class="fas fa-envelope skp-footer-icon"></i>
+                <span class="skp-contact-label"><?= $lang['email'] ?? 'Email' ?>:</span>
                 <a href="mailto:<?= htmlspecialchars($settings['email']) ?>"><?= htmlspecialchars($settings['email']) ?></a>
             </p>
 
-            <h4 class="footer-title social-title"><?= $lang['social_media'] ?? 'SOCIAL MEDIA' ?></h4>
-            <div class="social-icons">
+            <h4 class="skp-footer-title skp-social-title"><?= $lang['social_media'] ?? 'SOCIAL MEDIA' ?></h4>
+            <div class="skp-social-icons">
                 <a href="<?= htmlspecialchars($settings['facebook_link']) ?>" target="_blank" title="Facebook">
                     <i class="fab fa-facebook-f"></i>
                 </a>
@@ -54,9 +54,9 @@ if ($result && $result->num_rows > 0) {
         </div>
 
 
-        <div class="footer-section footer-map">
-            <h4 class="footer-title"><?= $lang['our_location'] ?? 'OUR LOCATION' ?></h4>
-            <div class="map-embed-wrapper">
+        <div class="skp-footer-section skp-footer-map">
+            <h4 class="skp-footer-title"><?= $lang['our_location'] ?? 'OUR LOCATION' ?></h4>
+            <div class="skp-map-embed-wrapper">
                 <iframe
                         src="<?= htmlspecialchars($settings['map_embed'], ENT_QUOTES, 'UTF-8') ?>"
                         loading="lazy"
@@ -67,11 +67,11 @@ if ($result && $result->num_rows > 0) {
         </div>
     </div>
 
-    <div class="footer-separator"></div>
+    <div class="skp-footer-separator"></div>
 
-    <div class="footer-bottom">
-        <p class="copyright-text">© <?php echo date('Y'); ?> <?= $lang['office_name'] ?? 'सलकपुर खानेपानी / Salakpur KhanePani' ?>. <?= $lang['all_rights'] ?? 'All rights reserved.' ?></p>
-        <span class="developer-credit" style="display: none;">
+    <div class="skp-footer-bottom">
+        <p class="skp-copyright-text">© <?php echo date('Y'); ?> <?= $lang['office_name'] ?? 'सलकपुर खानेपानी / Salakpur KhanePani' ?>. <?= $lang['all_rights'] ?? 'All rights reserved.' ?></p>
+        <span class="skp-developer-credit" style="display: none;">
             Developed by <a href="https://acharyanischal.com.np" target="_blank" rel="noopener noreferrer">Nischal Acharya</a>
         </span>
     </div>
@@ -86,7 +86,7 @@ if ($result && $result->num_rows > 0) {
         --color-bottom-bg: #003366;
     }
 
-    footer {
+    .skp-footer {
         background: var(--color-primary);
         color: var(--color-text-light);
         margin-top: 50px;
@@ -94,7 +94,7 @@ if ($result && $result->num_rows > 0) {
         line-height: 1.6;
     }
 
-    .footer-container {
+    .skp-footer-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 30px;
@@ -103,7 +103,7 @@ if ($result && $result->num_rows > 0) {
         margin: 0 auto;
     }
 
-    .footer-title {
+    .skp-footer-title {
         font-size: 1rem;
         font-weight: 700;
         margin-bottom: 20px;
@@ -113,7 +113,7 @@ if ($result && $result->num_rows > 0) {
         position: relative;
     }
 
-    .footer-title::after {
+    .skp-footer-title::after {
         content: '';
         display: block;
         width: 40px;
@@ -124,16 +124,16 @@ if ($result && $result->num_rows > 0) {
         bottom: -8px;
     }
 
-    .footer-links {
+    .skp-footer-links {
         list-style: none;
         padding: 0;
     }
 
-    .footer-links li {
+    .skp-footer-links li {
         margin: 10px 0;
     }
 
-    .footer-links li a {
+    .skp-footer-links li a {
         color: var(--color-text-dim);
         text-decoration: none;
         font-size: 0.95rem;
@@ -141,12 +141,12 @@ if ($result && $result->num_rows > 0) {
         display: inline-block;
     }
 
-    .footer-links li a:hover {
+    .skp-footer-links li a:hover {
         color: var(--color-secondary);
         padding-left: 5px;
     }
 
-    .footer-contact .contact-item {
+    .skp-footer-contact .skp-contact-item {
         margin: 12px 0;
         font-size: 0.9rem;
         color: var(--color-text-dim);
@@ -154,17 +154,17 @@ if ($result && $result->num_rows > 0) {
         align-items: center;
     }
 
-    .footer-contact .contact-item a {
+    .skp-footer-contact .skp-contact-item a {
         color: var(--color-text-dim);
         text-decoration: none;
         transition: color 0.3s ease;
     }
 
-    .footer-contact .contact-item a:hover {
+    .skp-footer-contact .skp-contact-item a:hover {
         color: var(--color-secondary);
     }
 
-    .footer-contact .footer-icon {
+    .skp-footer-contact .skp-footer-icon {
         color: var(--color-secondary);
         font-size: 1rem;
         margin-right: 10px;
@@ -172,18 +172,18 @@ if ($result && $result->num_rows > 0) {
         text-align: center;
     }
 
-    .footer-contact .contact-label {
+    .skp-footer-contact .skp-contact-label {
         font-weight: bold;
         margin-right: 5px;
         color: var(--color-text-light);
     }
 
-    .social-title {
+    .skp-social-title {
         margin-top: 30px;
         margin-bottom: 20px;
     }
 
-    .social-icons a {
+    .skp-social-icons a {
         font-size: 1.5rem;
         color: var(--color-text-light);
         margin-right: 18px;
@@ -191,12 +191,12 @@ if ($result && $result->num_rows > 0) {
         transition: color 0.3s, transform 0.3s;
     }
 
-    .social-icons a:hover {
+    .skp-social-icons a:hover {
         color: var(--color-secondary);
         transform: translateY(-3px) scale(1.05);
     }
 
-    .footer-map .map-embed-wrapper {
+    .skp-footer-map .skp-map-embed-wrapper {
         position: relative;
         padding-bottom: 60%;
         height: 0;
@@ -205,7 +205,7 @@ if ($result && $result->num_rows > 0) {
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
-    .footer-map iframe {
+    .skp-footer-map iframe {
         position: absolute;
         top: 0;
         left: 0;
@@ -214,13 +214,13 @@ if ($result && $result->num_rows > 0) {
         border: none;
     }
 
-    .footer-separator {
+    .skp-footer-separator {
         max-width: 1280px;
         margin: 0 auto;
         border-top: 1px solid var(--color-bottom-bg);
     }
 
-    .footer-bottom {
+    .skp-footer-bottom {
         background: var(--color-primary);
         text-align: center;
         padding: 20px 15px;
@@ -232,44 +232,44 @@ if ($result && $result->num_rows > 0) {
         color: var(--color-text-dim);
     }
 
-    .footer-bottom .copyright-text {
+    .skp-footer-bottom .skp-copyright-text {
         margin: 5px 0;
     }
 
-    .footer-bottom .developer-credit {
+    .skp-footer-bottom .skp-developer-credit {
         margin: 5px 0;
         font-size: 0.8rem;
     }
 
-    .footer-bottom .developer-credit a {
+    .skp-footer-bottom .skp-developer-credit a {
         color: var(--color-text-dim);
         text-decoration: none;
         transition: color 0.3s ease;
     }
 
-    .footer-bottom .developer-credit a:hover {
+    .skp-footer-bottom .skp-developer-credit a:hover {
         color: var(--color-secondary);
         text-decoration: underline;
     }
 
     @media (max-width: 900px) {
-        .footer-container {
+        .skp-footer-container {
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         }
     }
 
     @media (max-width: 600px) {
-        .footer-container {
+        .skp-footer-container {
             grid-template-columns: 1fr;
             padding: 30px 20px;
             gap: 40px;
         }
 
-        .footer-bottom {
+        .skp-footer-bottom {
             padding: 15px;
         }
 
-        .footer-map .map-embed-wrapper {
+        .skp-footer-map .skp-map-embed-wrapper {
             padding-bottom: 70%;
         }
     }

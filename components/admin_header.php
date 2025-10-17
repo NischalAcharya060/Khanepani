@@ -748,7 +748,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     }
 
     /* ================================
-    NOTIFICATION MODAL (Responsive updates)
+    ENHANCED NOTIFICATION MODAL
     ================================ */
     .notif-modal {
         display: none;
@@ -758,77 +758,379 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         top: 0;
         width: 100%;
         height: 100%;
-        background: rgba(20, 20, 20, 0.6);
-        backdrop-filter: blur(6px);
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
         transition: all 0.3s ease-in-out;
+        opacity: 0;
+    }
+
+    .notif-modal.show {
+        display: block;
+        animation: fadeIn 0.3s ease-out forwards;
     }
 
     .notif-modal-content {
-        background: #fff;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         margin: 80px auto;
         padding: 0;
         border-radius: 20px;
-        /* UPDATED: Use max-width and percentage for responsive sizing */
         width: 90%;
-        max-width: 400px;
-        max-height: 85%; /* Increased max height */
-        overflow-y: auto;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-        font-family: 'Roboto', sans-serif;
-        animation: slideDown 0.35s ease;
-        border-top: 6px solid #004080;
+        max-width: 480px;
+        max-height: 75vh;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        font-family: 'Inter', sans-serif;
+        animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+    }
+
+    .notif-modal-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #004080, #0066cc, #004080);
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px) scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
     }
 
     .notif-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 18px 24px;
-        background: linear-gradient(90deg, #004080, #0066cc);
-        border-radius: 16px 16px 0 0;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #004080 0%, #0066cc 100%);
         color: white;
+        position: relative;
+    }
+
+    .notif-header h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notif-header h3::before {
+        content: '📬';
+        font-size: 1.2em;
+    }
+
+    .close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg) scale(1.1);
+    }
+
+    .clear-btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 15px 24px;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .clear-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .clear-btn:active {
+        transform: translateY(0);
+    }
+
+    .clear-btn.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .clear-btn.loading::after {
+        content: '';
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .notif-modal-content ul {
+        list-style: none;
+        padding: 0 20px 20px;
+        margin: 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .notif-modal-content ul::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .notif-modal-content ul::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .notif-modal-content ul::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+    .notif-modal-content ul::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
     }
 
     .notif-modal-content li {
-        /* UPDATED: Use flex-wrap to stack content on small screens */
-        flex-direction: row;
-        flex-wrap: wrap; /* Allows wrapping on smaller list items */
-        padding: 12px 14px;
-        margin-bottom: 10px;
-        background: #f7f9fc;
-        border-radius: 12px;
-        cursor: pointer;
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        transition: all 0.25s ease;
+        padding: 16px;
+        margin-bottom: 12px;
+        background: white;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
     }
 
-    @media (max-width: 380px) {
+    .notif-modal-content li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(135deg, #004080, #0066cc);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .notif-modal-content li:hover::before {
+        opacity: 1;
+    }
+
+    .notif-modal-content li:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
+
+    .msg-left {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .msg-left strong {
+        display: block;
+        color: #1e293b;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .time {
+        color: #64748b;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: block;
+    }
+
+    .msg-right {
+        color: #475569;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin-left: 15px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .no-messages {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+        font-style: italic;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin: 20px;
+        border: 2px dashed #e2e8f0;
+    }
+
+    .no-messages::before {
+        content: '💌';
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+
+    /* Enhanced badge animation */
+    .notif-badge {
+        position: absolute;
+        top: -6px;
+        right: -10px;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 7px;
+        border-radius: 50%;
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+        animation: badgePulse 2s infinite;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes badgePulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+        }
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.6);
+        }
+    }
+
+    /* Enhanced notification bell hover effect */
+    .notification {
+        position: relative;
+        font-size: 22px;
+        cursor: pointer;
+        min-width: 22px;
+        transition: all 0.3s ease;
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    .notification:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.1);
+    }
+
+    .notification:active {
+        transform: scale(0.95);
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 480px) {
+        .notif-modal-content {
+            margin: 60px auto;
+            width: 95%;
+            max-height: 70vh;
+        }
+
+        .notif-header {
+            padding: 16px 20px;
+        }
+
+        .notif-header h3 {
+            font-size: 1.1rem;
+        }
+
         .notif-modal-content li {
             flex-direction: column;
             align-items: flex-start;
         }
+
         .msg-right {
-            max-width: 100%; /* Take full width when stacked */
+            margin-left: 0;
             margin-top: 8px;
+            max-width: 100%;
+            -webkit-line-clamp: 3;
+        }
+
+        .clear-btn {
+            margin: 12px 20px;
+            padding: 10px 16px;
+            font-size: 0.85rem;
         }
     }
 
+    @media (max-width: 380px) {
+        .notif-modal-content {
+            border-radius: 16px;
+        }
 
-    /* ... other notification styles remain the same ... */
+        .notif-header {
+            padding: 14px 16px;
+        }
 
-    @keyframes slideDown {
-        from { transform: translateY(-40px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+        .notif-modal-content ul {
+            padding: 0 16px 16px;
+        }
+
+        .notif-modal-content li {
+            padding: 12px;
+        }
     }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
     }
-
-    /* Removed redundant @media screen and (max-width: 500px) block,
-       as max-width: 400px; max-height: 85%; covers mobile responsiveness. */
 </style>
 
 <script>
@@ -877,41 +1179,153 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         });
     }
 
-    // Notification modal
+    // Enhanced Notification Modal
     const notifBell = document.getElementById('notifBell');
     const notifModal = document.getElementById('notifModal');
     const closeBtn = document.getElementById('closeNotif');
+    const clearBtn = document.getElementById('clearUnread');
 
-    notifBell.addEventListener('click', () => {
-        notifModal.style.display = 'block';
-    });
+    function openNotificationModal() {
+        notifModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
 
-    closeBtn.addEventListener('click', () => {
-        notifModal.style.display = 'none';
-    });
+        // Add entrance animation to list items
+        const listItems = notifModal.querySelectorAll('li');
+        listItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.style.animation = 'slideInRight 0.5s ease-out forwards';
+        });
+    }
+
+    function closeNotificationModal() {
+        notifModal.classList.remove('show');
+        document.body.style.overflow = '';
+
+        // Reset animations
+        const listItems = notifModal.querySelectorAll('li');
+        listItems.forEach(item => {
+            item.style.animation = '';
+        });
+    }
+
+    notifBell.addEventListener('click', openNotificationModal);
+    closeBtn.addEventListener('click', closeNotificationModal);
 
     window.addEventListener('click', (e) => {
         if (e.target === notifModal) {
-            notifModal.style.display = 'none';
+            closeNotificationModal();
         }
     });
 
-    // NOTE: Changed alert() to console.log as per platform constraints.
-    document.getElementById("clearUnread")?.addEventListener("click", function() {
-        fetch("../admin/clear_unread.php", { method: "POST" })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("✅ All unread messages cleared!");
-                    location.reload();
-                } else {
-                    console.log("❌ Failed to clear messages.");
-                }
-            })
-            .catch(error => {
-                console.log("❌ An error occurred while communicating with the server.");
-            });
+    // Enhanced clear unread functionality
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+
+            // Add loading state
+            btn.classList.add('loading');
+            btn.innerHTML = 'Clearing...';
+
+            fetch("../admin/clear_unread.php", { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Success animation
+                        btn.innerHTML = '✅ Cleared!';
+                        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        // Error state
+                        btn.innerHTML = '❌ Failed';
+                        btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.style.background = '';
+                            btn.classList.remove('loading');
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    btn.innerHTML = '❌ Error';
+                    btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                        btn.classList.remove('loading');
+                    }, 2000);
+                });
+        });
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && notifModal.classList.contains('show')) {
+            closeNotificationModal();
+        }
     });
+
+    // Enhanced list item click with ripple effect
+    document.querySelectorAll('.notif-modal-content li').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(0, 100, 255, 0.3);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                pointer-events: none;
+            `;
+
+            this.appendChild(ripple);
+
+            // Navigate after animation
+            setTimeout(() => {
+                const messageId = this.getAttribute('onclick')?.match(/id=(\d+)/)?.[1];
+                if (messageId) {
+                    window.location.href = `view_message.php?id=${messageId}`;
+                }
+            }, 300);
+        });
+    });
+
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 
     function toggleProfileMenu() {
         const dropdown = document.getElementById("profileDropdown");
