@@ -210,7 +210,6 @@ $username = $_SESSION['username'] ?? 'Admin';
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
-        /* Base styles from original CSS */
         h2 {
             color: #1e3a8a;
             font-weight: 700;

@@ -564,29 +564,6 @@ for($m=1; $m<=12; $m++){
             font-size: 14px;
         }
 
-        .dark-mode-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--shadow-medium);
-            transition: var(--transition);
-            z-index: 1000;
-        }
-        .dark-mode-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-hover);
-        }
-
         /* Dark mode styles */
         body.dark-mode {
             --text-dark: #e9ecef;
@@ -1021,34 +998,6 @@ for($m=1; $m<=12; $m++){
 
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
-
-    // Dark mode functionality
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-
-    // Check for saved theme preference or respect OS preference
-    const currentTheme = localStorage.getItem('theme') ||
-        (prefersDarkScheme.matches ? 'dark' : 'light');
-
-    if (currentTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        darkModeToggle.innerHTML = '<i data-feather="sun"></i>';
-        feather.replace();
-    }
-
-    darkModeToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-
-        if (document.body.classList.contains('dark-mode')) {
-            localStorage.setItem('theme', 'dark');
-            darkModeToggle.innerHTML = '<i data-feather="sun"></i>';
-        } else {
-            localStorage.setItem('theme', 'light');
-            darkModeToggle.innerHTML = '<i data-feather="moon"></i>';
-        }
-
-        feather.replace();
-    });
 
     // Add animation on scroll
     const observerOptions = {

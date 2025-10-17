@@ -95,20 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        :root {
-            --primary-color: #007bff;
-            --primary-hover: #0056b3;
-            --text-color-dark: #212529;
-            --text-color-light: #6c757d;
-            --bg-light: #f5f7fa;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --error-color: #dc3545;
-        }
-        body { background-color: var(--bg-light); font-family: 'Roboto', sans-serif; }
-
-        .main-content { padding: 40px 20px; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 25px; }
+        <?php include '../css/dark-mode.css'; ?>
 
         .page-header {
             display: flex;

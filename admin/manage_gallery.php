@@ -119,6 +119,7 @@ $username = $_SESSION['username'];
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
+        <?php include '../css/dark-mode.css'; ?>
         h2 {
             color: #1e3a8a;
             font-weight: 700;

@@ -65,34 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* --- Modern CSS Variables for easy theming --- */
-        :root {
-            --primary-color: #4C7AFF; /* Modern Blue */
-            --primary-hover: #3b61d3;
-            --text-color-dark: #1f2937; /* Dark Gray for text */
-            --text-color-light: #4b5563; /* Medium Gray for subtitles/labels */
-            --bg-light: #f9fafb; /* Light Gray background */
-            --card-bg: #ffffff;
-            --border-color: #e5e7eb;
-            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            --success-color: #059669; /* Tailwind Green-600 */
-            --error-color: #dc2626; /* Tailwind Red-600 */
-        }
-
-        body {
-            background-color: var(--bg-light);
-        }
-
-        /* --- Main Content & Header --- */
-        .main-content {
-            padding: 40px 30px;
-            max-width: 700px; /* Slightly wider card for better form layout */
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
         .page-header {
             display: flex;
             align-items: center;

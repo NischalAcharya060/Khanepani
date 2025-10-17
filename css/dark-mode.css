@@ -1,0 +1,463 @@
+/* ================================
+   DARK MODE VARIABLES - CENTRAL
+   Based on Dashboard Dark Mode
+   ================================ */
+:root {
+    /* Light mode colors (Dashboard Default) */
+    --sidebar-mobile-width: 240px;
+    --sidebar-expanded-width: 240px;
+    --primary-color: #4361ee;
+    --primary-light: #4895ef;
+    --primary-dark: #3a0ca3;
+    --success-color: #4cc9a7;
+    --warning-color: #f9c74f;
+    --danger-color: #f94144;
+    --info-color: #577590;
+    --secondary-color: #6c757d;
+    --text-dark: #212529;
+    --text-light: #6c757d;
+    --card-background: #ffffff;
+    --background-light: #f8f9fa;
+    --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    --border-color: #e9ecef;
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --active-admin-color: #7209b7;
+    --chart-gallery-color: #4895ef;
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Header & Sidebar */
+    --header-bg: linear-gradient(90deg, #004080, #0066cc);
+    --sidebar-bg: rgba(0, 38, 77, 0.95);
+
+    /* Message colors */
+    --success-bg: #d4edda;
+    --success-color: #155724;
+    --success-border: #c3e6cb;
+    --error-bg: #f8d7da;
+    --error-color: #721c24;
+    --error-border: #f5c6cb;
+    --warning-bg: #fff3cd;
+    --warning-color: #856404;
+    --warning-border: #ffeaa7;
+    --info-bg: #d1ecf1;
+    --info-color: #0c5460;
+    --info-border: #bee5eb;
+}
+
+/* ================================
+   DARK MODE - Dashboard Style
+   ================================ */
+body.dark-mode {
+    /* Dark mode colors (Dashboard Dark Mode) */
+    --text-dark: #e9ecef;
+    --text-light: #adb5bd;
+    --card-background: #2d3748;
+    --background-light: #1a202c;
+    --background-gradient: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    --border-color: #4a5568;
+
+    /* Header & Sidebar Dark Mode */
+    --header-bg: linear-gradient(90deg, #002b4d, #004080);
+    --sidebar-bg: rgba(0, 20, 40, 0.95);
+
+    /* Message colors Dark Mode */
+    --success-bg: #1e3a2e;
+    --success-color: #4ade80;
+    --success-border: #166534;
+    --error-bg: #3a1e1e;
+    --error-color: #f87171;
+    --error-border: #991b1b;
+    --warning-bg: #3a2e0f;
+    --warning-color: #fbbf24;
+    --warning-border: #92400e;
+    --info-bg: #1e3a4e;
+    --info-color: #60a5fa;
+    --info-border: #1e40af;
+}
+
+/* ================================
+   BASE DARK MODE STYLES
+   ================================ */
+body.dark-mode {
+    font-family: 'Inter', sans-serif;
+    background: var(--background-gradient);
+    color: var(--text-dark);
+    margin: 0;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* ================================
+   LAYOUT COMPONENTS
+   ================================ */
+body.dark-mode .dashboard-wrapper,
+body.dark-mode .main-content,
+body.dark-mode .dashboard {
+    background: var(--background-gradient);
+    color: var(--text-dark);
+}
+
+body.dark-mode .dashboard h2 {
+    color: var(--text-dark);
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-mode .subtitle {
+    color: var(--text-light);
+}
+
+/* ================================
+   CARDS & STATS
+   ================================ */
+body.dark-mode .stat-card,
+body.dark-mode .chart-card,
+body.dark-mode .activity-card,
+body.dark-mode .quick-actions-card,
+body.dark-mode .system-info-card,
+body.dark-mode .card {
+    background: var(--card-background);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .stat-card h3 {
+    color: var(--text-light);
+}
+
+body.dark-mode .stat-card p {
+    color: var(--text-dark);
+}
+
+body.dark-mode .stat-card .today-count {
+    color: var(--text-light);
+}
+
+body.dark-mode .stat-card .icon-box {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Chart card specific */
+body.dark-mode .chart-card h3 {
+    color: var(--primary-color);
+    border-bottom-color: var(--border-color);
+}
+
+/* Activity card specific */
+body.dark-mode .activity-card h3 {
+    color: var(--primary-color);
+}
+
+body.dark-mode .activity-count {
+    color: var(--text-light);
+    background: var(--background-light);
+}
+
+body.dark-mode .activity-feed li {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .activity-feed li:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .activity-desc {
+    color: var(--text-dark);
+}
+
+body.dark-mode .activity-time {
+    color: var(--text-light);
+}
+
+body.dark-mode .no-activity {
+    color: var(--text-light);
+}
+
+/* Quick actions */
+body.dark-mode .quick-actions-card h3 {
+    color: var(--primary-color);
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .action-list a {
+    background: var(--background-light);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .action-list a:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* System info */
+body.dark-mode .system-info-card h3 {
+    color: var(--primary-color);
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .system-info-item {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .system-info-label {
+    color: var(--text-dark);
+}
+
+body.dark-mode .system-info-value {
+    color: var(--text-light);
+}
+
+/* ================================
+   BUTTONS
+   ================================ */
+body.dark-mode .btn {
+    background: var(--background-light);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .btn:hover {
+    background: #0056d6;
+    color: white;
+    border-color: #0056d6;
+}
+
+body.dark-mode .btn.info {
+    background: #1e40af;
+    color: white;
+}
+
+body.dark-mode .btn.danger {
+    background: #dc2626;
+    color: white;
+}
+
+body.dark-mode .btn.success {
+    background: #059669;
+    color: white;
+}
+
+body.dark-mode .view-all-btn {
+    color: var(--primary-color);
+    background: rgba(67, 97, 238, 0.1);
+}
+
+body.dark-mode .view-all-btn:hover {
+    color: white;
+    background: var(--primary-color);
+}
+
+/* ================================
+   TABLES
+   ================================ */
+body.dark-mode table {
+    background: var(--card-background);
+    border-color: var(--border-color);
+}
+
+body.dark-mode table th {
+    background: var(--background-light);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+body.dark-mode table td {
+    border-color: var(--border-color);
+    color: var(--text-dark);
+    background: var(--card-background);
+}
+
+body.dark-mode table tr:hover {
+    background: var(--background-light);
+}
+
+/* Responsive table fixes for dark mode */
+@media screen and (max-width: 768px) {
+    body.dark-mode .notice-table tr {
+        border-color: var(--border-color);
+        background: var(--card-background);
+    }
+
+    body.dark-mode .notice-table td {
+        border-color: var(--border-color);
+        color: var(--text-dark);
+        background: var(--card-background);
+    }
+
+    body.dark-mode .notice-table tr td:nth-child(1) {
+        background-color: var(--background-light);
+    }
+
+    body.dark-mode .notice-table td:before {
+        color: var(--text-dark);
+    }
+}
+
+/* ================================
+   FORM ELEMENTS
+   ================================ */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background: var(--card-background);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+    border-color: var(--primary-color);
+    background: var(--background-light);
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: var(--text-light);
+}
+
+/* ================================
+   PAGINATION
+   ================================ */
+body.dark-mode .pagination a {
+    background: var(--card-background);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .pagination a.active {
+    background: #0056d6;
+    color: white;
+    border-color: #0056d6;
+}
+
+body.dark-mode .pagination a:hover {
+    background: #0056d6;
+    color: white;
+    border-color: #0056d6;
+}
+
+/* ================================
+   MESSAGES & ALERTS
+   ================================ */
+body.dark-mode .message {
+    background: var(--success-bg);
+    color: var(--success-color);
+    border-color: var(--success-border);
+}
+
+body.dark-mode .message.error {
+    background: var(--error-bg);
+    color: var(--error-color);
+    border-color: var(--error-border);
+}
+
+body.dark-mode .message.warning {
+    background: var(--warning-bg);
+    color: var(--warning-color);
+    border-color: var(--warning-border);
+}
+
+body.dark-mode .message.info {
+    background: var(--info-bg);
+    color: var(--info-color);
+    border-color: var(--info-border);
+}
+
+/* Mobile banner */
+body.dark-mode #mobileOptimizationBanner {
+    background-color: var(--warning-color);
+    color: var(--text-dark);
+}
+
+/* ================================
+   HEADINGS & TEXT
+   ================================ */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: var(--text-dark);
+}
+
+body.dark-mode p {
+    color: var(--text-dark);
+}
+
+/* ================================
+   LINKS
+   ================================ */
+body.dark-mode a {
+    color: var(--primary-light);
+}
+
+body.dark-mode a:hover {
+    color: var(--primary-color);
+}
+
+/* ================================
+   CODE & PRE
+   ================================ */
+body.dark-mode code,
+body.dark-mode pre {
+    background: var(--background-light);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+/* ================================
+   LOADING ANIMATIONS
+   ================================ */
+body.dark-mode .chart-loading::after {
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+body.dark-mode .text-muted {
+    color: var(--text-light) !important;
+}
+
+body.dark-mode .bg-light {
+    background-color: var(--background-light) !important;
+}
+
+body.dark-mode .bg-white {
+    background-color: var(--card-background) !important;
+}
+
+body.dark-mode .border {
+    border-color: var(--border-color) !important;
+}
+
+/* ================================
+   CUSTOM SCROLLBAR FOR DARK MODE
+   ================================ */
+body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--background-light);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-light);
+}

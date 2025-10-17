@@ -143,22 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../css/admin.css">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        :root {
-            --primary-color: #10b981;
-            --primary-hover: #059669;
-            --secondary-color: #6c757d;
-            --secondary-hover: #5a6268;
-            --danger-color: #ef4444;
-            --text-color-dark: #1f2937;
-            --text-color-light: #6b7280;
-            --bg-light: #f9fafb;
-            --card-bg: #ffffff;
-            --border-color: #e5e7eb;
-            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-            --error-color: #dc3545;
-        }
-        body { background-color: var(--bg-light); }
-        .main-content { padding: 40px 30px; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        <?php include '../css/dark-mode.css'; ?>
         .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         .title-group h2 { font-size: 28px; color: var(--text-color-dark); margin: 0; font-weight: 700; }
         .back-btn { display: inline-flex; align-items: center; padding: 8px 15px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-color-light); font-weight: 500; transition: all 0.2s ease; }

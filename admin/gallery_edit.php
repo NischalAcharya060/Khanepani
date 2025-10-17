@@ -101,34 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* --- General Styling and Layout --- */
-        :root {
-            --primary-color: #007bff;
-            --primary-dark: #0056b3;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --background-light: #f4f6f9;
-            --card-background: #ffffff;
-            --border-color: #e9ecef;
-            --text-dark: #343a40;
-            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 6px 15px rgba(0, 0, 0, 0.15);
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--background-light);
-            color: var(--text-dark);
-        }
-
-        /* Ensure main-content padding is right when not using sidebar.css */
-        .main-content {
-            padding: 30px;
-            max-width: 700px; /* Centered form max width */
-            margin: 0 auto;
-        }
-
         /* --- Back Button Styling --- */
         .back-btn {
             display: inline-flex;

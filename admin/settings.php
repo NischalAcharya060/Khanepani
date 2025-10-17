@@ -460,30 +460,6 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             border: 1px solid var(--error-color);
         }
 
-        .dark-mode-toggle {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 55px;
-            height: 55px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--shadow-light);
-            transition: var(--transition);
-            z-index: 1000;
-        }
-
-        .dark-mode-toggle:hover {
-            transform: scale(1.1) rotate(15deg);
-            box-shadow: var(--shadow-hover);
-        }
-
         .setting-card {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -625,10 +601,6 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
 <body <?php echo 'class="sidebar-expanded-state"' ?>>
 
 <?php include '../components/admin_header.php'; ?>
-
-<!--<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">-->
-<!--    <i data-feather="moon"></i>-->
-<!--</button>-->
 
 <div class="content-wrapper">
     <div class="main-content">
@@ -854,33 +826,6 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             const tabId = this.getAttribute('data-tab');
             document.getElementById(`${tabId}-tab`).classList.add('active');
         });
-    });
-
-    // Dark Mode Toggle
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const currentTheme = localStorage.getItem('theme') ||
-        (prefersDarkScheme.matches ? 'dark' : 'light');
-
-    if (currentTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        darkModeToggle.innerHTML = '<i data-feather="sun"></i>';
-        feather.replace();
-    }
-
-    darkModeToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-
-        if (document.body.classList.contains('dark-mode')) {
-            localStorage.setItem('theme', 'dark');
-            darkModeToggle.innerHTML = '<i data-feather="sun"></i>';
-        } else {
-            localStorage.setItem('theme', 'light');
-            darkModeToggle.innerHTML = '<i data-feather="moon"></i>';
-        }
-
-        feather.replace();
     });
 
     // Map Preview Function

@@ -5,6 +5,13 @@ include '../config/database/db.php';
 include '../config/Nepali_calendar.php';
 $cal = new Nepali_Calendar();
 
+// --- Dark Mode Handling ---
+if (isset($_GET['dark_mode'])) {
+    $_SESSION['dark_mode'] = ($_GET['dark_mode'] === 'on');
+}
+
+$is_dark_mode = $_SESSION['dark_mode'] ?? false;
+
 function format_nepali_date($date_str, $cal) {
     $timestamp = strtotime($date_str);
     $year  = (int)date('Y', $timestamp);
@@ -84,13 +91,31 @@ $username = $_SESSION['username'];
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        <?php include '../css/dark-mode.css'; ?>
         /* Existing Styles */
         .notice-table th, .notice-table td { padding: 12px 8px; }
-        .notice-table tr:hover { background: #f1f1f1; }
+        .notice-table tr:hover { background: var(--bg-secondary); }
         .pagination { text-align: center; margin-top: 20px; }
-        .pagination a { margin: 0 5px; text-decoration: none; padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; color: #0056d6; }
-        .pagination a.active { background-color: #0056d6; color: white; border-color: #0056d6; }
-        .pagination a:hover { background-color: #0056d6; color: white; }
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            background: var(--card-bg);
+            transition: all 0.3s ease;
+        }
+        .pagination a.active {
+            background-color: #0056d6;
+            color: white;
+            border-color: #0056d6;
+        }
+        .pagination a:hover {
+            background-color: #0056d6;
+            color: white;
+            border-color: #0056d6;
+        }
 
         .message {
             padding: 15px 20px;
@@ -100,21 +125,76 @@ $username = $_SESSION['username'];
             display: flex;
             align-items: center;
             margin-bottom: 20px;
+            background: var(--success-bg);
+            color: var(--success-color);
+            border: 1px solid var(--success-border);
+        }
+        .message.error {
+            background: var(--error-bg);
+            color: var(--error-color);
+            border: 1px solid var(--error-border);
         }
         .message i {
             margin-right: 10px;
             width: 20px;
             height: 20px;
         }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+
+        /* Table styles for dark mode */
+        body.dark-mode .notice-table {
+            background: var(--card-bg);
+            border-color: var(--border-color);
         }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+
+        body.dark-mode .notice-table th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .notice-table td {
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        body.dark-mode .notice-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Button styles for dark mode */
+        body.dark-mode .btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .btn:hover {
+            background: #0056d6;
+            color: white;
+            border-color: #0056d6;
+        }
+
+        body.dark-mode .btn.info {
+            background: #1e40af;
+            color: white;
+        }
+
+        body.dark-mode .btn.danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* Main content area */
+        .main-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        /* Heading styles */
+        body.dark-mode h2,
+        body.dark-mode .subtitle {
+            color: var(--text-primary);
         }
 
         /* --- START Responsive Table CSS Fix --- */
@@ -131,6 +211,7 @@ $username = $_SESSION['username'];
                 box-shadow: none;
                 border-radius: 0;
                 margin-top: 20px;
+                background: var(--card-bg);
             }
 
             .notice-table thead {
@@ -140,29 +221,32 @@ $username = $_SESSION['username'];
             .notice-table tr {
                 display: block;
                 margin-bottom: 15px;
-                border: 1px solid #e0e0e0;
+                border: 1px solid var(--border-color);
                 border-radius: 8px;
                 overflow: hidden;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                box-shadow: 0 2px 4px var(--shadow-color);
+                background: var(--card-bg);
             }
 
             .notice-table tr:hover {
-                background: #ffffff; /* Keep card background white on hover */
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                background: var(--bg-secondary);
+                box-shadow: 0 4px 8px var(--shadow-color);
             }
 
             .notice-table td {
                 display: block;
                 text-align: right !important;
-                border-bottom: 1px solid #f0f0f0;
+                border-bottom: 1px solid var(--border-color);
                 position: relative;
                 padding-left: 45% !important; /* Make room for the label */
                 white-space: normal;
                 word-break: break-word;
+                color: var(--text-primary);
+                background: var(--card-bg);
             }
 
             .notice-table tr:last-child td {
-                border-bottom: 1px solid #f0f0f0; /* Ensure all rows have a separator */
+                border-bottom: 1px solid var(--border-color); /* Ensure all rows have a separator */
             }
 
             .notice-table td:before {
@@ -172,7 +256,7 @@ $username = $_SESSION['username'];
                 width: 40%;
                 text-align: left;
                 font-weight: 600;
-                color: #34495e; /* A clear color for labels */
+                color: var(--text-primary);
                 text-transform: capitalize;
                 content: attr(data-label);
             }
@@ -181,7 +265,7 @@ $username = $_SESSION['username'];
             .notice-table tr td:nth-child(1) { /* S.N. */
                 text-align: left !important;
                 font-weight: 700;
-                background-color: #f8f9fa;
+                background-color: var(--bg-secondary);
                 border-top-left-radius: 8px;
                 border-top-right-radius: 8px;
                 padding-left: 12px !important;
@@ -189,7 +273,7 @@ $username = $_SESSION['username'];
             }
             .notice-table tr td:nth-child(1):before {
                 content: 'S.N.'; /* Use a fixed label for S.N. as it's a number */
-                color: #212529;
+                color: var(--text-primary);
             }
 
             .notice-table tr td:nth-child(2) { /* Title */
@@ -204,10 +288,20 @@ $username = $_SESSION['username'];
                 display: flex;
                 flex-direction: column;
                 gap: 8px; /* Space out the action buttons */
+                background: var(--card-bg);
             }
             .notice-table td:last-child a.btn {
                 flex-grow: 1;
                 width: 100%; /* Make buttons full width */
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+                border-color: var(--border-color);
+            }
+
+            body.dark-mode .notice-table td:last-child a.btn:hover {
+                background: #0056d6;
+                color: white;
+                border-color: #0056d6;
             }
 
             /* Use data-label attribute for all columns */
@@ -217,9 +311,10 @@ $username = $_SESSION['username'];
             }
             .notice-table tr td:nth-child(1):before { content: '<?= $lang['sn'] ?? 'S.N.' ?>'; position: initial; width: auto; }
             .notice-table tr td:nth-child(2):before { content: '<?= $lang['title'] ?? 'Title' ?>'; }
-            .notice-table tr td:nth-child(3):before { content: '<?= $lang['date'] ?? 'Date' ?>'; }
-            .notice-table tr td:nth-child(4):before { content: '<?= $lang['created_by'] ?? 'Created By' ?>'; }
-            .notice-table tr td:nth-child(5):before { content: '<?= $lang['actions'] ?? 'Actions' ?>'; position: initial; width: auto; }
+            .notice-table tr td:nth-child(3):before { content: '<?= $lang['notice_type'] ?? 'Notice Type' ?>'; }
+            .notice-table tr td:nth-child(4):before { content: '<?= $lang['date'] ?? 'Date' ?>'; }
+            .notice-table tr td:nth-child(5):before { content: '<?= $lang['created_by'] ?? 'Created By' ?>'; }
+            .notice-table tr td:nth-child(6):before { content: '<?= $lang['actions'] ?? 'Actions' ?>'; position: initial; width: auto; }
         }
 
         /* Further optimization for small phones */
@@ -238,7 +333,7 @@ $username = $_SESSION['username'];
         /* --- END Responsive Table CSS Fix --- */
     </style>
 </head>
-<body>
+<body class="<?= $is_dark_mode ? 'dark-mode' : '' ?>">
 
 <?php include '../components/admin_header.php'; ?>
 
@@ -300,7 +395,7 @@ $username = $_SESSION['username'];
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="5" style="text-align:center; padding:20px;"><?= $lang['no_notices'] ?? 'No notices found.' ?></td>
+                <td colspan="6" style="text-align:center; padding:20px; color: var(--text-primary);"><?= $lang['no_notices'] ?? 'No notices found.' ?></td>
             </tr>
         <?php endif; ?>
         </tbody>
@@ -328,6 +423,13 @@ $username = $_SESSION['username'];
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
     }
+
+    // Apply dark mode on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if ($is_dark_mode): ?>
+        document.body.classList.add('dark-mode');
+        <?php endif; ?>
+    });
 </script>
 
 </body>

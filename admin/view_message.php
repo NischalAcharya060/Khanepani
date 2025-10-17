@@ -82,25 +82,6 @@ $unread = $countResult->fetch_assoc()['unread_count'];
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* --- General Styling and Layout --- */
-        :root {
-            --primary-color: #007bff;
-            --primary-dark: #0056b3;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --background-light: #f4f6f9;
-            --card-background: #ffffff;
-            --border-color: #e9ecef;
-            --text-dark: #343a40;
-            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--background-light);
-            margin: 0;
-        }
 
         .main-content {
             padding: 30px;

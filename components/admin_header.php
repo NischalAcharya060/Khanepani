@@ -20,6 +20,13 @@ if (!isset($conn) || $conn->connect_error) {
     die($generic_db_error);
 }
 
+// --- Dark Mode Handling ---
+if (isset($_GET['dark_mode'])) {
+    $_SESSION['dark_mode'] = ($_GET['dark_mode'] === 'on');
+}
+
+$is_dark_mode = $_SESSION['dark_mode'] ?? false;
+
 // --- Language Handling ---
 if (isset($_GET['lang']) && in_array($_GET['lang'], $allowed_langs)) {
     $_SESSION['lang'] = $_GET['lang'];
@@ -95,6 +102,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 ?>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<body class="<?= $is_dark_mode ? 'dark-mode' : '' ?>">
 <header class="admin-header">
     <div class="logo">
         <img src="../assets/images/logo.jpg" alt="Logo">
@@ -109,6 +117,18 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             <a href="?lang=np" class="lang-link <?= ($current_lang == 'np') ? 'active-lang' : '' ?>" title="नेपाली">
                 <img src="../assets/images/np.png" alt="NP" class="flag-icon">
                 <span>NP</span>
+            </a>
+        </div>
+
+        <!-- DARK MODE TOGGLE BUTTON -->
+        <div class="dark-mode-toggle">
+            <a href="?dark_mode=<?= $is_dark_mode ? 'off' : 'on' ?>" class="dark-mode-btn" title="<?= $is_dark_mode ? 'Switch to Light Mode' : 'Switch to Dark Mode' ?>">
+                <span class="dark-mode-icon">
+                    <?= $is_dark_mode ? '🌙' : '☀️' ?>
+                </span>
+                <span class="dark-mode-text">
+                    <?= $is_dark_mode ? 'Light' : 'Dark' ?>
+                </span>
             </a>
         </div>
 
@@ -240,6 +260,178 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 </aside>
 
 <style>
+    /* ================================
+       DARK MODE VARIABLES
+    ================================ */
+    :root {
+        --sidebar-mobile-width: 240px;
+        --sidebar-collapsed-width: 60px;
+        --sidebar-expanded-width: 240px;
+
+        /* Light mode colors */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --header-bg: linear-gradient(90deg, #004080, #0066cc);
+        --sidebar-bg: rgba(0, 38, 77, 0.95);
+        --card-bg: #ffffff;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode {
+        /* Dark mode colors */
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --border-color: #404040;
+        --header-bg: linear-gradient(90deg, #002b4d, #004080);
+        --sidebar-bg: rgba(0, 20, 40, 0.95);
+        --card-bg: #2d2d2d;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Apply dark mode styles */
+    body.dark-mode {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    /* Update existing elements for dark mode */
+    body.dark-mode .admin-header {
+        background: var(--header-bg);
+    }
+
+    body.dark-mode .sidebar {
+        background: var(--sidebar-bg);
+    }
+
+    body.dark-mode .profile-dropdown {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    body.dark-mode .dropdown-item {
+        color: var(--text-primary);
+    }
+
+    body.dark-mode .dropdown-item:hover {
+        background: var(--bg-secondary);
+    }
+
+    body.dark-mode .notif-modal-content {
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    body.dark-mode .notif-modal-content li {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+    }
+
+    body.dark-mode .msg-left strong {
+        color: var(--text-primary);
+    }
+
+    body.dark-mode .time {
+        color: var(--text-secondary);
+    }
+
+    body.dark-mode .msg-right {
+        color: var(--text-secondary);
+    }
+
+    body.dark-mode .no-messages {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+    }
+
+    body.dark-mode .dropdown-divider {
+        background: var(--border-color);
+    }
+
+    body.dark-mode .dropdown-item i {
+        color: var(--text-secondary);
+    }
+
+    body.dark-mode .dropdown-item:hover i {
+        color: var(--text-primary);
+    }
+
+    /* ================================
+       DARK MODE TOGGLE - HEADER STYLE
+    ================================ */
+    .dark-mode-toggle {
+        display: flex;
+        align-items: center;
+    }
+
+    .dark-mode-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+    }
+
+    .dark-mode-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        color: white;
+    }
+
+    .dark-mode-btn:active {
+        transform: translateY(0);
+    }
+
+    .dark-mode-icon {
+        font-size: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    .dark-mode-btn:hover .dark-mode-icon {
+        transform: rotate(20deg);
+    }
+
+    /* Hide text on smaller screens */
+    @media (max-width: 768px) {
+        .dark-mode-text {
+            display: none;
+        }
+        .dark-mode-btn {
+            padding: 8px 12px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .dark-mode-btn {
+            padding: 6px 10px;
+            gap: 0;
+        }
+        .dark-mode-icon {
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dark-mode-toggle {
+            margin-right: 0;
+        }
+    }
+
     /* ================================
        VARIABLES & CORE SLIDING SETUP
     ================================ */
@@ -411,6 +603,14 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         cursor: pointer;
         /* NEW: Ensure visibility on smaller screens */
         min-width: 22px;
+        transition: all 0.3s ease;
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    .notification:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.1);
     }
 
     .notif-badge {
@@ -1323,6 +1523,13 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 </style>
 
 <script>
+    // Apply dark mode class on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if ($is_dark_mode): ?>
+        document.body.classList.add('dark-mode');
+        <?php endif; ?>
+    });
+
     // Sidebar toggle (mobile)
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
