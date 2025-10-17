@@ -261,8 +261,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
 <style>
     /* ================================
-       DARK MODE VARIABLES
-    ================================ */
+   DARK MODE VARIABLES
+=============================== */
     :root {
         --sidebar-mobile-width: 240px;
         --sidebar-collapsed-width: 60px;
@@ -363,7 +363,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
     /* ================================
        DARK MODE TOGGLE - HEADER STYLE
-    ================================ */
+    =============================== */
     .dark-mode-toggle {
         display: flex;
         align-items: center;
@@ -406,35 +406,9 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: rotate(20deg);
     }
 
-    /* Hide text on smaller screens */
-    @media (max-width: 768px) {
-        .dark-mode-text {
-            display: none;
-        }
-        .dark-mode-btn {
-            padding: 8px 12px;
-        }
-    }
-
-    @media (max-width: 600px) {
-        .dark-mode-btn {
-            padding: 6px 10px;
-            gap: 0;
-        }
-        .dark-mode-icon {
-            font-size: 16px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .dark-mode-toggle {
-            margin-right: 0;
-        }
-    }
-
     /* ================================
        VARIABLES & CORE SLIDING SETUP
-    ================================ */
+    =============================== */
     :root {
         --sidebar-mobile-width: 240px;
         --sidebar-collapsed-width: 60px;
@@ -473,10 +447,9 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-
     /* ================================
        HEADER
-    ================================ */
+    =============================== */
     .admin-header {
         background: linear-gradient(90deg, #004080, #0066cc);
         color: white;
@@ -495,7 +468,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         display: flex;
         align-items: center;
         gap: 15px;
-        /* NEW: Prevent text wrapping */
         white-space: nowrap;
     }
 
@@ -507,19 +479,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transition: transform 0.3s;
     }
 
-    /* NEW: Adjust logo size and hide H1 on smaller mobile screens */
-    @media (max-width: 480px) {
-        .admin-header .logo img {
-            height: 40px;
-        }
-        .admin-header .logo h1 {
-            display: none;
-        }
-        .admin-header {
-            padding: 10px 15px;
-        }
-    }
-
     .admin-header .logo img:hover {
         transform: scale(1.05) rotate(2deg);
     }
@@ -527,7 +486,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     .admin-header .user-info {
         display: flex;
         align-items: center;
-        /* NEW: Use flex-wrap to prevent overflow on small screens */
         flex-wrap: nowrap;
         gap: 18px;
         font-weight: 500;
@@ -539,17 +497,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         gap: 8px;
         padding: 5px;
         font-weight: 600;
-    }
-
-    /* NEW: Hide language text on small screens to save space */
-    @media (max-width: 600px) {
-        .lang-switcher span {
-            display: none;
-        }
-        .lang-link {
-            padding: 6px 8px; /* Reduce padding when text is hidden */
-            gap: 0;
-        }
     }
 
     .lang-link {
@@ -591,6 +538,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         cursor: pointer;
         transition: all 0.3s ease;
     }
+
     .menu-toggle:hover {
         background: #ff8533;
         transform: scale(1.1);
@@ -601,7 +549,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         position: relative;
         font-size: 22px;
         cursor: pointer;
-        /* NEW: Ensure visibility on smaller screens */
         min-width: 22px;
         transition: all 0.3s ease;
         padding: 8px;
@@ -634,7 +581,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
     /* ================================
        Profile Menu
-    ================================ */
+    =============================== */
     .profile-menu {
         position: relative;
     }
@@ -678,11 +625,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         border: 2px solid white;
         border-radius: 50%;
         animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.2); opacity: 0.8; }
     }
 
     .profile-info {
@@ -847,40 +789,9 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         background: #2d1b1b !important;
     }
 
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .profile-info {
-            display: none;
-        }
-
-        .profile-trigger {
-            padding: 6px 8px;
-        }
-
-        .profile-dropdown {
-            min-width: 200px;
-            right: -10px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .profile-dropdown {
-            min-width: 180px;
-            right: -15px;
-        }
-
-        .dropdown-header {
-            padding: 16px;
-        }
-
-        .dropdown-item {
-            padding: 10px 16px;
-        }
-    }
-
     /* ================================
        SIDEBAR
-    ================================ */
+    =============================== */
     .sidebar {
         width: var(--sidebar-expanded-width);
         height: 100vh;
@@ -919,28 +830,27 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-
     /* Default mobile state (off screen) */
     @media (max-width: 900px) {
         /* Sidebar starts off-screen */
         .sidebar {
             transform: translateX(-100%);
             width: var(--sidebar-mobile-width);
-            top: 66px; /* Adjust top to account for potentially smaller header on mobile */
-            height: calc(100vh - 66px); /* Fill the rest of the viewport */
+            top: 66px;
+            height: calc(100vh - 66px);
         }
         /* Mobile Active State */
         .sidebar.active {
             transform: translateX(0);
         }
         .menu-toggle {
-            display: block; /* Show mobile toggle */
+            display: block;
         }
         .sidebar-top {
             justify-content: flex-end;
         }
         .sidebar.active .collapse-toggle {
-            display: none; /* Hide desktop toggle on mobile active state */
+            display: none;
         }
         /* Mobile sidebar must always be expanded for usability */
         .sidebar.collapsed {
@@ -948,7 +858,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             transform: translateX(-100%);
         }
     }
-
 
     .sidebar ul {
         list-style: none;
@@ -1012,133 +921,37 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         cursor: pointer;
         transition: all 0.3s ease;
     }
+
     .collapse-toggle:hover {
         background: #ff8533;
         transform: scale(1.1);
     }
+
     .sidebar.collapsed .collapse-toggle {
         transform: rotate(180deg);
     }
 
     /* --------------------------------
        NEW: SIDEBAR GROUP SEPARATOR
-       -------------------------------- */
+    -------------------------------- */
     .sidebar ul li.sidebar-group-separator {
         height: 1px;
         margin: 15px 15px;
-        background: rgba(255, 255, 255, 0.25); /* Stronger visibility */
+        background: rgba(255, 255, 255, 0.25);
         border-radius: 1px;
         list-style: none;
-        /* Reset default list item margin */
         padding: 0;
     }
 
     /* Adjust separator when collapsed */
     .sidebar.collapsed .sidebar-group-separator {
         margin: 15px 5px;
-        /* Full width of the collapsed sidebar */
         width: calc(100% - 10px);
     }
 
-    /* --------------------------------
-       SIDEBAR DROPDOWN STYLES (NEW)
-       -------------------------------- */
-    .sidebar-dropdown {
-        position: relative;
-    }
-
-    .dropdown-toggle {
-        justify-content: space-between;
-        /* Ensures chevron is on the right */
-        transition: background 0.3s ease;
-    }
-
-    /* Remove extra padding on hover for dropdown link */
-    .dropdown-toggle:hover {
-        padding-left: 28px;
-    }
-
-    .dropdown-arrow {
-        margin-left: auto;
-        font-size: 10px;
-        transition: transform 0.3s ease;
-    }
-
-    /* Dropdown Content */
-    .dropdown-content {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        max-height: 0; /* Starts hidden */
-        overflow: hidden;
-        transition: max-height 0.3s ease-in-out;
-    }
-
-    /* Styling for nested links */
-    .dropdown-content li a {
-        padding-left: 45px; /* Indent sub-links */
-        font-size: 14px;
-        border-left: none; /* Remove main border */
-    }
-
-    /* Sub-link hover/active state */
-    .dropdown-content li a.active,
-    .dropdown-content li a:hover {
-        background: rgba(255, 255, 255, 0.1);
-        padding-left: 55px; /* Indent on hover/active */
-        border-left: 2px solid #ff6600; /* Add a sub-link border */
-    }
-
-    .dropdown-content li a .sub-icon {
-        margin-right: 10px;
-    }
-
-    /* DROPDOWN OPEN STATES (JS controlled via 'open') */
-    .sidebar-dropdown.open .dropdown-content {
-        max-height: 500px; /* Large enough value to show all content */
-    }
-    .sidebar-dropdown.open .dropdown-arrow {
-        transform: rotate(180deg);
-    }
-
-    /* Sidebar Collapsed State Overrides */
-    .sidebar.collapsed .sidebar-dropdown .dropdown-toggle {
-        /* Make entire collapsed toggle the hover trigger */
-        position: relative;
-        z-index: 20;
-    }
-
-    /* Hide text/arrow in collapsed state */
-    .sidebar.collapsed .dropdown-toggle .link-text,
-    .sidebar.collapsed .dropdown-toggle .dropdown-arrow {
-        opacity: 0;
-        visibility: hidden;
-    }
-
-    .sidebar.collapsed .dropdown-content {
-        /* Hide content completely in collapsed mode */
-        max-height: 0 !important;
-        overflow: hidden;
-    }
-
-    /* Active styling for the dropdown link when child is active */
-    .sidebar-dropdown .dropdown-toggle.active {
-        /* Ensure background and border are applied */
-        background: linear-gradient(90deg, #004080, #0059b3);
-        border-left: 4px solid #ff6600;
-        box-shadow: inset 3px 0 10px rgba(0,0,0,0.2);
-    }
-
-    /* Re-show link-text and arrow for active state when collapsed */
-    .sidebar.collapsed .sidebar-dropdown .dropdown-toggle.active .link-text,
-    .sidebar.collapsed .sidebar-dropdown .dropdown-toggle.active .dropdown-arrow {
-        opacity: 1;
-        visibility: visible;
-    }
-
     /* ================================
-    ENHANCED NOTIFICATION MODAL
-    ================================ */
+       ENHANCED NOTIFICATION MODAL
+    =============================== */
     .notif-modal {
         display: none;
         position: fixed;
@@ -1458,23 +1271,354 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: scale(0.95);
     }
 
-    /* Responsive improvements */
+    /* ================================
+       RESPONSIVE IMPROVEMENTS
+    =============================== */
+
+    /* Medium screens (768px - 900px) */
+    @media (max-width: 900px) {
+        .admin-header {
+            padding: 12px 20px;
+        }
+
+        .admin-header .logo h1 {
+            font-size: 18px;
+        }
+
+        .user-info {
+            gap: 12px;
+        }
+
+        .dark-mode-btn {
+            padding: 6px 10px;
+        }
+
+        .lang-switcher {
+            gap: 4px;
+        }
+
+        .lang-link {
+            padding: 5px 8px;
+        }
+
+        .sidebar {
+            top: 60px;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar ul li a {
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+
+        .sidebar-top {
+            padding: 8px;
+        }
+
+        .collapse-toggle {
+            padding: 4px 8px;
+            font-size: 14px;
+        }
+    }
+
+    /* Small tablets and large phones (600px - 768px) */
+    @media (max-width: 768px) {
+        .admin-header {
+            padding: 10px 15px;
+        }
+
+        .admin-header .logo h1 {
+            font-size: 16px;
+        }
+
+        .admin-header .logo img {
+            height: 35px;
+        }
+
+        .user-info {
+            gap: 10px;
+        }
+
+        /* Hide dark mode text, show only icon */
+        .dark-mode-text {
+            display: none;
+        }
+
+        .dark-mode-btn {
+            padding: 6px 8px;
+        }
+
+        /* Hide language text, show only flags */
+        .lang-switcher span {
+            display: none;
+        }
+
+        .lang-link {
+            padding: 4px 6px;
+        }
+
+        .flag-icon {
+            width: 18px;
+            height: 12px;
+        }
+
+        /* Adjust notification bell */
+        .notification {
+            font-size: 18px;
+            padding: 6px;
+        }
+
+        .notif-badge {
+            font-size: 10px;
+            padding: 1px 4px;
+            top: -4px;
+            right: -8px;
+        }
+
+        /* Compact profile info */
+        .profile-info {
+            display: none;
+        }
+
+        .profile-trigger {
+            padding: 4px 8px;
+        }
+
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+        }
+
+        .dropdown-arrow {
+            width: 14px;
+            height: 14px;
+        }
+
+        .profile-dropdown {
+            min-width: 200px;
+            right: -10px;
+        }
+
+        .sidebar {
+            width: 220px;
+            top: 55px;
+            height: calc(100vh - 55px);
+        }
+
+        .sidebar ul li a {
+            padding: 10px 14px;
+        }
+
+        .link-text {
+            font-size: 13px;
+        }
+
+        .sidebar-group-separator {
+            margin: 12px 10px;
+        }
+    }
+
+    /* Mobile phones (480px - 600px) */
+    @media (max-width: 600px) {
+        .admin-header {
+            padding: 8px 12px;
+        }
+
+        .admin-header .logo h1 {
+            display: none;
+        }
+
+        .admin-header .logo img {
+            height: 30px;
+        }
+
+        .user-info {
+            gap: 8px;
+        }
+
+        /* Further compact dark mode toggle */
+        .dark-mode-toggle {
+            margin-right: 0;
+        }
+
+        .dark-mode-btn {
+            padding: 4px 6px;
+        }
+
+        .dark-mode-icon {
+            font-size: 14px;
+        }
+
+        /* Compact language switcher */
+        .lang-switcher {
+            gap: 2px;
+        }
+
+        .lang-link {
+            padding: 3px 4px;
+        }
+
+        .flag-icon {
+            width: 16px;
+            height: 10px;
+        }
+
+        /* Smaller notification bell */
+        .notification {
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .notif-badge {
+            font-size: 9px;
+            padding: 1px 3px;
+            min-width: 16px;
+            height: 16px;
+        }
+
+        /* Compact profile trigger */
+        .profile-trigger {
+            gap: 6px;
+            padding: 3px 6px;
+        }
+
+        .profile-pic {
+            width: 28px;
+            height: 28px;
+        }
+
+        .dropdown-arrow {
+            width: 12px;
+            height: 12px;
+        }
+
+        .profile-dropdown {
+            min-width: 180px;
+            right: -15px;
+        }
+
+        .dropdown-header {
+            padding: 16px;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+        }
+
+        .sidebar {
+            width: 200px;
+            top: 50px;
+            height: calc(100vh - 50px);
+        }
+
+        .sidebar ul li a {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .sub-icon {
+            font-size: 14px;
+        }
+    }
+
+    /* Small phones (below 480px) */
     @media (max-width: 480px) {
+        .admin-header {
+            padding: 6px 10px;
+        }
+
+        .admin-header .logo img {
+            height: 25px;
+        }
+
+        .user-info {
+            gap: 6px;
+        }
+
+        /* Hide language switcher on very small screens */
+        .lang-switcher {
+            display: none;
+        }
+
+        /* Ultra-compact dark mode toggle */
+        .dark-mode-btn {
+            padding: 3px 4px;
+        }
+
+        .dark-mode-icon {
+            font-size: 12px;
+        }
+
+        /* Smaller notification */
+        .notification {
+            font-size: 14px;
+            padding: 3px;
+        }
+
+        .notif-badge {
+            font-size: 8px;
+            padding: 0px 2px;
+            top: -3px;
+            right: -6px;
+            min-width: 14px;
+            height: 14px;
+        }
+
+        /* Minimal profile trigger */
+        .profile-trigger {
+            gap: 4px;
+            padding: 2px 4px;
+        }
+
+        .profile-pic {
+            width: 24px;
+            height: 24px;
+        }
+
+        .dropdown-arrow {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Adjust menu toggle button */
+        .menu-toggle {
+            font-size: 18px;
+            padding: 4px 8px;
+        }
+
+        /* Notification modal responsive */
         .notif-modal-content {
-            margin: 60px auto;
+            margin: 40px auto;
             width: 95%;
-            max-height: 70vh;
+            max-height: 80vh;
         }
 
         .notif-header {
-            padding: 16px 20px;
+            padding: 12px 16px;
         }
 
         .notif-header h3 {
-            font-size: 1.1rem;
+            font-size: 1rem;
+        }
+
+        .close-btn {
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+        }
+
+        .clear-btn {
+            margin: 10px 16px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .notif-modal-content ul {
+            padding: 0 12px 12px;
         }
 
         .notif-modal-content li {
+            padding: 12px;
             flex-direction: column;
             align-items: flex-start;
         }
@@ -1483,31 +1627,149 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             margin-left: 0;
             margin-top: 8px;
             max-width: 100%;
-            -webkit-line-clamp: 3;
         }
 
-        .clear-btn {
-            margin: 12px 20px;
-            padding: 10px 16px;
-            font-size: 0.85rem;
+        .no-messages {
+            padding: 20px 15px;
+            margin: 15px;
         }
     }
 
-    @media (max-width: 380px) {
+    /* Extra small phones (below 360px) */
+    @media (max-width: 360px) {
+        .admin-header {
+            padding: 4px 8px;
+        }
+
+        .user-info {
+            gap: 4px;
+        }
+
+        /* Hide dark mode toggle on very small screens */
+        .dark-mode-toggle {
+            display: none;
+        }
+
+        /* Even more compact notification */
+        .notification {
+            font-size: 12px;
+            padding: 2px;
+        }
+
+        .profile-trigger {
+            padding: 1px 3px;
+        }
+
+        .profile-pic {
+            width: 22px;
+            height: 22px;
+        }
+    }
+
+    /* ================================
+       TOUCH DEVICE OPTIMIZATIONS
+    =============================== */
+    @media (hover: none) and (pointer: coarse) {
+        .dark-mode-btn:hover,
+        .lang-link:hover,
+        .notification:hover,
+        .profile-trigger:hover,
+        .menu-toggle:hover,
+        .collapse-toggle:hover {
+            transform: none;
+        }
+
+        .dark-mode-btn:active,
+        .lang-link:active,
+        .notification:active,
+        .profile-trigger:active,
+        .menu-toggle:active,
+        .collapse-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Increase tap targets for mobile */
+        .dark-mode-btn,
+        .lang-link,
+        .notification,
+        .menu-toggle,
+        .collapse-toggle {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .profile-trigger {
+            min-height: 44px;
+        }
+    }
+
+    /* ================================
+       LANDSCAPE ORIENTATION SUPPORT
+    =============================== */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .admin-header {
+            padding: 6px 15px;
+        }
+
+        .admin-header .logo img {
+            height: 25px;
+        }
+
+        .sidebar {
+            top: 45px;
+            height: calc(100vh - 45px);
+        }
+
+        .sidebar ul li a {
+            padding: 8px 16px;
+        }
+
         .notif-modal-content {
-            border-radius: 16px;
+            margin: 20px auto;
+            max-height: 85vh;
+        }
+    }
+
+    /* ================================
+       HIGH DPI SCREENS OPTIMIZATION
+    =============================== */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .admin-header .logo img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
-        .notif-header {
-            padding: 14px 16px;
+        .flag-icon {
+            image-rendering: -webkit-optimize-contrast;
         }
+    }
 
-        .notif-modal-content ul {
-            padding: 0 16px 16px;
-        }
-
+    /* ================================
+       REDUCED MOTION SUPPORT
+    =============================== */
+    @media (prefers-reduced-motion: reduce) {
+        .admin-header .logo img,
+        .dark-mode-btn,
+        .lang-link,
+        .notification,
+        .profile-trigger,
+        .menu-toggle,
+        .collapse-toggle,
+        .sidebar ul li a,
+        .dropdown-item,
+        .notif-modal-content,
         .notif-modal-content li {
-            padding: 12px;
+            transition: none;
+            animation: none;
+        }
+
+        .dark-mode-btn:hover .dark-mode-icon,
+        .profile-trigger:hover .dropdown-arrow {
+            transform: none;
+        }
+
+        .notif-badge {
+            animation: none;
         }
     }
 
@@ -1528,39 +1790,101 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         <?php if ($is_dark_mode): ?>
         document.body.classList.add('dark-mode');
         <?php endif; ?>
+
+        // Initialize sidebar state
+        initializeSidebar();
     });
 
-    // Sidebar toggle (mobile)
+    // Initialize sidebar based on screen size and saved state
+    function initializeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const body = document.body;
+
+        if (window.innerWidth <= 900) {
+            // Mobile: always start with sidebar hidden
+            sidebar.classList.remove('active');
+            body.classList.remove('mobile-sidebar-open');
+            sidebar.classList.remove('collapsed'); // Mobile should never be collapsed
+        } else {
+            // Desktop: apply saved state
+            const savedState = '<?= $sidebar_state ?>'; // expanded or collapsed
+            if (savedState === 'collapsed') {
+                sidebar.classList.add('collapsed');
+                body.classList.add('sidebar-collapsed-state');
+            } else {
+                sidebar.classList.remove('collapsed');
+                body.classList.remove('sidebar-collapsed-state');
+            }
+            sidebar.classList.remove('active'); // Remove mobile active state on desktop
+        }
+    }
+
+    // SIMPLIFIED Sidebar toggle (mobile)
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const body = document.body;
 
-        // 1. Toggle the sidebar 'active' class (to make it visible/hide it)
-        sidebar.classList.toggle('active');
+        if (window.innerWidth <= 900) {
+            // Mobile behavior
+            sidebar.classList.toggle('active');
+            body.classList.toggle('mobile-sidebar-open');
 
-        // 2. Toggle the body class to trigger the dashboard content slide
-        body.classList.toggle('mobile-sidebar-open');
-
-        // Ensure desktop collapse class is off when mobile sidebar is active
-        if (sidebar.classList.contains('active')) {
-            // UPDATED: Only remove 'collapsed' if it's there AND we are on a smaller screen (optional but safer)
-            if (window.innerWidth <= 900) {
-                sidebar.classList.remove('collapsed');
-                body.classList.remove('sidebar-collapsed-state');
+            // Add/remove overlay
+            if (sidebar.classList.contains('active')) {
+                createMobileOverlay();
+            } else {
+                removeMobileOverlay();
             }
+        } else {
+            // Desktop: toggle collapse/expand
+            toggleSidebarCollapse();
         }
     }
 
-    function toggleSidebarCollapse() {
+    // Create mobile overlay
+    function createMobileOverlay() {
+        if (document.getElementById('mobile-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'mobile-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 980;
+            backdrop-filter: blur(2px);
+        `;
+        overlay.onclick = closeMobileSidebar;
+        document.body.appendChild(overlay);
+    }
+
+    // Remove mobile overlay
+    function removeMobileOverlay() {
+        const overlay = document.getElementById('mobile-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+
+    // Close mobile sidebar
+    function closeMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
         const body = document.body;
 
-        // Prevent collapse/expand on mobile
-        if (window.innerWidth <= 900 && !sidebar.classList.contains('active')) {
-            // Only allow toggle if it's the desktop collapse button click
-            return;
-        }
+        sidebar.classList.remove('active');
+        body.classList.remove('mobile-sidebar-open');
+        removeMobileOverlay();
+    }
 
+    // Desktop sidebar collapse/expand
+    function toggleSidebarCollapse() {
+        if (window.innerWidth <= 900) return; // Don't allow collapse on mobile
+
+        const sidebar = document.getElementById('sidebar');
+        const body = document.body;
 
         sidebar.classList.toggle('collapsed');
         body.classList.toggle('sidebar-collapsed-state');
@@ -1574,6 +1898,25 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             body: "state=" + state
         });
     }
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        const sidebar = document.getElementById('sidebar');
+
+        if (window.innerWidth > 900) {
+            // Desktop: remove mobile states
+            sidebar.classList.remove('active');
+            document.body.classList.remove('mobile-sidebar-open');
+            removeMobileOverlay();
+
+            // Ensure proper desktop state
+            initializeSidebar();
+        } else {
+            // Mobile: ensure collapsed state is removed
+            sidebar.classList.remove('collapsed');
+            document.body.classList.remove('sidebar-collapsed-state');
+        }
+    });
 
     // Enhanced Notification Modal
     const notifBell = document.getElementById('notifBell');
@@ -1604,8 +1947,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         });
     }
 
-    notifBell.addEventListener('click', openNotificationModal);
-    closeBtn.addEventListener('click', closeNotificationModal);
+    if (notifBell) notifBell.addEventListener('click', openNotificationModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeNotificationModal);
 
     window.addEventListener('click', (e) => {
         if (e.target === notifModal) {
@@ -1661,7 +2004,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
     // Keyboard support
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && notifModal.classList.contains('show')) {
+        if (e.key === 'Escape' && notifModal && notifModal.classList.contains('show')) {
             closeNotificationModal();
         }
     });
@@ -1725,39 +2068,16 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
     function toggleProfileMenu() {
         const dropdown = document.getElementById("profileDropdown");
-        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+        if (dropdown) {
+            dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+        }
     }
 
     window.addEventListener("click", function(e) {
         const trigger = document.querySelector(".profile-trigger");
         const dropdown = document.getElementById("profileDropdown");
-        if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+        if (trigger && dropdown && !trigger.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.style.display = "none";
         }
-    });
-
-    // ==================================
-    // NEW: Sidebar Dropdown Logic
-    // ==================================
-    document.querySelectorAll('.sidebar-dropdown .dropdown-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            const parentLi = this.closest('.sidebar-dropdown');
-
-            // Do nothing if sidebar is collapsed on desktop
-            if (window.innerWidth > 900 && document.getElementById('sidebar').classList.contains('collapsed')) {
-                return;
-            }
-
-            // Close other open dropdowns
-            document.querySelectorAll('.sidebar-dropdown').forEach(item => {
-                if (item !== parentLi && item.classList.contains('open')) {
-                    item.classList.remove('open');
-                }
-            });
-
-            // Toggle current dropdown
-            parentLi.classList.toggle('open');
-        });
     });
 </script>

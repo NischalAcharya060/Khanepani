@@ -24,6 +24,14 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
+// System Information for Advanced Tab
+$php_version = phpversion();
+$mysql_version = mysqli_get_server_info($conn);
+$server_software = $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown';
+$upload_max_filesize = ini_get('upload_max_filesize');
+$memory_limit = ini_get('memory_limit');
+$max_execution_time = ini_get('max_execution_time');
+
 $msg = "";
 
 // --- Handle Form Submission ---
@@ -475,6 +483,87 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             box-shadow: var(--shadow-hover);
         }
 
+        /* System Information Card Styles */
+        .system-info-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .system-info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .system-info-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .system-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .system-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(67, 97, 238, 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .system-info-item:hover {
+            background: rgba(67, 97, 238, 0.1);
+            transform: translateX(5px);
+        }
+
+        .system-info-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .system-info-value {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 14px;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Animation for system info card */
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        /* Dark mode adjustments for system info */
+        .dark-mode .system-info-item {
+            background: rgba(67, 97, 238, 0.1);
+            border-color: #475569;
+        }
+
+        .dark-mode .system-info-value {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary-light);
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .main-content {
@@ -533,6 +622,21 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             .map-iframe-wrapper {
                 padding-bottom: 75%; /* Better mobile aspect ratio */
             }
+
+            .system-info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .system-info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .system-info-value {
+                align-self: flex-end;
+            }
         }
 
         @media (max-width: 480px) {
@@ -558,6 +662,19 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             select {
                 padding: 12px 14px;
                 font-size: 15px;
+            }
+
+            .system-info-card {
+                padding: 20px 15px;
+            }
+
+            .system-info-item {
+                padding: 10px 12px;
+            }
+
+            .system-info-label,
+            .system-info-value {
+                font-size: 13px;
             }
         }
 
@@ -766,17 +883,33 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
                         <?= $lang['advanced_settings'] ?? 'Advanced Settings' ?>
                     </h3>
 
-                    <div class="setting-card advanced-settings">
-                        <h4 style="margin-bottom: 10px; color: var(--primary-color);">
-                            <i data-feather="database"></i>
-                            <?= $lang['system_info'] ?? 'System Information' ?>
-                        </h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
-                            <div>
-                                <strong>PHP Version:</strong> <?= phpversion() ?>
+                    <!-- System Information Card -->
+                    <div class="system-info-card animate-fade-in">
+                        <h3><i data-feather="server"></i> <?= $lang['system_info'] ?? 'System Information' ?></h3>
+                        <div class="system-info-grid">
+                            <div class="system-info-item">
+                                <span class="system-info-label">PHP Version</span>
+                                <span class="system-info-value"><?= $php_version ?></span>
                             </div>
-                            <div>
-                                <strong>MySQL Version:</strong> <?= mysqli_get_server_info($conn) ?>
+                            <div class="system-info-item">
+                                <span class="system-info-label">MySQL Version</span>
+                                <span class="system-info-value"><?= $mysql_version ?></span>
+                            </div>
+                            <div class="system-info-item">
+                                <span class="system-info-label">Server Software</span>
+                                <span class="system-info-value"><?= $server_software ?></span>
+                            </div>
+                            <div class="system-info-item">
+                                <span class="system-info-label">Upload Max Filesize</span>
+                                <span class="system-info-value"><?= $upload_max_filesize ?></span>
+                            </div>
+                            <div class="system-info-item">
+                                <span class="system-info-label">Memory Limit</span>
+                                <span class="system-info-value"><?= $memory_limit ?></span>
+                            </div>
+                            <div class="system-info-item">
+                                <span class="system-info-label">Max Execution Time</span>
+                                <span class="system-info-value"><?= $max_execution_time ?>s</span>
                             </div>
                         </div>
                     </div>
@@ -792,6 +925,21 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
                         <button type="button" class="copy-button" onclick="exportSettings()">
                             <i data-feather="download"></i>
                             <?= $lang['export'] ?? 'Export Settings' ?>
+                        </button>
+                    </div>
+
+                    <!-- Additional Advanced Options -->
+                    <div class="setting-card">
+                        <h4 style="margin-bottom: 15px; color: var(--text-dark);">
+                            <i data-feather="shield"></i>
+                            <?= $lang['security_settings'] ?? 'Security Settings' ?>
+                        </h4>
+                        <p style="color: var(--text-light); margin-bottom: 15px; font-size: 14px;">
+                            <?= $lang['security_desc'] ?? 'Manage security-related settings and configurations.' ?>
+                        </p>
+                        <button type="button" class="copy-button" onclick="showSecurityModal()">
+                            <i data-feather="settings"></i>
+                            <?= $lang['configure_security'] ?? 'Configure Security' ?>
                         </button>
                     </div>
                 </div>
@@ -889,6 +1037,123 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         document.body.removeChild(downloadAnchor);
+    }
+
+    // Security Settings Modal
+    function showSecurityModal() {
+        const securitySettings = {
+            'Session Timeout': '30 minutes',
+            'Password Policy': 'Strong (min 8 characters)',
+            'Login Attempts': '5 attempts allowed',
+            'IP Whitelist': 'Not configured',
+            'Two-Factor Auth': 'Disabled'
+        };
+
+        let modalHTML = `
+            <div class="modal-overlay" id="securityModal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(5px);
+            ">
+                <div class="modal-content" style="
+                    background: var(--card-bg);
+                    padding: 30px;
+                    border-radius: var(--border-radius);
+                    max-width: 500px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    box-shadow: var(--shadow-hover);
+                    border: 1px solid var(--border-color);
+                ">
+                    <div class="modal-header" style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                        padding-bottom: 15px;
+                        border-bottom: 1px solid var(--border-color);
+                    ">
+                        <h3 style="color: var(--primary-color); display: flex; align-items: center; gap: 10px;">
+                            <i data-feather="shield"></i>
+                            Security Settings
+                        </h3>
+                        <button onclick="closeSecurityModal()" style="
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                            color: var(--text-light);
+                        ">&times;</button>
+                    </div>
+                    <div class="security-settings-list">
+        `;
+
+        for (const [key, value] of Object.entries(securitySettings)) {
+            modalHTML += `
+                <div class="security-item" style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid var(--border-color);
+                ">
+                    <span style="font-weight: 600; color: var(--text-dark);">${key}</span>
+                    <span style="color: var(--primary-color); font-weight: 500;">${value}</span>
+                </div>
+            `;
+        }
+
+        modalHTML += `
+                    </div>
+                    <div class="modal-actions" style="
+                        margin-top: 25px;
+                        padding-top: 20px;
+                        border-top: 1px solid var(--border-color);
+                        display: flex;
+                        gap: 15px;
+                        justify-content: flex-end;
+                    ">
+                        <button onclick="closeSecurityModal()" style="
+                            padding: 10px 20px;
+                            background: var(--border-color);
+                            color: var(--text-dark);
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-weight: 600;
+                        ">Close</button>
+                        <button style="
+                            padding: 10px 20px;
+                            background: var(--primary-color);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-weight: 600;
+                        ">Configure</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        feather.replace();
+    }
+
+    function closeSecurityModal() {
+        const modal = document.getElementById('securityModal');
+        if (modal) {
+            modal.remove();
+        }
     }
 
     // Form Submission Loading
