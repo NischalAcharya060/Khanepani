@@ -1214,6 +1214,92 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: scale(0.95);
     }
 
+    /* Toast Notifications */
+    .notification-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #004080, #0066cc);
+        color: white;
+        padding: 0;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 350px;
+        overflow: hidden;
+    }
+
+    .notification-toast.show {
+        transform: translateX(0);
+    }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        gap: 12px;
+    }
+
+    .toast-icon {
+        font-size: 1.2em;
+        animation: ring 0.5s ease 2;
+    }
+
+    @keyframes ring {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(15deg); }
+        75% { transform: rotate(-15deg); }
+    }
+
+    .toast-message {
+        flex: 1;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .toast-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        font-size: 16px;
+    }
+
+    .toast-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    /* Pulse animation for new notifications */
+    .notification.has-new {
+        animation: pulse-glow 1s ease 3;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            transform: scale(1);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        50% {
+            transform: scale(1.1);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+    }
+
+    /* Dark mode support for toast */
+    body.dark-mode .notification-toast {
+        background: linear-gradient(135deg, #002b4d, #004080);
+    }
+
     @media (max-width: 900px) {
         .admin-header {
             padding: 12px 20px;
@@ -1729,6 +1815,9 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     }
 </style>
 
+<!-- Add jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script src="js/theme-manager.js"></script>
 
 <script>
@@ -1865,153 +1954,260 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     });
 
-    // Enhanced Notification Modal
-    const notifBell = document.getElementById('notifBell');
-    const notifModal = document.getElementById('notifModal');
-    const closeBtn = document.getElementById('closeNotif');
-    const clearBtn = document.getElementById('clearUnread');
-
-    function openNotificationModal() {
-        notifModal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-
-        // Add entrance animation to list items
-        const listItems = notifModal.querySelectorAll('li');
-        listItems.forEach((item, index) => {
-            item.style.animationDelay = `${index * 0.1}s`;
-            item.style.animation = 'slideInRight 0.5s ease-out forwards';
-        });
-    }
-
-    function closeNotificationModal() {
-        notifModal.classList.remove('show');
-        document.body.style.overflow = '';
-
-        // Reset animations
-        const listItems = notifModal.querySelectorAll('li');
-        listItems.forEach(item => {
-            item.style.animation = '';
-        });
-    }
-
-    if (notifBell) notifBell.addEventListener('click', openNotificationModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeNotificationModal);
-
-    window.addEventListener('click', (e) => {
-        if (e.target === notifModal) {
-            closeNotificationModal();
+    // Real-time notification system
+    class RealTimeNotifications {
+        constructor() {
+            this.pollingInterval = 5000; // 5 seconds
+            this.isPolling = false;
+            this.lastCount = <?= $unread_count ?>; // Initial count from PHP
+            this.init();
         }
-    });
 
-    // Enhanced clear unread functionality
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            const btn = this;
-            const originalText = btn.innerHTML;
+        init() {
+            this.startPolling();
+            this.bindEvents();
+        }
 
-            // Add loading state
-            btn.classList.add('loading');
-            btn.innerHTML = 'Clearing...';
+        startPolling() {
+            if (this.isPolling) return;
 
-            fetch("../admin/clear_unread.php", { method: "POST" })
-                .then(res => res.json())
-                .then(data => {
+            this.isPolling = true;
+            this.pollNotifications();
+
+            // Set up interval polling
+            setInterval(() => {
+                this.pollNotifications();
+            }, this.pollingInterval);
+        }
+
+        pollNotifications() {
+            $.ajax({
+                url: '../admin/get_notifications.php',
+                type: 'GET',
+                dataType: 'json',
+                success: (data) => {
                     if (data.success) {
-                        // Success animation
-                        btn.innerHTML = '✅ Cleared!';
-                        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        this.updateNotifications(data);
+                    }
+                },
+                error: (xhr, status, error) => {
+                    console.error('Notification polling failed:', error);
+                }
+            });
+        }
+
+        updateNotifications(data) {
+            const currentCount = data.unread_count;
+
+            // Update badge count
+            this.updateBadge(currentCount);
+
+            // Update notification modal if open
+            this.updateModal(data.notifications);
+
+            // Show notification alert for new messages
+            if (currentCount > this.lastCount) {
+                this.showNewMessageAlert(currentCount - this.lastCount);
+            }
+
+            this.lastCount = currentCount;
+        }
+
+        updateBadge(count) {
+            const badge = $('.notif-badge');
+            const notificationBell = $('#notifBell');
+
+            if (count > 0) {
+                if (badge.length > 0) {
+                    badge.text(count);
+                } else {
+                    $('<span class="notif-badge">' + count + '</span>').appendTo(notificationBell);
+                }
+
+                // Add pulse animation for new notifications
+                notificationBell.addClass('has-new');
+                setTimeout(() => notificationBell.removeClass('has-new'), 2000);
+
+            } else {
+                badge.remove();
+                notificationBell.removeClass('has-new');
+            }
+        }
+
+        updateModal(notifications) {
+            // Only update if modal is open
+            if ($('#notifModal').hasClass('show')) {
+                this.refreshModalContent(notifications);
+            }
+        }
+
+        refreshModalContent(notifications) {
+            const modalContent = $('.notif-modal-content ul');
+            const noMessages = $('.no-messages');
+            const clearBtn = $('#clearUnread');
+
+            if (notifications.length > 0) {
+                noMessages.hide();
+                clearBtn.show();
+
+                let html = '';
+                notifications.forEach(notif => {
+                    html += `
+                        <li onclick="window.location.href='view_message.php?id=${notif.id}'">
+                            <div class="msg-left">
+                                <strong>${notif.name}</strong>
+                                <span class="time">${notif.time}</span>
+                            </div>
+                            <div class="msg-right">
+                                ${notif.message}
+                            </div>
+                        </li>
+                    `;
+                });
+
+                modalContent.html(html);
+            } else {
+                modalContent.html('');
+                noMessages.show();
+                clearBtn.hide();
+            }
+        }
+
+        showNewMessageAlert(newCount) {
+            // Create toast notification
+            this.showToast(`You have ${newCount} new message${newCount > 1 ? 's' : ''}`);
+
+            // Play notification sound (optional)
+            this.playNotificationSound();
+        }
+
+        showToast(message) {
+            // Remove existing toasts
+            $('.notification-toast').remove();
+
+            const toast = $(`
+                <div class="notification-toast">
+                    <div class="toast-content">
+                        <span class="toast-icon">🔔</span>
+                        <span class="toast-message">${message}</span>
+                        <button class="toast-close">&times;</button>
+                    </div>
+                </div>
+            `);
+
+            $('body').append(toast);
+
+            // Show toast with animation
+            setTimeout(() => toast.addClass('show'), 100);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.removeClass('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+
+            // Close on click
+            toast.find('.toast-close').click(() => {
+                toast.removeClass('show');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+
+        playNotificationSound() {
+            // Optional: Play notification sound
+            // You can add an audio element and play it here
+            try {
+                const audio = new Audio('../assets/sounds/notification.mp3');
+                audio.volume = 0.3;
+                audio.play().catch(e => console.log('Audio play failed:', e));
+            } catch (e) {
+                console.log('Notification sound not available');
+            }
+        }
+
+        bindEvents() {
+            // Manual refresh when clicking notification bell
+            $('#notifBell').on('click', () => {
+                this.pollNotifications();
+            });
+
+            // Clear all notifications
+            $(document).on('click', '#clearUnread', () => {
+                this.clearAllNotifications();
+            });
+        }
+
+        clearAllNotifications() {
+            const btn = $('#clearUnread');
+            const originalText = btn.html();
+
+            btn.addClass('loading').html('Clearing...');
+
+            $.ajax({
+                url: '../admin/clear_unread.php',
+                type: 'POST',
+                dataType: 'json',
+                success: (data) => {
+                    if (data.success) {
+                        btn.html('✅ Cleared!');
+                        this.updateBadge(0);
+                        this.lastCount = 0;
 
                         setTimeout(() => {
-                            location.reload();
+                            if ($('#notifModal').hasClass('show')) {
+                                this.refreshModalContent([]);
+                            }
                         }, 1000);
                     } else {
-                        // Error state
-                        btn.innerHTML = '❌ Failed';
-                        btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-
-                        setTimeout(() => {
-                            btn.innerHTML = originalText;
-                            btn.style.background = '';
-                            btn.classList.remove('loading');
-                        }, 2000);
+                        btn.html('❌ Failed');
+                        setTimeout(() => btn.html(originalText).removeClass('loading'), 2000);
                     }
-                })
-                .catch(error => {
-                    btn.innerHTML = '❌ Error';
-                    btn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = '';
-                        btn.classList.remove('loading');
-                    }, 2000);
-                });
-        });
+                },
+                error: () => {
+                    btn.html('❌ Error');
+                    setTimeout(() => btn.html(originalText).removeClass('loading'), 2000);
+                }
+            });
+        }
     }
 
-    // Keyboard support
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && notifModal && notifModal.classList.contains('show')) {
-            closeNotificationModal();
-        }
-    });
+    // Initialize when document is ready
+    $(document).ready(function() {
+        // Initialize real-time notifications
+        window.notificationSystem = new RealTimeNotifications();
 
-    // Enhanced list item click with ripple effect
-    document.querySelectorAll('.notif-modal-content li').forEach(item => {
-        item.addEventListener('click', function(e) {
-            // Create ripple effect
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
+        // Enhanced notification modal with jQuery
+        $(document).on('click', '#notifBell', function(e) {
+            e.preventDefault();
+            $('#notifModal').addClass('show');
+            $('body').css('overflow', 'hidden');
 
-            ripple.style.cssText = `
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(0, 100, 255, 0.3);
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                width: ${size}px;
-                height: ${size}px;
-                left: ${x}px;
-                top: ${y}px;
-                pointer-events: none;
-            `;
-
-            this.appendChild(ripple);
-
-            // Navigate after animation
-            setTimeout(() => {
-                const messageId = this.getAttribute('onclick')?.match(/id=(\d+)/)?.[1];
-                if (messageId) {
-                    window.location.href = `view_message.php?id=${messageId}`;
-                }
-            }, 300);
+            // Refresh notifications when opening modal
+            window.notificationSystem.pollNotifications();
         });
-    });
 
-    // Add CSS for ripple animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
+        $(document).on('click', '#closeNotif', function(e) {
+            e.preventDefault();
+            closeNotificationModal();
+        });
+
+        $(document).on('click', function(e) {
+            if ($(e.target).is('#notifModal')) {
+                closeNotificationModal();
             }
+        });
+
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $('#notifModal').hasClass('show')) {
+                closeNotificationModal();
+            }
+        });
+
+        function closeNotificationModal() {
+            $('#notifModal').removeClass('show');
+            $('body').css('overflow', '');
         }
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-    `;
-    document.head.appendChild(style);
+    });
 
     function toggleProfileMenu() {
         const dropdown = document.getElementById("profileDropdown");
