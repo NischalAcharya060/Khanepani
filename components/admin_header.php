@@ -260,15 +260,10 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 </aside>
 
 <style>
-    /* ================================
-   DARK MODE VARIABLES
-=============================== */
     :root {
         --sidebar-mobile-width: 240px;
         --sidebar-collapsed-width: 60px;
         --sidebar-expanded-width: 240px;
-
-        /* Light mode colors */
         --bg-primary: #ffffff;
         --bg-secondary: #f8f9fa;
         --text-primary: #333333;
@@ -281,7 +276,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     }
 
     body.dark-mode {
-        /* Dark mode colors */
         --bg-primary: #1a1a1a;
         --bg-secondary: #2d2d2d;
         --text-primary: #ffffff;
@@ -293,13 +287,11 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         --shadow-color: rgba(0, 0, 0, 0.3);
     }
 
-    /* Apply dark mode styles */
     body.dark-mode {
         background-color: var(--bg-primary);
         color: var(--text-primary);
     }
 
-    /* Update existing elements for dark mode */
     body.dark-mode .admin-header {
         background: var(--header-bg);
     }
@@ -361,9 +353,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         color: var(--text-primary);
     }
 
-    /* ================================
-       DARK MODE TOGGLE - HEADER STYLE
-    =============================== */
     .dark-mode-toggle {
         display: flex;
         align-items: center;
@@ -406,50 +395,31 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: rotate(20deg);
     }
 
-    /* ================================
-       VARIABLES & CORE SLIDING SETUP
-    =============================== */
     :root {
         --sidebar-mobile-width: 240px;
         --sidebar-collapsed-width: 60px;
         --sidebar-expanded-width: 240px;
     }
 
-    /* ------------------------------------------------------------------
-       MOBILE SLIDING EFFECT: Main content shifts when sidebar is active
-       ------------------------------------------------------------------ */
     body.mobile-sidebar-open {
         overflow-x: hidden;
     }
 
-    /* This class must be applied to the main content container (e.g., `<main class="dashboard-wrapper">`)
-       outside this header/sidebar code for the dashboard content to shift. */
     body.mobile-sidebar-open .dashboard-wrapper {
         transform: translateX(var(--sidebar-mobile-width));
-        /* Prevents content from being pushed twice on mobile */
         padding-left: 0 !important;
     }
 
-    /* ------------------------------------------------------------------
-       NEW: Desktop Sidebar Shift for Main Content
-       This ensures the main content (dashboard-wrapper) shifts for desktop
-       sidebar state changes.
-       ------------------------------------------------------------------ */
     @media (min-width: 901px) {
-        /* Default state: Expanded sidebar */
         .dashboard-wrapper {
             transition: padding-left 0.3s ease-in-out;
-            padding-left: var(--sidebar-expanded-width); /* Default desktop padding */
+            padding-left: var(--sidebar-expanded-width);
         }
-        /* Collapsed state */
         .sidebar-collapsed-state .dashboard-wrapper {
             padding-left: var(--sidebar-collapsed-width);
         }
     }
 
-    /* ================================
-       HEADER
-    =============================== */
     .admin-header {
         background: linear-gradient(90deg, #004080, #0066cc);
         color: white;
@@ -544,7 +514,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: scale(1.1);
     }
 
-    /* Notification Bell */
     .notification {
         position: relative;
         font-size: 22px;
@@ -579,9 +548,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         50% { transform: scale(1.2); }
     }
 
-    /* ================================
-       Profile Menu
-    =============================== */
     .profile-menu {
         position: relative;
     }
@@ -759,7 +725,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         background: #fff0f0 !important;
     }
 
-    /* Dark mode support */
     .dark-mode .profile-dropdown {
         background: #1e293b;
         border-color: #475569;
@@ -789,12 +754,9 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         background: #2d1b1b !important;
     }
 
-    /* ================================
-       SIDEBAR
-    =============================== */
     .sidebar {
         width: var(--sidebar-expanded-width);
-        height: 100vh;
+        max-height: 100vh;
         position: fixed;
         top: 70px;
         left: 0;
@@ -808,38 +770,31 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         z-index: 990;
     }
 
-    /* Default desktop state */
     @media (min-width: 901px) {
         .sidebar.expanded {
             width: var(--sidebar-expanded-width);
         }
 
-        /* Sidebar collapsed desktop state */
         .sidebar.collapsed {
             width: var(--sidebar-collapsed-width);
         }
 
         .menu-toggle {
-            /* Hide mobile toggle on desktop */
             display: none;
         }
 
-        /* Ensure sidebar top is aligned correctly on desktop */
         .sidebar-top {
             justify-content: flex-end;
         }
     }
 
-    /* Default mobile state (off screen) */
     @media (max-width: 900px) {
-        /* Sidebar starts off-screen */
         .sidebar {
             transform: translateX(-100%);
             width: var(--sidebar-mobile-width);
             top: 66px;
-            height: calc(100vh - 66px);
+            max-height: calc(100vh - 66px);
         }
-        /* Mobile Active State */
         .sidebar.active {
             transform: translateX(0);
         }
@@ -852,7 +807,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         .sidebar.active .collapse-toggle {
             display: none;
         }
-        /* Mobile sidebar must always be expanded for usability */
         .sidebar.collapsed {
             width: var(--sidebar-mobile-width);
             transform: translateX(-100%);
@@ -901,7 +855,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         visibility: hidden;
     }
 
-    /* Sidebar top (button placement) */
     .sidebar-top {
         display: flex;
         justify-content: flex-end;
@@ -910,7 +863,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Toggle button */
     .collapse-toggle {
         background: #ff6600;
         border: none;
@@ -931,9 +883,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: rotate(180deg);
     }
 
-    /* --------------------------------
-       NEW: SIDEBAR GROUP SEPARATOR
-    -------------------------------- */
     .sidebar ul li.sidebar-group-separator {
         height: 1px;
         margin: 15px 15px;
@@ -943,15 +892,11 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         padding: 0;
     }
 
-    /* Adjust separator when collapsed */
     .sidebar.collapsed .sidebar-group-separator {
         margin: 15px 5px;
         width: calc(100% - 10px);
     }
 
-    /* ================================
-       ENHANCED NOTIFICATION MODAL
-    =============================== */
     .notif-modal {
         display: none;
         position: fixed;
@@ -1220,7 +1165,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         opacity: 0.5;
     }
 
-    /* Enhanced badge animation */
     .notif-badge {
         position: absolute;
         top: -6px;
@@ -1251,7 +1195,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* Enhanced notification bell hover effect */
     .notification {
         position: relative;
         font-size: 22px;
@@ -1271,11 +1214,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         transform: scale(0.95);
     }
 
-    /* ================================
-       RESPONSIVE IMPROVEMENTS
-    =============================== */
-
-    /* Medium screens (768px - 900px) */
     @media (max-width: 900px) {
         .admin-header {
             padding: 12px 20px;
@@ -1301,9 +1239,49 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             padding: 5px 8px;
         }
 
+        .flag-icon {
+            width: 22px;
+            height: 14px;
+        }
+
+        .notification {
+            font-size: 18px;
+            padding: 6px;
+        }
+
+        .notif-badge {
+            font-size: 10px;
+            padding: 1px 4px;
+            top: -4px;
+            right: -8px;
+        }
+
+        .profile-info {
+            display: none;
+        }
+
+        .profile-trigger {
+            padding: 4px 8px;
+        }
+
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+        }
+
+        .dropdown-arrow {
+            width: 14px;
+            height: 14px;
+        }
+
+        .profile-dropdown {
+            min-width: 200px;
+            right: -10px;
+        }
+
         .sidebar {
             top: 60px;
-            height: calc(100vh - 60px);
+            max-height: calc(100vh - 60px);
         }
 
         .sidebar ul li a {
@@ -1321,7 +1299,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* Small tablets and large phones (600px - 768px) */
     @media (max-width: 768px) {
         .admin-header {
             padding: 10px 15px;
@@ -1339,7 +1316,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             gap: 10px;
         }
 
-        /* Hide dark mode text, show only icon */
         .dark-mode-text {
             display: none;
         }
@@ -1348,7 +1324,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             padding: 6px 8px;
         }
 
-        /* Hide language text, show only flags */
         .lang-switcher span {
             display: none;
         }
@@ -1362,7 +1337,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             height: 12px;
         }
 
-        /* Adjust notification bell */
         .notification {
             font-size: 18px;
             padding: 6px;
@@ -1375,7 +1349,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             right: -8px;
         }
 
-        /* Compact profile info */
         .profile-info {
             display: none;
         }
@@ -1402,7 +1375,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         .sidebar {
             width: 220px;
             top: 55px;
-            height: calc(100vh - 55px);
+            max-height: calc(100vh - 55px);
         }
 
         .sidebar ul li a {
@@ -1418,7 +1391,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* Mobile phones (480px - 600px) */
     @media (max-width: 600px) {
         .admin-header {
             padding: 8px 12px;
@@ -1436,7 +1408,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             gap: 8px;
         }
 
-        /* Further compact dark mode toggle */
         .dark-mode-toggle {
             margin-right: 0;
         }
@@ -1449,7 +1420,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             font-size: 14px;
         }
 
-        /* Compact language switcher */
         .lang-switcher {
             gap: 2px;
         }
@@ -1463,7 +1433,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             height: 10px;
         }
 
-        /* Smaller notification bell */
         .notification {
             font-size: 16px;
             padding: 4px;
@@ -1476,7 +1445,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             height: 16px;
         }
 
-        /* Compact profile trigger */
         .profile-trigger {
             gap: 6px;
             padding: 3px 6px;
@@ -1508,7 +1476,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         .sidebar {
             width: 200px;
             top: 50px;
-            height: calc(100vh - 50px);
+            max-height: calc(100vh - 50px);
         }
 
         .sidebar ul li a {
@@ -1521,7 +1489,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* Small phones (below 480px) */
     @media (max-width: 480px) {
         .admin-header {
             padding: 6px 10px;
@@ -1535,12 +1502,10 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             gap: 6px;
         }
 
-        /* Hide language switcher on very small screens */
         .lang-switcher {
             display: none;
         }
 
-        /* Ultra-compact dark mode toggle */
         .dark-mode-btn {
             padding: 3px 4px;
         }
@@ -1549,7 +1514,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             font-size: 12px;
         }
 
-        /* Smaller notification */
         .notification {
             font-size: 14px;
             padding: 3px;
@@ -1564,7 +1528,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             height: 14px;
         }
 
-        /* Minimal profile trigger */
         .profile-trigger {
             gap: 4px;
             padding: 2px 4px;
@@ -1580,13 +1543,11 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             height: 10px;
         }
 
-        /* Adjust menu toggle button */
         .menu-toggle {
             font-size: 18px;
             padding: 4px 8px;
         }
 
-        /* Notification modal responsive */
         .notif-modal-content {
             margin: 40px auto;
             width: 95%;
@@ -1635,7 +1596,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* Extra small phones (below 360px) */
     @media (max-width: 360px) {
         .admin-header {
             padding: 4px 8px;
@@ -1645,12 +1605,10 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             gap: 4px;
         }
 
-        /* Hide dark mode toggle on very small screens */
         .dark-mode-toggle {
             display: none;
         }
 
-        /* Even more compact notification */
         .notification {
             font-size: 12px;
             padding: 2px;
@@ -1666,9 +1624,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* ================================
-       TOUCH DEVICE OPTIMIZATIONS
-    =============================== */
     @media (hover: none) and (pointer: coarse) {
         .dark-mode-btn:hover,
         .lang-link:hover,
@@ -1688,7 +1643,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             transform: scale(0.95);
         }
 
-        /* Increase tap targets for mobile */
         .dark-mode-btn,
         .lang-link,
         .notification,
@@ -1703,9 +1657,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* ================================
-       LANDSCAPE ORIENTATION SUPPORT
-    =============================== */
     @media (max-height: 500px) and (orientation: landscape) {
         .admin-header {
             padding: 6px 15px;
@@ -1717,7 +1668,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 
         .sidebar {
             top: 45px;
-            height: calc(100vh - 45px);
+            max-height: calc(100vh - 45px);
         }
 
         .sidebar ul li a {
@@ -1730,9 +1681,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* ================================
-       HIGH DPI SCREENS OPTIMIZATION
-    =============================== */
     @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
         .admin-header .logo img {
             image-rendering: -webkit-optimize-contrast;
@@ -1744,9 +1692,6 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
     }
 
-    /* ================================
-       REDUCED MOTION SUPPORT
-    =============================== */
     @media (prefers-reduced-motion: reduce) {
         .admin-header .logo img,
         .dark-mode-btn,
