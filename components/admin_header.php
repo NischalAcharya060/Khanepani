@@ -1784,6 +1784,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
     }
 </style>
 
+<script src="js/theme-manager.js"></script>
+
 <script>
     // Apply dark mode class on page load
     document.addEventListener('DOMContentLoaded', function() {
