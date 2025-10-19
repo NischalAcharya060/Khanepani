@@ -2002,8 +2002,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             // Update badge count
             this.updateBadge(currentCount);
 
-            // Update notification modal if open
-            this.updateModal(data.notifications);
+            // Always update modal content (even when closed)
+            this.updateModalContent(data.notifications);
 
             // Show notification alert for new messages
             if (currentCount > this.lastCount) {
@@ -2034,14 +2034,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             }
         }
 
-        updateModal(notifications) {
-            // Only update if modal is open
-            if ($('#notifModal').hasClass('show')) {
-                this.refreshModalContent(notifications);
-            }
-        }
-
-        refreshModalContent(notifications) {
+        updateModalContent(notifications) {
             const modalContent = $('.notif-modal-content ul');
             const noMessages = $('.no-messages');
             const clearBtn = $('#clearUnread');
@@ -2053,24 +2046,67 @@ $current_admin_id = $_SESSION['admin'] ?? '';
                 let html = '';
                 notifications.forEach(notif => {
                     html += `
-                        <li onclick="window.location.href='view_message.php?id=${notif.id}'">
-                            <div class="msg-left">
-                                <strong>${notif.name}</strong>
-                                <span class="time">${notif.time}</span>
-                            </div>
-                            <div class="msg-right">
-                                ${notif.message}
-                            </div>
-                        </li>
-                    `;
+                    <li data-message-id="${notif.id}" class="message-item">
+                        <div class="msg-left">
+                            <strong>${notif.name}</strong>
+                            <span class="time">${notif.time}</span>
+                        </div>
+                        <div class="msg-right">
+                            ${notif.message}
+                        </div>
+                    </li>
+                `;
                 });
 
                 modalContent.html(html);
+
+                // Add click handler for individual messages
+                modalContent.find('.message-item').click((e) => {
+                    e.preventDefault();
+                    const messageId = $(e.currentTarget).data('message-id');
+                    this.markMessageAsRead(messageId);
+                });
             } else {
                 modalContent.html('');
                 noMessages.show();
                 clearBtn.hide();
             }
+        }
+
+        markMessageAsRead(messageId) {
+            // Mark the message as read via AJAX
+            $.ajax({
+                url: '../admin/mark_message_read.php',
+                type: 'POST',
+                data: { message_id: messageId },
+                dataType: 'json',
+                success: (data) => {
+                    if (data.success) {
+                        // Remove the message from the modal immediately
+                        $(`.message-item[data-message-id="${messageId}"]`).remove();
+
+                        // Update badge count
+                        this.updateBadge(data.new_unread_count);
+                        this.lastCount = data.new_unread_count;
+
+                        // If no messages left, show "no messages"
+                        if (data.new_unread_count === 0) {
+                            $('.no-messages').show();
+                            $('#clearUnread').hide();
+                        }
+
+                        // Redirect to view the message
+                        window.location.href = `view_message.php?id=${messageId}`;
+                    } else {
+                        // Fallback to direct navigation
+                        window.location.href = `view_message.php?id=${messageId}`;
+                    }
+                },
+                error: () => {
+                    // If AJAX fails, fall back to direct navigation
+                    window.location.href = `view_message.php?id=${messageId}`;
+                }
+            });
         }
 
         showNewMessageAlert(newCount) {
@@ -2086,14 +2122,14 @@ $current_admin_id = $_SESSION['admin'] ?? '';
             $('.notification-toast').remove();
 
             const toast = $(`
-                <div class="notification-toast">
-                    <div class="toast-content">
-                        <span class="toast-icon">🔔</span>
-                        <span class="toast-message">${message}</span>
-                        <button class="toast-close">&times;</button>
-                    </div>
+            <div class="notification-toast">
+                <div class="toast-content">
+                    <span class="toast-icon">🔔</span>
+                    <span class="toast-message">${message}</span>
+                    <button class="toast-close">&times;</button>
                 </div>
-            `);
+            </div>
+        `);
 
             $('body').append(toast);
 
@@ -2114,15 +2150,61 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         }
 
         playNotificationSound() {
-            // Optional: Play notification sound
-            // You can add an audio element and play it here
             try {
-                const audio = new Audio('../assets/sounds/notification.mp3');
-                audio.volume = 0.3;
-                audio.play().catch(e => console.log('Audio play failed:', e));
+                const audioPath = '../assets/files/notification.mp3';
+                console.log('Attempting to play audio from:', audioPath);
+
+                const audio = new Audio(audioPath);
+                audio.volume = 1.0;
+
+                // Add event listeners for debugging
+                audio.addEventListener('canplay', () => {
+                    console.log('Audio can play');
+                });
+
+                audio.addEventListener('error', (e) => {
+                    console.error('Audio error:', e);
+                    console.log('Audio error details:', audio.error);
+                });
+
+                audio.addEventListener('loadstart', () => {
+                    console.log('Audio loading started');
+                });
+
+                const playPromise = audio.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('Audio playing successfully');
+                    }).catch(error => {
+                        console.log('Audio play failed:', error);
+                        console.log('Autoplay might be blocked by browser');
+
+                        // Try to play on user interaction
+                        this.enableAudioOnInteraction(audio);
+                    });
+                }
             } catch (e) {
-                console.log('Notification sound not available');
+                console.log('Notification sound error:', e);
             }
+        }
+
+        enableAudioOnInteraction(audio) {
+            // Enable audio on next user interaction
+            const enableAudio = () => {
+                audio.play().then(() => {
+                    console.log('Audio played after user interaction');
+                }).catch(error => {
+                    console.log('Still failed after interaction:', error);
+                });
+
+                // Remove event listeners after first interaction
+                document.removeEventListener('click', enableAudio);
+                document.removeEventListener('keydown', enableAudio);
+            };
+
+            document.addEventListener('click', enableAudio, { once: true });
+            document.addEventListener('keydown', enableAudio, { once: true });
         }
 
         bindEvents() {
@@ -2153,11 +2235,8 @@ $current_admin_id = $_SESSION['admin'] ?? '';
                         this.updateBadge(0);
                         this.lastCount = 0;
 
-                        setTimeout(() => {
-                            if ($('#notifModal').hasClass('show')) {
-                                this.refreshModalContent([]);
-                            }
-                        }, 1000);
+                        // Update modal content immediately
+                        this.updateModalContent([]);
                     } else {
                         btn.html('❌ Failed');
                         setTimeout(() => btn.html(originalText).removeClass('loading'), 2000);
