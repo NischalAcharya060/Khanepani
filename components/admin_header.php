@@ -253,9 +253,13 @@ $current_admin_id = $_SESSION['admin'] ?? '';
         <li><a href="../admin/messages.php" class="<?= $current_page == 'messages.php' ? 'active' : '' ?>">📬 <span class="link-text"><?= $lang['messages'] ?></span></a></li>
         <li class="sidebar-group-separator"></li>
         <li><a href="../admin/activity.php" class="<?= $current_page == 'activity.php' ? 'active' : '' ?>">🕒 <span class="link-text"><?= $lang['recent_activity'] ?></span></a></li>
-        <li class="sidebar-group-separator"></li>
-        <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
-        <li class="sidebar-group-separator"></li>
+        <?php
+        if ($current_admin_id === 'master' || in_array($current_role_id, [1])):
+        ?>
+            <li class="sidebar-group-separator"></li>
+            <li><a href="../admin/settings.php" class="<?= $current_page == 'settings.php' ? 'active' : '' ?>">⚙ <span class="link-text"><?= $lang['settings'] ?></span></a></li>
+            <li class="sidebar-group-separator"></li>
+        <?php endif; ?>
     </ul>
 </aside>
 
