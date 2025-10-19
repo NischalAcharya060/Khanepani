@@ -168,10 +168,12 @@ for($m=1; $m<=12; $m++){
             z-index: 10;
             padding-left: var(--sidebar-expanded-width);
             min-height: 100vh;
+            width: calc(100% - var(--sidebar-expanded-width));
         }
 
         .sidebar-collapsed-state .dashboard-wrapper {
             padding-left: 70px;
+            width: calc(100% - 70px);
         }
 
         @media (max-width: 900px) {
@@ -181,11 +183,18 @@ for($m=1; $m<=12; $m++){
             }
             body.mobile-sidebar-open .dashboard-wrapper {
                 transform: translateX(var(--sidebar-mobile-width));
+                width: calc(100% - var(--sidebar-mobile-width));
             }
         }
+
         @media (min-width: 901px) {
             body.mobile-sidebar-open .dashboard-wrapper {
                 transform: translateX(0);
+                width: calc(100% - var(--sidebar-expanded-width));
+            }
+
+            .sidebar-collapsed-state body.mobile-sidebar-open .dashboard-wrapper {
+                width: calc(100% - 70px);
             }
         }
 
@@ -724,7 +733,7 @@ for($m=1; $m<=12; $m++){
         }
     </style>
 </head>
-<body <?php echo 'class="sidebar-expanded-state"' ?>>
+<body class="<?php echo isset($_SESSION['sidebar_state']) && $_SESSION['sidebar_state'] === 'collapsed' ? 'sidebar-collapsed-state' : 'sidebar-expanded-state'; ?>">
 
 <?php include '../components/admin_header.php'; ?>
 

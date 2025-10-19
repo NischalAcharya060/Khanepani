@@ -1822,7 +1822,7 @@ $current_admin_id = $_SESSION['admin'] ?? '';
 <!-- Add jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script src="js/theme-manager.js"></script>
+<script src="../components/js/theme-manager.js"></script>
 
 <script>
     // Apply dark mode class on page load
