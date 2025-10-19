@@ -162,6 +162,10 @@ $lang = [
     'last_activity' => 'Last Activity',
     'change_profile_picture' => 'Change Profile Picture',
     'save_changes' => 'Save Profile Changes',
+    'delete_confirmation_label' => 'Type "DELETE MY ACCOUNT" to confirm',
+    'delete_confirmation_placeholder' => 'DELETE MY ACCOUNT',
+    'delete_password_label' => 'Enter your password',
+    'delete_password_placeholder' => '••••••••',
 
     // Password
     'current_password' => 'Current Password',

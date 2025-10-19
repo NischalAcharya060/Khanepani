@@ -45,6 +45,13 @@
     --info-bg: #d1ecf1;
     --info-color: #0c5460;
     --info-border: #bee5eb;
+
+    /* Profile Page Specific */
+    --profile-image-border: #4361ee;
+    --profile-image-shadow: rgba(67, 97, 238, 0.1);
+    --password-meter-bg: #e9ecef;
+    --delete-confirmation-bg: #fff5f5;
+    --delete-confirmation-border: #f94144;
 }
 
 /* ================================
@@ -76,6 +83,13 @@ body.dark-mode {
     --info-bg: #1e3a4e;
     --info-color: #60a5fa;
     --info-border: #1e40af;
+
+    /* Profile Page Dark Mode */
+    --profile-image-border: #4895ef;
+    --profile-image-shadow: rgba(72, 149, 239, 0.2);
+    --password-meter-bg: #4a5568;
+    --delete-confirmation-bg: rgba(248, 65, 68, 0.1);
+    --delete-confirmation-border: #f94144;
 }
 
 /* ================================
@@ -216,6 +230,132 @@ body.dark-mode .system-info-value {
 }
 
 /* ================================
+   PROFILE PAGE DARK MODE ENHANCEMENTS
+   ================================ */
+body.dark-mode .profile-image-preview {
+    border-color: var(--profile-image-border);
+    box-shadow: 0 0 0 8px var(--profile-image-shadow);
+}
+
+body.dark-mode .image-overlay {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .image-overlay i {
+    color: var(--text-dark);
+}
+
+body.dark-mode .password-strength-meter {
+    background: var(--password-meter-bg);
+}
+
+body.dark-mode .password-feedback {
+    color: var(--text-light);
+}
+
+body.dark-mode .delete-confirmation {
+    background: var(--delete-confirmation-bg);
+    border-color: var(--delete-confirmation-border);
+}
+
+body.dark-mode .confirmation-step label {
+    color: var(--danger-color);
+}
+
+body.dark-mode .confirmation-step input {
+    background: var(--card-background);
+    border: 2px solid rgba(248, 65, 68, 0.3);
+    color: var(--text-dark);
+}
+
+body.dark-mode .confirmation-step input:focus {
+    border-color: var(--danger-color);
+    background: var(--background-light);
+}
+
+/* Profile detail list dark mode */
+body.dark-mode .profile-detail-list li {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .profile-detail-list strong {
+    color: var(--text-dark);
+}
+
+body.dark-mode .profile-detail-list span {
+    color: var(--text-light);
+}
+
+/* Master admin dark mode enhancements */
+body.dark-mode .card.master-admin {
+    background: linear-gradient(135deg, var(--background-light) 0%, var(--card-background) 100%);
+    border-bottom: 5px solid var(--warning-color);
+}
+
+body.dark-mode .card.master-admin h2 {
+    color: var(--warning-color);
+}
+
+body.dark-mode .card.master-admin img {
+    border-color: var(--warning-color);
+    box-shadow: 0 0 0 10px rgba(249, 199, 79, 0.2);
+}
+
+body.dark-mode .master-warning {
+    background-color: rgba(249, 199, 79, 0.1);
+    color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+/* Danger zone card dark mode */
+body.dark-mode .card.danger-zone {
+    background-color: rgba(248, 65, 68, 0.05);
+    border-color: var(--danger-color);
+}
+
+body.dark-mode .card.danger-zone .card-title {
+    color: var(--danger-color);
+    border-bottom-color: var(--danger-color);
+}
+
+/* Form enhancements for dark mode */
+body.dark-mode input[type="text"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="email"] {
+    background: var(--card-background);
+    color: var(--text-dark);
+    border-color: var(--border-color);
+}
+
+body.dark-mode input[type="text"]:focus,
+body.dark-mode input[type="password"]:focus,
+body.dark-mode input[type="email"]:focus {
+    border-color: var(--primary-color);
+    background: var(--background-light);
+}
+
+body.dark-mode input::placeholder {
+    color: var(--text-light);
+}
+
+/* Password strength indicators in dark mode */
+body.dark-mode .password-strength-weak {
+    background: var(--danger-color);
+}
+
+body.dark-mode .password-strength-fair {
+    background: var(--warning-color);
+}
+
+body.dark-mode .password-strength-good {
+    background: #f1c40f;
+}
+
+body.dark-mode .password-strength-strong {
+    background: var(--success-color);
+}
+
+/* ================================
    BUTTONS
    ================================ */
 body.dark-mode .btn {
@@ -253,6 +393,32 @@ body.dark-mode .view-all-btn {
 body.dark-mode .view-all-btn:hover {
     color: white;
     background: var(--primary-color);
+}
+
+/* Profile page buttons */
+body.dark-mode button {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+body.dark-mode button:hover {
+    background: linear-gradient(45deg, var(--primary-light), var(--primary-color));
+}
+
+body.dark-mode .danger-button {
+    background: linear-gradient(45deg, var(--danger-color), #c0392b);
+}
+
+body.dark-mode .danger-button:hover {
+    background: linear-gradient(45deg, #c0392b, #922b21);
+}
+
+body.dark-mode .danger-button:disabled {
+    background: var(--border-color);
+    color: var(--text-light);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* ================================
@@ -372,6 +538,25 @@ body.dark-mode .message.info {
     border-color: var(--info-border);
 }
 
+/* Profile page message boxes */
+body.dark-mode .message-box {
+    background: var(--success-bg);
+    color: var(--success-color);
+    border-left-color: var(--success-border);
+}
+
+body.dark-mode .message-box.error {
+    background: var(--error-bg);
+    color: var(--error-color);
+    border-left-color: var(--error-border);
+}
+
+body.dark-mode .message-box.success {
+    background: var(--success-bg);
+    color: var(--success-color);
+    border-left-color: var(--success-border);
+}
+
 /* Mobile banner */
 body.dark-mode #mobileOptimizationBanner {
     background-color: var(--warning-color);
@@ -443,6 +628,17 @@ body.dark-mode .border {
 }
 
 /* ================================
+   ACCESSIBILITY ENHANCEMENTS
+   ================================ */
+body.dark-mode button:focus,
+body.dark-mode input:focus,
+body.dark-mode a:focus,
+body.dark-mode select:focus {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
+/* ================================
    CUSTOM SCROLLBAR FOR DARK MODE
    ================================ */
 body.dark-mode ::-webkit-scrollbar {
@@ -460,4 +656,47 @@ body.dark-mode ::-webkit-scrollbar-thumb {
 
 body.dark-mode ::-webkit-scrollbar-thumb:hover {
     background: var(--text-light);
+}
+
+/* ================================
+   PERFORMANCE OPTIMIZATIONS
+   ================================ */
+@media (prefers-reduced-motion: reduce) {
+    body.dark-mode * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ================================
+   PRINT STYLES
+   ================================ */
+@media print {
+    body.dark-mode {
+        background: white !important;
+        color: black !important;
+    }
+
+    body.dark-mode .card {
+        background: white !important;
+        color: black !important;
+        border: 1px solid #ddd !important;
+    }
+}
+
+/* ================================
+   RESPONSIVE ENHANCEMENTS
+   ================================ */
+@media (max-width: 768px) {
+    body.dark-mode .profile-image-container {
+        margin: 0 auto 20px auto;
+    }
+
+    body.dark-mode .card {
+        padding: 20px;
+    }
+
+    body.dark-mode .delete-confirmation {
+        padding: 15px;
+    }
 }

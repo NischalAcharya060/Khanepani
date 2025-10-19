@@ -170,14 +170,18 @@ $lang = [
     "allowed_types" => "केवल JPG, JPEG, PNG, GIF अनुमति छ।",
 
     // Profile
-    'profile_overview' => 'प्रोफाइल अवलोकन',
-    'edit_account_details' => 'खाता विवरण सम्पादन',
-    'update_security_credentials' => 'सुरक्षा विवरण अद्यावधिक गर्नुहोस्',
+    'profile_overview' => 'प्रोफाइल विवरण',
+    'edit_account_details' => 'खाता विवरण सम्पादन गर्नुहोस्',
     'username' => 'प्रयोगकर्ता नाम',
+    'update_security_credentials' => 'सुरक्षा प्रमाणहरू अद्यावधिक गर्नुहोस्',
     'account_created' => 'खाता सिर्जना गरिएको मिति',
     'last_activity' => 'अन्तिम गतिविधि',
-    'change_profile_picture' => 'प्रोफाइल तस्वीर परिवर्तन',
+    'change_profile_picture' => 'प्रोफाइल तस्वीर परिवर्तन गर्नुहोस्',
     'save_changes' => 'परिवर्तनहरू सुरक्षित गर्नुहोस्',
+    'delete_confirmation_label' => '"मेरो खाता मेटाउनुहोस्" टाइप गरेर पुष्टि गर्नुहोस्',
+    'delete_confirmation_placeholder' => 'मेरो खाता मेटाउनुहोस्',
+    'delete_password_label' => 'तपाईंको पासवर्ड प्रविष्ट गर्नुहोस्',
+    'delete_password_placeholder' => '••••••••',
 
     // Password
     'current_password' => 'हालको पासवर्ड',
