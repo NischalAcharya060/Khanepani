@@ -1,8 +1,8 @@
 <?php
-//// Start session if not already started
-//if (session_status() === PHP_SESSION_NONE) {
-//    session_start();
-//}
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Include database
 include 'config/database/db.php';
@@ -26,6 +26,7 @@ if (file_exists($langFile)) {
     include __DIR__ . '/../lang/en.php';
 }
 
+// Fetch settings from database
 $settings = [
         'email' => 'info@salakpurkhanepani.com',
         'phone' => '+977-1-4117356',
@@ -39,8 +40,15 @@ if ($result && $result->num_rows > 0) {
 }
 ?>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<!DOCTYPE html>
+<html lang="<?= $_SESSION['lang'] ?>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $lang['site_title'] ?? 'Khane Pani' ?></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
 <div class="info-bar">
     <section class="datetime-bar">
         <div class="container">
@@ -62,37 +70,41 @@ if ($result && $result->num_rows > 0) {
             </a>
         </div>
 
-        <div class="hamburger" id="hamburger">
-            <i class="fa-solid fa-bars"></i>
+        <div class="hamburger" id="hamburger" aria-label="Toggle navigation">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
         </div>
 
-        <nav class="main-nav" id="main-nav">
-            <a href="../index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
+        <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+            <a href="../index.php" class="nav-link <?= $current_page == 'index.php' ? 'active' : '' ?>">
                 <?= $lang['home'] ?? 'Home' ?>
             </a>
-            <a href="../notices.php" class="<?= $current_page == 'notices.php' ? 'active' : '' ?>">
+            <a href="../notices.php" class="nav-link <?= $current_page == 'notices.php' ? 'active' : '' ?>">
                 <?= $lang['notices'] ?? 'Notices' ?>
             </a>
+
             <div class="dropdown" id="about-dropdown">
-                <a href="javascript:void(0)" class="dropbtn">
+                <button class="dropbtn nav-link" aria-expanded="false">
                     <?= $lang['about'] ?? 'About' ?> <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
-                </a>
+                </button>
                 <div class="dropdown-content">
                     <a href="../about_us.php"><i class="fa-solid fa-info-circle"></i> <?= $lang['about_us'] ?? 'About Us' ?></a>
                     <a href="../our_services.php"><i class="fa-solid fa-faucet-drip"></i> <?= $lang['our_services'] ?? 'Our Services' ?></a>
                 </div>
             </div>
+
             <div class="dropdown" id="resources-dropdown">
-                <a href="javascript:void(0)" class="dropbtn">
+                <button class="dropbtn nav-link" aria-expanded="false">
                     <?= $lang['resources'] ?? 'Resources' ?> <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
-                </a>
+                </button>
                 <div class="dropdown-content">
                     <a href="../gallery.php"><i class="fa-solid fa-images"></i> <?= $lang['user_gallery'] ?? 'Gallery' ?></a>
                     <a href="../nepali_unicode.php"><i class="fa-solid fa-keyboard"></i> <?= $lang['nepali_unicode'] ?? 'Nepali Unicode' ?></a>
                 </div>
             </div>
 
-            <a href="../contact.php" class="<?= $current_page == 'contact.php' ? 'active' : '' ?>">
+            <a href="../contact.php" class="nav-link <?= $current_page == 'contact.php' ? 'active' : '' ?>">
                 <?= $lang['contact'] ?? 'Contact' ?>
             </a>
 
@@ -102,10 +114,10 @@ if ($result && $result->num_rows > 0) {
                 </a>
 
                 <div class="lang-switcher">
-                    <a href="?lang=en" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'en' ? 'active-lang' : '' ?>">
+                    <a href="?lang=en" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'en' ? 'active-lang' : '' ?>" aria-label="Switch to English">
                         <img src="../assets/images/gb.webp" alt="EN" class="flag-icon"> EN
                     </a>
-                    <a href="?lang=np" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'np' ? 'active-lang' : '' ?>">
+                    <a href="?lang=np" class="lang-link <?= ($_SESSION['lang'] ?? 'en') == 'np' ? 'active-lang' : '' ?>" aria-label="Switch to Nepali">
                         <img src="../assets/images/np.png" alt="NP" class="flag-icon"> NP
                     </a>
                 </div>
@@ -116,45 +128,70 @@ if ($result && $result->num_rows > 0) {
 
 <style>
     /* =====================
+       VARIABLES
+    ===================== */
+    :root {
+        --primary-color: #004080;
+        --secondary-color: #ff6600;
+        --accent-color: #0056d6;
+        --light-color: #ffffff;
+        --dark-color: #333333;
+        --gray-light: #f5f5f5;
+        --gray-medium: #e0e0e0;
+        --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        --shadow-heavy: 0 6px 15px rgba(0,0,0,0.15);
+        --border-radius: 8px;
+        --transition: all 0.3s ease;
+    }
+
+    /* =====================
        INFO BAR
     ===================== */
     .info-bar {
-        background: linear-gradient(90deg, #004080, #0066cc);
-        color: #ffffff;
+        background: linear-gradient(90deg, var(--primary-color), #0066cc);
+        color: var(--light-color);
         padding: 3px 0;
         font-size: 14px;
     }
-    .info-bar .info-bar-content {
+
+    .datetime-bar {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 2px 0;
+        text-align: center;
+    }
+
+    .info-bar-content {
         display: flex;
         justify-content: flex-end;
-        gap: 15px;
+        gap: 20px;
         flex-wrap: wrap;
+        padding: 5px 0;
     }
-    @media (max-width: 600px) {
-        .info-bar {
-            font-size: 12px;
-            text-align: center;
-        }
-        .info-bar .info-bar-content {
-            justify-content: center;
-        }
+
+    .info-bar-content span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
     /* =====================
        HEADER
     ===================== */
     header {
-        background: #fff;
+        background: var(--light-color);
         padding: 12px 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: var(--shadow);
         position: sticky;
         top: 0;
-        z-index: 999;
+        z-index: 1000;
+        transition: var(--transition);
     }
+
     .header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: relative;
     }
 
     /* Logo */
@@ -162,14 +199,22 @@ if ($result && $result->num_rows > 0) {
         display: flex;
         align-items: center;
         text-decoration: none;
-        color: #004080;
+        color: var(--primary-color);
         font-weight: 700;
         font-size: 20px;
+        transition: var(--transition);
     }
+
+    .logo a:hover {
+        transform: translateY(-2px);
+    }
+
     .logo a img {
         width: 55px;
-        margin-right: 10px;
-        border-radius: 8px;
+        height: 55px;
+        margin-right: 12px;
+        border-radius: var(--border-radius);
+        object-fit: cover;
     }
 
     /* =====================
@@ -179,43 +224,60 @@ if ($result && $result->num_rows > 0) {
         display: flex;
         gap: 25px;
         align-items: center;
+        transition: var(--transition);
     }
-    .main-nav a {
+
+    .nav-link {
         text-decoration: none;
-        color: #004080;
+        color: var(--primary-color);
         font-weight: 500;
-        padding: 6px 0;
+        padding: 8px 0;
         position: relative;
-    }
-
-    .main-nav a::after {
-        content: "";
-        display: block;
-        height: 2px;
-        background: #ff6600;
-        width: 0;
-        transition: width 0.3s;
-        position: absolute;
-        bottom: -3px;
-        left: 0;
-    }
-    .main-nav a:hover::after {
-        width: 100%;
-    }
-
-    /* =====================
-       DROPDOWN (Fixed Hover Sensitivity and Mobile Icon Rotation)
-    ===================== */
-    .dropdown {
-        position: relative;
-    }
-    .dropbtn {
-        cursor: pointer;
+        transition: var(--transition);
         display: flex;
         align-items: center;
     }
 
-    /* Style for the Chevron icon */
+    .nav-link.active {
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+
+    .nav-link::after {
+        content: "";
+        display: block;
+        height: 2px;
+        background: var(--secondary-color);
+        width: 0;
+        transition: var(--transition);
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after {
+        width: 100%;
+    }
+
+    /* =====================
+       DROPDOWN
+    ===================== */
+    .dropdown {
+        position: relative;
+    }
+
+    .dropbtn {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background: none;
+        border: none;
+        font: inherit;
+        color: inherit;
+        padding: 8px 0;
+    }
+
     .dropdown-arrow {
         font-size: 10px;
         margin-left: 5px;
@@ -227,59 +289,83 @@ if ($result && $result->num_rows > 0) {
         position: absolute;
         top: 100%;
         left: 0;
-        background: #fff;
-        min-width: 160px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        border-radius: 6px;
+        background: var(--light-color);
+        min-width: 200px;
+        box-shadow: var(--shadow-heavy);
+        border-radius: var(--border-radius);
         z-index: 10;
-        padding-top: 10px;
-        top: calc(100% - 10px);
+        padding: 10px 0;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s, transform 0.3s;
     }
 
     .dropdown-content a {
-        display: block;
-        padding: 10px 14px;
-        color: #333;
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        color: var(--dark-color);
         white-space: nowrap;
-        position: relative;
-        top: 10px;
+        text-decoration: none;
+        transition: var(--transition);
     }
 
-    .dropdown-content a:first-child {
-        margin-top: -10px;
-    }
-
-    /* Icon Spacing for Dropdown Links */
     .dropdown-content a i {
-        margin-right: 8px;
+        margin-right: 10px;
         width: 16px;
         text-align: center;
     }
 
     .dropdown-content a:hover {
-        background: #ff6600;
-        color: #fff;
+        background: var(--secondary-color);
+        color: var(--light-color);
     }
 
-    /* Desktop Hover Activation & Chevron Rotation */
+    /* Desktop Hover Activation */
     @media (min-width: 993px) {
         .dropdown:hover .dropdown-content {
             display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
+
         .dropdown:hover .dropdown-arrow {
             transform: rotate(180deg);
         }
     }
-
 
     /* =====================
        HAMBURGER
     ===================== */
     .hamburger {
         display: none;
-        font-size: 26px;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 24px;
+        height: 18px;
         cursor: pointer;
-        color: #004080;
+        z-index: 1001;
+    }
+
+    .hamburger-line {
+        display: block;
+        height: 2px;
+        width: 100%;
+        background-color: var(--primary-color);
+        border-radius: 1px;
+        transition: var(--transition);
+    }
+
+    .hamburger.active .hamburger-line:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger.active .hamburger-line:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active .hamburger-line:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -6px);
     }
 
     /* =====================
@@ -288,74 +374,107 @@ if ($result && $result->num_rows > 0) {
     .header-utilities {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 15px;
     }
-    /* Fix Employee Portal Button */
+
     .employee-btn {
-        display: inline-flex !important;
+        display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: linear-gradient(135deg, #007bff, #0056d6) !important;
-        color: #fff !important;
-        padding: 8px 14px !important;
-        border-radius: 8px !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        text-decoration: none !important;
-        border: none !important;
-        box-shadow: none !important;
-        position: relative;
+        background: linear-gradient(135deg, var(--accent-color), #007bff);
+        color: var(--light-color);
+        padding: 8px 16px;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        box-shadow: 0 2px 5px rgba(0, 86, 214, 0.3);
     }
 
-    /* Remove orange underline effect inside nav */
-    .employee-btn::after {
-        display: none !important;
+    .employee-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 86, 214, 0.4);
     }
 
-    /* Fix Language Switcher */
+    .lang-switcher {
+        display: flex;
+        gap: 5px;
+        background: var(--gray-light);
+        border-radius: 20px;
+        padding: 2px;
+    }
+
     .lang-link {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 4px 8px !important;
-        border-radius: 20px !important;
-        color: #444 !important;
-        font-weight: 500 !important;
-        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        color: var(--dark-color);
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
     }
+
     .lang-link:hover {
-        background: #f0f0f0 !important;
-        color: #1a1a1a !important;
+        background: var(--gray-medium);
     }
+
     .lang-link.active-lang {
-        background: #0056d6 !important;
-        color: #fff !important;
+        background: var(--accent-color);
+        color: var(--light-color);
     }
+
     .flag-icon {
         width: 18px;
         height: 12px;
         object-fit: cover;
+        border-radius: 1px;
     }
 
     /* =====================
-       RESPONSIVE (Mobile Overrides)
+       RESPONSIVE DESIGN
     ===================== */
     @media (max-width: 992px) {
+        .hamburger {
+            display: flex;
+        }
+
         .main-nav {
             display: none;
             flex-direction: column;
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            width: 250px;
-            background: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--light-color);
+            padding: 80px 20px 20px;
+            box-shadow: var(--shadow-heavy);
+            overflow-y: auto;
+            gap: 0;
         }
-        .main-nav.show { display: flex; }
-        .main-nav a { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .main-nav a:last-child { border-bottom: none; }
+
+        .main-nav.show {
+            display: flex;
+        }
+
+        .nav-link {
+            width: 100%;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-medium);
+        }
+
+        .dropdown {
+            width: 100%;
+        }
+
+        .dropbtn {
+            width: 100%;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
 
         .dropdown-content {
             display: none;
@@ -364,35 +483,81 @@ if ($result && $result->num_rows > 0) {
             left: unset;
             min-width: 100%;
             box-shadow: none;
-            background: #f9f9f9;
+            background: var(--gray-light);
             border-radius: 0;
-            padding: 5px 0;
+            padding: 5px 0 5px 15px;
+            opacity: 1;
+            transform: none;
+            transition: none;
         }
 
-        /* The class toggled by JS on mobile */
         .dropdown-content.show-dropdown {
             display: block;
         }
 
-        .dropdown-content.show-dropdown ~ .dropbtn .dropdown-arrow,
-        .dropdown-content.show-dropdown + .dropbtn .dropdown-arrow {
-            transform: rotate(180deg);
-        }
-
-        .hamburger { display: block; }
-
-        /* utilities stack under nav */
         .header-utilities {
             flex-direction: column;
             align-items: flex-start;
-            margin-top: 10px;
-            gap: 10px;
+            margin-top: 20px;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .employee-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .lang-switcher {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-bar-content {
+            justify-content: center;
         }
     }
+
     @media (max-width: 480px) {
-        .logo a span { font-size: 16px; }
-        .lang-switcher { flex-wrap: wrap; }
-        .lang-link { flex: 1; justify-content: center; }
+        .logo a span {
+            font-size: 16px;
+        }
+
+        .logo a img {
+            width: 45px;
+            height: 45px;
+            margin-right: 8px;
+        }
+
+        .main-nav {
+            width: 100%;
+        }
+
+        .info-bar {
+            font-size: 12px;
+        }
+    }
+
+    /* =====================
+       ACCESSIBILITY
+    ===================== */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 </style>
 
@@ -400,49 +565,73 @@ if ($result && $result->num_rows > 0) {
     document.addEventListener("DOMContentLoaded", function () {
         const hamburger = document.getElementById("hamburger");
         const nav = document.getElementById("main-nav");
+        const body = document.body;
 
         // Hamburger/Navigation Toggle
         hamburger.addEventListener("click", function () {
-            nav.classList.toggle("show");
+            const isExpanded = nav.classList.toggle("show");
+            hamburger.classList.toggle("active", isExpanded);
+            hamburger.setAttribute("aria-expanded", isExpanded);
 
-            // Toggle hamburger icon between bars and xmark
-            this.innerHTML = nav.classList.contains("show")
-                ? '<i class="fa-solid fa-xmark"></i>'
-                : '<i class="fa-solid fa-bars"></i>';
+            // Prevent body scroll when menu is open
+            body.style.overflow = isExpanded ? "hidden" : "";
 
             // Close all dropdowns when the main nav is closed
-            if (!nav.classList.contains("show")) {
+            if (!isExpanded) {
                 document.querySelectorAll(".dropdown-content").forEach(content => {
                     content.classList.remove("show-dropdown");
                 });
             }
         });
 
+        // Mobile dropdown toggle
         const dropdowns = document.querySelectorAll(".dropdown > .dropbtn");
         dropdowns.forEach((btn) => {
             btn.addEventListener("click", function (e) {
                 if (window.innerWidth <= 992) {
                     e.preventDefault();
+                    e.stopPropagation();
 
                     const dropdownContent = this.nextElementSibling;
+                    const isExpanded = this.getAttribute("aria-expanded") === "true";
 
+                    // Close all other dropdowns
                     document.querySelectorAll(".dropdown-content").forEach(content => {
                         if (content !== dropdownContent) {
                             content.classList.remove("show-dropdown");
                         }
                     });
 
-                    // Toggle the current dropdown content
+                    document.querySelectorAll(".dropbtn").forEach(button => {
+                        if (button !== this) {
+                            button.setAttribute("aria-expanded", "false");
+                        }
+                    });
+
+                    // Toggle the current dropdown
                     dropdownContent.classList.toggle("show-dropdown");
+                    this.setAttribute("aria-expanded", !isExpanded);
                 }
             });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener("click", function(e) {
+            if (window.innerWidth <= 992 && !e.target.closest(".dropdown") && !e.target.closest(".hamburger")) {
+                document.querySelectorAll(".dropdown-content").forEach(content => {
+                    content.classList.remove("show-dropdown");
+                });
+
+                document.querySelectorAll(".dropbtn").forEach(button => {
+                    button.setAttribute("aria-expanded", "false");
+                });
+            }
         });
 
         // Live Datetime Update
         const datetimeElement = document.getElementById('live-datetime');
 
         function updateLiveDateTime() {
-            // Check if the element exists before trying to fetch
             if (!datetimeElement) return;
 
             fetch('../utils/get_live_datetime.php')
@@ -459,5 +648,17 @@ if ($result && $result->num_rows > 0) {
         updateLiveDateTime();
         setInterval(updateLiveDateTime, 1000);
 
+        // Close menu when clicking on a link (for single page applications)
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    nav.classList.remove('show');
+                    hamburger.classList.remove('active');
+                    body.style.overflow = '';
+                }
+            });
+        });
     });
 </script>
+</body>
+</html>
