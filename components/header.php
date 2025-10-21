@@ -110,7 +110,7 @@ if ($result && $result->num_rows > 0) {
 
             <div class="header-utilities">
                 <a href="../admin/login.php" class="employee-btn">
-                    <i class="fa-solid fa-user-shield"></i> <?= $lang['employee_portal'] ?? 'Employee Portal' ?>
+                    <i class="fa-solid fa-user-shield"></i> <?= $lang['employee_portal'] ?? 'Staff Portal' ?>
                 </a>
 
                 <div class="lang-switcher">
@@ -128,8 +128,8 @@ if ($result && $result->num_rows > 0) {
 
 <style>
     /* =====================
-       VARIABLES
-    ===================== */
+   VARIABLES
+===================== */
     :root {
         --primary-color: #004080;
         --secondary-color: #ff6600;
@@ -335,7 +335,7 @@ if ($result && $result->num_rows > 0) {
     }
 
     /* =====================
-       HAMBURGER
+       HAMBURGER - FIXED
     ===================== */
     .hamburger {
         display: none;
@@ -344,7 +344,8 @@ if ($result && $result->num_rows > 0) {
         width: 24px;
         height: 18px;
         cursor: pointer;
-        z-index: 1001;
+        z-index: 1002; /* Increased z-index */
+        position: relative;
     }
 
     .hamburger-line {
@@ -434,7 +435,7 @@ if ($result && $result->num_rows > 0) {
     }
 
     /* =====================
-       RESPONSIVE DESIGN
+       RESPONSIVE DESIGN - FIXED
     ===================== */
     @media (max-width: 992px) {
         .hamburger {
@@ -454,6 +455,7 @@ if ($result && $result->num_rows > 0) {
             box-shadow: var(--shadow-heavy);
             overflow-y: auto;
             gap: 0;
+            z-index: 1001; /* Ensure nav is above other content */
         }
 
         .main-nav.show {
@@ -464,6 +466,7 @@ if ($result && $result->num_rows > 0) {
             width: 100%;
             padding: 12px 0;
             border-bottom: 1px solid var(--gray-medium);
+            cursor: pointer; /* Ensure clickable */
         }
 
         .dropdown {
@@ -474,6 +477,7 @@ if ($result && $result->num_rows > 0) {
             width: 100%;
             justify-content: space-between;
             padding: 12px 0;
+            cursor: pointer;
         }
 
         .dropdown-content {
@@ -489,6 +493,7 @@ if ($result && $result->num_rows > 0) {
             opacity: 1;
             transform: none;
             transition: none;
+            z-index: 1002; /* Ensure dropdown content is clickable */
         }
 
         .dropdown-content.show-dropdown {
@@ -515,6 +520,11 @@ if ($result && $result->num_rows > 0) {
 
         .info-bar-content {
             justify-content: center;
+        }
+
+        /* Prevent body scroll when menu is open */
+        body.menu-open {
+            overflow: hidden;
         }
     }
 
@@ -568,18 +578,21 @@ if ($result && $result->num_rows > 0) {
         const body = document.body;
 
         // Hamburger/Navigation Toggle
-        hamburger.addEventListener("click", function () {
+        hamburger.addEventListener("click", function (e) {
+            e.stopPropagation(); // Prevent event bubbling
+
             const isExpanded = nav.classList.toggle("show");
             hamburger.classList.toggle("active", isExpanded);
             hamburger.setAttribute("aria-expanded", isExpanded);
-
-            // Prevent body scroll when menu is open
-            body.style.overflow = isExpanded ? "hidden" : "";
+            body.classList.toggle("menu-open", isExpanded);
 
             // Close all dropdowns when the main nav is closed
             if (!isExpanded) {
                 document.querySelectorAll(".dropdown-content").forEach(content => {
                     content.classList.remove("show-dropdown");
+                });
+                document.querySelectorAll(".dropbtn").forEach(button => {
+                    button.setAttribute("aria-expanded", "false");
                 });
             }
         });
@@ -617,15 +630,38 @@ if ($result && $result->num_rows > 0) {
 
         // Close dropdowns when clicking outside
         document.addEventListener("click", function(e) {
-            if (window.innerWidth <= 992 && !e.target.closest(".dropdown") && !e.target.closest(".hamburger")) {
-                document.querySelectorAll(".dropdown-content").forEach(content => {
-                    content.classList.remove("show-dropdown");
-                });
+            if (window.innerWidth <= 992) {
+                if (!e.target.closest(".dropdown") && !e.target.closest(".hamburger")) {
+                    document.querySelectorAll(".dropdown-content").forEach(content => {
+                        content.classList.remove("show-dropdown");
+                    });
 
-                document.querySelectorAll(".dropbtn").forEach(button => {
-                    button.setAttribute("aria-expanded", "false");
-                });
+                    document.querySelectorAll(".dropbtn").forEach(button => {
+                        button.setAttribute("aria-expanded", "false");
+                    });
+                }
+
+                // Close entire menu when clicking outside on mobile
+                if (!e.target.closest(".main-nav") && !e.target.closest(".hamburger") && nav.classList.contains("show")) {
+                    nav.classList.remove("show");
+                    hamburger.classList.remove("active");
+                    body.classList.remove("menu-open");
+                    hamburger.setAttribute("aria-expanded", "false");
+                }
             }
+        });
+
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Only close if it's a regular nav link (not a dropdown button)
+                if (!link.classList.contains('dropbtn') && window.innerWidth <= 992) {
+                    nav.classList.remove("show");
+                    hamburger.classList.remove("active");
+                    body.classList.remove("menu-open");
+                    hamburger.setAttribute("aria-expanded", "false");
+                }
+            });
         });
 
         // Live Datetime Update
@@ -647,17 +683,6 @@ if ($result && $result->num_rows > 0) {
 
         updateLiveDateTime();
         setInterval(updateLiveDateTime, 1000);
-
-        // Close menu when clicking on a link (for single page applications)
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 992) {
-                    nav.classList.remove('show');
-                    hamburger.classList.remove('active');
-                    body.style.overflow = '';
-                }
-            });
-        });
     });
 </script>
 </body>
