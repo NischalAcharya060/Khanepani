@@ -3,19 +3,17 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include database, language, Nepali calendar
 include 'config/database/db.php';
 include 'config/lang.php';
 include 'config/Nepali_calendar.php';
 $cal = new Nepali_Calendar();
 
-// Function to format date with time (kept unchanged)
 function format_date($date_str, $cal) {
     $timestamp = strtotime($date_str);
     $year  = (int)date('Y', $timestamp);
     $month = (int)date('m', $timestamp);
     $day   = (int)date('d', $timestamp);
-    $hour  = (int)date('h', $timestamp); // 12-hour format
+    $hour  = (int)date('h', $timestamp);
     $minute = (int)date('i', $timestamp);
     $ampm  = date('A', $timestamp);
 
@@ -26,7 +24,6 @@ function format_date($date_str, $cal) {
         $dateNep = strtr($nepDate['year'].'-'.$nepDate['month'].'-'.$nepDate['date'], $np_numbers);
         $timeNep = strtr(sprintf("%02d:%02d", $hour, $minute), $np_numbers) . " " . $ampm;
 
-        // Concatenated format for a single line in the detail view
         return 'मिति: ' . $dateNep . ', ' . 'समय: ' . $timeNep;
     } else {
         return date("F d, Y, h:i A", $timestamp);
@@ -40,7 +37,6 @@ if(!isset($_GET['id'])) {
 
 $id = intval($_GET['id']);
 
-// Use prepared statement for security
 $stmt = $conn->prepare("SELECT * FROM notices WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -56,22 +52,19 @@ if(mysqli_num_rows($result) === 0){
 $notice = mysqli_fetch_assoc($result);
 $displayDate = format_date($notice['created_at'], $cal);
 
-// DECODE: Decode the JSON array of files from the 'file' column
 $attached_files = $notice['file'] ? json_decode($notice['file'], true) : [];
 if (!is_array($attached_files)) {
     $attached_files = [];
 }
 
-// --- LOGIC FOR SLIDER/ATTACHMENTS ---
 $image_files = [];
 $other_attachments = [];
 $image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
 foreach ($attached_files as $file_name) {
     $fileExt = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-    $filePath = "assets/uploads/" . $file_name; // Note: user side path is different
+    $filePath = "assets/uploads/" . $file_name;
 
-    // Check file existence before categorizing
     if (file_exists($filePath)) {
         if (in_array($fileExt, $image_extensions)) {
             $image_files[] = $file_name;
@@ -79,7 +72,6 @@ foreach ($attached_files as $file_name) {
             $other_attachments[] = $file_name;
         }
     } else {
-        // Optionally log or skip files that don't exist
     }
 }
 
@@ -98,20 +90,19 @@ $has_attachments_to_list = !empty($other_attachments);
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* --- CSS Variables & Reset (MODERNIZED) --- */
         :root {
             --primary: #007bff;
-            --primary-light: #e6f2ff; /* Light primary for accents */
+            --primary-light: #e6f2ff;
             --primary-dark: #004d99;
             --secondary: #6c757d;
             --success: #28a745;
             --warning: #ffc107;
-            --text-dark: #212529; /* Darker text */
+            --text-dark: #212529;
             --text-light: #606b74;
-            --bg-light: #f8f9fa; /* Lighter base background */
+            --bg-light: #f8f9fa;
             --card-bg: #ffffff;
             --border-color: #dee2e6;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Softer, deeper shadow */
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         body {
@@ -121,17 +112,15 @@ $has_attachments_to_list = !empty($other_attachments);
             padding: 0;
         }
 
-        /* --- Notice Container --- */
         .notice-detail {
             max-width: 900px;
             margin: 50px auto;
-            padding: 45px 40px; /* Increased padding */
+            padding: 45px 40px;
             background: var(--card-bg);
-            border-radius: 18px; /* More rounded */
+            border-radius: 18px;
             box-shadow: var(--shadow);
         }
 
-        /* --- Back Button (Pill-shaped, Integrated into flow) --- */
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -139,7 +128,7 @@ $has_attachments_to_list = !empty($other_attachments);
             margin-bottom: 25px;
             background: var(--primary-light);
             color: var(--primary-dark);
-            border-radius: 20px; /* Pill shape */
+            border-radius: 20px;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
@@ -155,9 +144,8 @@ $has_attachments_to_list = !empty($other_attachments);
         .back-btn i { width: 14px; height: 14px; margin-right: 6px; }
 
 
-        /* --- Header & Meta (Enhanced) --- */
         .notice-detail h2 {
-            font-size: 38px; /* Larger title */
+            font-size: 38px;
             margin-bottom: 15px;
             color: var(--text-dark);
             font-weight: 900;
@@ -167,9 +155,9 @@ $has_attachments_to_list = !empty($other_attachments);
         .notice-meta {
             font-size: 16px;
             color: var(--text-light);
-            margin-bottom: 40px; /* More space before content */
+            margin-bottom: 40px;
             padding-bottom: 20px;
-            border-bottom: 2px dashed var(--border-color); /* Dashed separator */
+            border-bottom: 2px dashed var(--border-color);
             display: flex;
             align-items: center;
         }
@@ -179,26 +167,22 @@ $has_attachments_to_list = !empty($other_attachments);
             color: var(--primary);
         }
 
-        /* --- Content & Images --- */
         .notice-content {
-            font-size: 18px; /* Slightly larger text */
+            font-size: 18px;
             line-height: 1.8;
             color: var(--text-dark);
             padding-top: 0;
-            /* Added margin-top to separate content from image/slider if present */
             margin-top: 30px;
         }
         .notice-content p {
             margin-top: 0;
         }
 
-        /* --- SLIDER STYLES (New/Modified) --- */
         .image-display-wrapper {
             margin: 0 auto 30px auto;
             max-width: 100%;
         }
 
-        /* Single Image Styling */
         .single-image-display {
             border-radius: 12px;
             overflow: hidden;
@@ -217,7 +201,6 @@ $has_attachments_to_list = !empty($other_attachments);
             display: block;
         }
 
-        /* Multiple Image Slider */
         .image-slider-container {
             position: relative;
             overflow: hidden;
@@ -269,14 +252,13 @@ $has_attachments_to_list = !empty($other_attachments);
         .slider-nav .prev { left: 15px; }
         .slider-nav .next { right: 15px; }
 
-        /* --- Attachments Section (Subtle Card Style) --- */
         .attachments-section {
             margin-top: 50px;
             padding: 25px 30px;
             border-radius: 12px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Subtle lift */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
         .attachments-section h3 {
             font-size: 22px;
@@ -301,7 +283,7 @@ $has_attachments_to_list = !empty($other_attachments);
             border-bottom: none;
         }
         .attachment-item:hover {
-            background-color: var(--primary-light); /* Light blue hover for interactivity */
+            background-color: var(--primary-light);
             border-radius: 4px;
             margin-left: -5px;
             margin-right: -5px;
@@ -337,14 +319,13 @@ $has_attachments_to_list = !empty($other_attachments);
             text-overflow: ellipsis;
         }
 
-        /* --- Lightbox (Modernized) --- */
         .lightbox {
             display: none;
             position: fixed;
             z-index: 1000;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(33, 37, 41, 0.98); /* Darker, slightly blue tint background */
+            background: rgba(33, 37, 41, 0.98);
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -358,7 +339,7 @@ $has_attachments_to_list = !empty($other_attachments);
             font-size: 40px;
             color: #fff;
             cursor: pointer;
-            font-weight: 300; /* Lighter weight for modern look */
+            font-weight: 300;
             transition: color 0.3s;
         }
         .lightbox .close:hover { color: var(--primary); }
@@ -387,7 +368,6 @@ $has_attachments_to_list = !empty($other_attachments);
             border-radius: 10px;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             .notice-detail { margin: 20px auto; padding: 20px 15px; border-radius: 12px; }
             .notice-detail h2 { font-size: 28px; }
@@ -439,15 +419,16 @@ $has_attachments_to_list = !empty($other_attachments);
                     </div>
                 </div>
             <?php else:
-                // SINGLE IMAGE: Display Image Normally with Lightbox trigger
                 $f = $image_files[0];
                 $filePath = "assets/uploads/" . $f;
                 $fileExt = strtolower(pathinfo($f, PATHINFO_EXTENSION));
 
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
                 $base_uri = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
-                $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $base_uri . $filePath;
-                $url = str_replace('//', '/', $url);
+
+                $cleaned_base_uri = preg_replace('#/+#', '/', $base_uri);
+
+                $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $cleaned_base_uri . $filePath;
                 ?>
                 <div class="single-image-display">
                     <img
@@ -474,8 +455,10 @@ $has_attachments_to_list = !empty($other_attachments);
 
                     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http';
                     $base_uri = str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']);
-                    $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $base_uri . $filePath;
-                    $url = str_replace('//', '/', $url);
+
+                    $cleaned_base_uri = preg_replace('#/+#', '/', $base_uri);
+
+                    $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $cleaned_base_uri . $filePath;
 
                     $icon = 'file';
                     $icon_color = 'var(--secondary)';
@@ -530,7 +513,6 @@ $has_attachments_to_list = !empty($other_attachments);
         const imageExtensions = ['jpg','jpeg','png','gif','webp'];
         const docExtensions = ['pdf','doc','docx','xls','xlsx','ppt','pptx','csv'];
 
-        // Reset both before loading
         lightboxImg.style.display = 'none';
         previewFrame.style.display = 'none';
         previewFrame.src = "";
@@ -545,10 +527,9 @@ $has_attachments_to_list = !empty($other_attachments);
             previewFrame.style.display = 'block';
 
             if (fileExt === 'pdf') {
-                previewFrame.src = fullUrl;
+                previewFrame.src = filePath;
                 caption.innerText = "<?= $lang['pdf_preview'] ?? 'PDF Document Preview' ?>";
             } else {
-                // Use Google Docs Viewer for other documents
                 previewFrame.src = "https://docs.google.com/gview?url=" + encodeURIComponent(fullUrl) + "&embedded=true";
                 caption.innerText = "<?= $lang['file_preview'] ?? 'File Preview (Google Viewer)' ?>";
             }
@@ -575,7 +556,6 @@ $has_attachments_to_list = !empty($other_attachments);
         }
     });
 
-    // --- Slider (Only runs if multiple images exist) ---
     <?php if ($has_multiple_images): ?>
     let currentSlide = 0;
     const slider = document.getElementById('image-slider');
