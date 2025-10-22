@@ -322,6 +322,8 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
             color: var(--text);
         }
 
+        .input-with-icon { position: relative; }
+
         input[type="text"], input[type="password"], input[type="email"] {
             padding: 16px 20px;
             border-radius: 12px;
@@ -330,6 +332,11 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
             color: var(--text);
             font-size: 16px;
             transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-with-icon input {
+            padding-right: 50px; /* Space for the eye icon */
         }
 
         input:focus {
@@ -337,6 +344,22 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
             box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
             outline: none;
             background: var(--bg);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-light);
+            width: 20px;
+            height: 20px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
         }
 
         .password-meter {
@@ -527,19 +550,28 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
                     <input type="hidden" name="change_password" value="1">
                     <div class="form-group">
                         <label><i data-feather="lock" class="icon"></i> <?= $lang['current_password'] ?></label>
-                        <input type="password" name="current_password" required placeholder="••••••••">
+                        <div class="input-with-icon">
+                            <input type="password" name="current_password" id="current_password" required placeholder="••••••••">
+                            <i data-feather="eye" class="toggle-password" onclick="togglePasswordVisibility('current_password', this)"></i>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label><i data-feather="unlock" class="icon"></i> <?= $lang['new_password'] ?></label>
-                        <input type="password" id="new_password" name="new_password" required placeholder="••••••••" onkeyup="checkPasswordStrength(this.value)">
+                        <div class="input-with-icon">
+                            <input type="password" id="new_password" name="new_password" required placeholder="••••••••" onkeyup="checkPasswordStrength(this.value); checkPasswordMatch()">
+                            <i data-feather="eye" class="toggle-password" onclick="togglePasswordVisibility('new_password', this)"></i>
+                        </div>
                         <div class="password-meter"><div class="meter-fill" id="passwordStrengthFill"></div></div>
                         <div class="password-feedback" id="passwordFeedback"></div>
                     </div>
 
                     <div class="form-group">
                         <label><i data-feather="repeat" class="icon"></i> <?= $lang['confirm_password'] ?></label>
-                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="••••••••" onkeyup="checkPasswordMatch()">
+                        <div class="input-with-icon">
+                            <input type="password" id="confirm_password" name="confirm_password" required placeholder="••••••••" onkeyup="checkPasswordMatch()">
+                            <i data-feather="eye" class="toggle-password" onclick="togglePasswordVisibility('confirm_password', this)"></i>
+                        </div>
                         <div class="password-feedback" id="passwordMatchFeedback"></div>
                     </div>
 
@@ -565,12 +597,15 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
                         </div>
                         <div class="confirmation-step">
                             <label><i data-feather="lock" class="icon"></i> <?= $lang['delete_password_label'] ?></label>
-                            <input
-                                    type="password"
-                                    id="confirm_password_delete"
-                                    name="confirm_password"
-                                    placeholder="<?= $lang['delete_password_placeholder'] ?>"
-                                    onkeyup="checkDeleteConfirmation()">
+                            <div class="input-with-icon">
+                                <input
+                                        type="password"
+                                        id="confirm_password_delete"
+                                        name="confirm_password"
+                                        placeholder="<?= $lang['delete_password_placeholder'] ?>"
+                                        onkeyup="checkDeleteConfirmation()">
+                                <i data-feather="eye" class="toggle-password" onclick="togglePasswordVisibility('confirm_password_delete', this)"></i>
+                            </div>
                         </div>
                     </div>
                     <button
@@ -597,6 +632,18 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
         }
     }
 
+    function togglePasswordVisibility(id, iconElement) {
+        const input = document.getElementById(id);
+        if (input.type === 'password') {
+            input.type = 'text';
+            iconElement.setAttribute('data-feather', 'eye-off');
+        } else {
+            input.type = 'password';
+            iconElement.setAttribute('data-feather', 'eye');
+        }
+        feather.replace();
+    }
+
     function checkPasswordStrength(password) {
         const fill = document.getElementById('passwordStrengthFill');
         const feedback = document.getElementById('passwordFeedback');
@@ -613,7 +660,8 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
         const classes = ['meter-weak', 'meter-fair', 'meter-good', 'meter-strong'];
         const texts = ['Weak', 'Fair', 'Good', 'Strong'];
         fill.classList.add(classes[score - 1]);
-        feedback.textContent = texts[score - 1] + (score < 4 ? ' - ' + messages.join(', ') : ' password');
+        fill.style.width = (score * 25) + '%';
+        feedback.textContent = texts[score - 1] + (score < 4 ? ' - Missing: ' + messages.join(', ') : ' password');
         feedback.style.color = ['#f94144', '#f9c74f', '#f1c40f', '#4cc9a7'][score - 1];
     }
 
@@ -648,6 +696,12 @@ if (!empty($admin['profile_pic']) && $admin['profile_pic'] !== 'default.png') {
 
     document.getElementById('currentProfileImage')?.addEventListener('click', () => {
         document.getElementById('profile_pic')?.click();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkPasswordStrength(document.getElementById('new_password')?.value || '');
+        checkPasswordMatch();
+        checkDeleteConfirmation();
     });
 </script>
 </body>

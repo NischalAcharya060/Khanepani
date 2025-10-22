@@ -2,54 +2,46 @@
 session_start();
 include '../config/database/db.php';
 
-// --- Language Handling ---
 if (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'en'; // default language
+    $_SESSION['lang'] = 'en';
 }
 if (isset($_GET['lang']) && in_array($_GET['lang'], ['en','np'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
 
-// Load language file
 $langFile = __DIR__ . '/../lang/' . $_SESSION['lang'] . '.php';
 if (file_exists($langFile)) {
     include $langFile;
 } else {
-    include __DIR__ . '/../lang/en.php'; // fallback
+    include __DIR__ . '/../lang/en.php';
 }
 
-// Master admin credentials
 $master_username = "masteradmin";
 $master_email = "master@admin.com";
 $master_password = "admin@123";
 
-// Insert master admin into database if not exists
 $hashed_password = password_hash($master_password, PASSWORD_DEFAULT);
 $stmt_check = $conn->prepare("SELECT id FROM admins WHERE username=?");
 $stmt_check->bind_param("s", $master_username);
 $stmt_check->execute();
 $result_check = $stmt_check->get_result();
 if ($result_check->num_rows === 0) {
-    // Note: Assuming role_id=1 exists and is 'masteradmin'
     $stmt_insert = $conn->prepare("INSERT INTO admins (username, email, password, status, role_id, created_at, last_login) VALUES (?, ?, ?, 'active', 1, NOW(), NOW())");
     $stmt_insert->bind_param("sss", $master_username, $master_email, $hashed_password);
     $stmt_insert->execute();
 }
 
-// If already logged in, redirect to dashboard
-if (isset($_SESSION['admin']) && $_SESSION['admin'] !== 'master') { // Added check to ignore 'master' string if it somehow got set previously
+if (isset($_SESSION['admin']) && $_SESSION['admin'] !== 'master') {
     header("Location: dashboard.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $login = trim($_POST['login']); // username or email
+    $login = trim($_POST['login']);
     $password = $_POST['password'];
     $error = '';
 
-    // 🌟 FIX 1: Master admin hardcoded bypass (Use DB data for session consistency)
     if (($login === $master_username || $login === $master_email) && $password === $master_password) {
-        // Fetch master admin ID and role_name
         $stmt_master = $conn->prepare("
             SELECT a.id, a.username, r.role_name 
             FROM admins a 
@@ -63,15 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result_master->num_rows === 1) {
             $master = $result_master->fetch_assoc();
 
-            // 1. Set the correct ID (integer)
             $_SESSION['admin'] = $master['id'];
 
-            // 2. Set necessary role and username
             $_SESSION['username'] = $master['username'];
             $_SESSION['role_name'] = $master['role_name'];
-            $_SESSION['is_master'] = true; // Use this for simple checks if needed
+            $_SESSION['is_master'] = true;
 
-            // 3. Update last_login timestamp
             $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
             $stmt_update->bind_param("i", $master['id']);
             $stmt_update->execute();
@@ -79,13 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header("Location: dashboard.php");
             exit();
         } else {
-            // This is a safety net; the initial setup should prevent this.
             $error = "❌ Master Admin not configured correctly in the database.";
         }
     }
 
 
-    // 🌟 FIX 2: Standard Login - Fetch admin info and role_name in one go
     $stmt = $conn->prepare("
         SELECT a.*, r.role_name 
         FROM admins a 
@@ -99,23 +86,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result->num_rows === 1) {
         $admin = $result->fetch_assoc();
 
-        // 🚫 Check account status BEFORE password verify
         if ($admin['status'] === 'banned') {
             $error = $lang['error_banned'] ?? "🚫 Your account has been permanently banned. Please contact the master admin.";
         } elseif ($admin['status'] === 'inactive') {
             $error = $lang['error_deactivated'] ?? "⚠️ Your account is currently deactivated. Contact the master admin to restore access.";
         } elseif ($admin['status'] === 'active') {
 
-            // ✅ Only active users can proceed
             if (password_verify($password, $admin['password'])) {
 
-                // Set the session variables correctly
                 $_SESSION['admin'] = $admin['id'];
                 $_SESSION['username'] = $admin['username'];
                 $_SESSION['role_name'] = $admin['role_name'];
                 $_SESSION['is_master'] = (strtolower($admin['role_name']) === 'masteradmin');
 
-                // Update last login
                 $stmt_update = $conn->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
                 $stmt_update->bind_param("i", $admin['id']);
                 $stmt_update->execute();
@@ -144,14 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2a6fdb; /* A strong blue for municipality/public theme */
-            --secondary-color: #0d3b66; /* Dark blue for contrast */
+            --primary-color: #2a6fdb;
+            --secondary-color: #0d3b66;
             --text-color: #333;
             --white: #ffffff;
             --bg-light: #f4f7f9;
             --error-bg: #ffebeb;
             --error-text: #cc0000;
-            --overlay-color: rgba(13, 59, 102, 0.75); /* Dark blue overlay */
+            --overlay-color: rgba(13, 59, 102, 0.75);
         }
 
         * {
@@ -172,11 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            /* Animation for background */
             animation: backgroundPan 60s linear infinite;
         }
 
-        /* New Keyframe for Background Pan */
         @keyframes backgroundPan {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -198,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex;
             width: 90%;
             max-width: 1000px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); /* Stronger shadow on the white box */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
             border-radius: 15px;
             overflow: hidden;
             background: var(--white);
@@ -228,13 +209,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             justify-content: center;
             padding: 20px;
             position: relative;
-            /* Initial state for right panel animation */
             transform: translateX(100%);
             opacity: 0;
-            animation: slideInRight 1s ease-out 0.3s forwards; /* Delayed animation */
+            animation: slideInRight 1s ease-out 0.3s forwards;
         }
 
-        /* New Keyframe for right panel slide in */
         @keyframes slideInRight {
             to { transform: translateX(0); opacity: 1; }
         }
@@ -259,7 +238,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-weight: 700;
             margin-bottom: 10px;
             font-size: 2em;
-            /* Animation */
             opacity: 0;
             transform: translateX(-20px);
             animation: slideInLeft 0.5s ease-out 0.8s forwards;
@@ -269,7 +247,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #777;
             margin-bottom: 30px;
             font-size: 1em;
-            /* Animation */
             opacity: 0;
             transform: translateX(-20px);
             animation: slideInLeft 0.5s ease-out 0.9s forwards;
@@ -304,10 +281,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .input-group {
             position: relative;
             margin-bottom: 25px;
-            /* Animation: start hidden */
             opacity: 0;
             transform: translateY(10px);
-            /* Staggered delay for inputs */
         }
 
         .login-form .input-group:nth-child(1) {
@@ -330,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transform: translateY(-50%);
             color: var(--primary-color);
             font-size: 1.1em;
-            transition: color 0.3s; /* Transition for icon color */
+            transition: color 0.3s;
         }
 
         .input-group input {
@@ -348,8 +323,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             outline: none;
         }
 
-        .input-group input:focus ~ .icon { /* Changed to use general sibling selector for correct targeting */
-            color: var(--secondary-color); /* Change icon color on focus */
+        .input-group input:focus ~ .icon {
+            color: var(--secondary-color);
         }
 
 
@@ -368,7 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .btn {
-            position: relative; /* Needed for positioning the spinner */
+            position: relative;
             overflow: hidden;
             background: var(--primary-color);
             color: var(--white);
@@ -381,7 +356,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
             letter-spacing: 1px;
             margin-top: 10px;
-            /* Animation */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             opacity: 0;
             animation: fadeInUp 0.5s ease-out 1.3s forwards;
         }
@@ -397,18 +375,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
         .btn.loading {
-            pointer-events: none; /* Disable multiple clicks */
-            background: #4a8cd6; /* Slightly darker color when loading */
-            color: transparent !important; /* Hide button text */
+            pointer-events: none;
+            background: #4a8cd6;
+            color: transparent !important;
             box-shadow: none;
         }
 
-        .btn.loading .btn-text {
+        .btn.loading .btn-text, .btn.loading .btn-icon {
             visibility: hidden;
             opacity: 0;
         }
 
-        /* The Spinner */
         .btn .spinner {
             position: absolute;
             top: 50%;
@@ -419,19 +396,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: var(--white);
             border-radius: 50%;
-            display: none; /* Hidden by default */
+            display: none;
             animation: spin 0.8s linear infinite;
         }
 
         .btn.loading .spinner {
-            display: block; /* Show spinner when loading */
+            display: block;
         }
 
         @keyframes spin {
             to { transform: translate(-50%, -50%) rotate(360deg); }
         }
-
-        /* --- End New CSS for Loading State --- */
 
 
         .back-btn {
@@ -441,7 +416,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s, transform 0.3s;
-            /* Animation */
             opacity: 0;
             transform: translateY(10px);
             animation: fadeInUp 0.5s ease-out 1.4s forwards;
@@ -452,20 +426,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transform: translateX(-5px);
         }
 
-        /* Language Selector */
         .language-selector {
             position: absolute;
             top: 20px;
             right: 20px;
             z-index: 20;
             transition: transform 0.3s ease-out;
-            /* Animation */
             opacity: 0;
             transform: translateY(-20px);
             animation: dropdownFadeIn 0.5s ease-out 1.5s forwards;
         }
 
-        /* New Keyframe for dropdown */
         @keyframes dropdownFadeIn {
             to { opacity: 1; transform: translateY(0); }
         }
@@ -486,7 +457,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 0 0 2px rgba(42, 111, 219, 0.1);
         }
 
-        /* Media Queries for Responsiveness */
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -545,6 +515,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <button type="submit" class="btn" id="login-btn">
+                <span class="btn-icon"><i class="fas fa-sign-in-alt"></i></span>
                 <span class="btn-text"><?= $lang['login_button'] ?></span>
                 <div class="spinner"></div>
             </button>
