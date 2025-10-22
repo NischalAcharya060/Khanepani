@@ -213,7 +213,7 @@ $lang = [
 
     // Settings
     'settings_title' => 'सेटिङहरू',
-    'basic_site_settings' => 'प्राथमिक साइट सेटिङहरू',
+    'site_settings' => 'साइट सेटिङहरू',
     'contact_email' => 'सम्पर्क इमेल',
     'contact_phone' => 'सम्पर्क फोन',
     'facebook_link' => 'फेसबुक पेज लिंक',
@@ -226,6 +226,30 @@ $lang = [
     'admin_settings_desc' => 'जानकारी र सामाजिक सञ्जाल लिङ्कहरू कन्फिगर गर्नुहोस्।',
     'map_embed' => 'नक्सा (Google Maps Link)',
     'map_placeholder' => 'तपाईंको Google Maps iframe Link कोड यहाँ टाँस्नुहोस्...',
+    'general_settings' => 'सामान्य',
+    'advanced' => 'उच्च',
+    'site_info' => 'साइट जानकारी',
+    'admin_site_title' => 'साइट शीर्षक',
+    'site_description' => 'साइट विवरण',
+    'contact_info' => 'सम्पर्क जानकारी',
+
+// उन्नत सेटिङहरू
+    'advanced_settings'       => 'उन्नत सेटिङहरू',
+    'system_info'              => 'प्रणाली जानकारी',
+    'export_settings'          => 'सेटिङहरू निर्यात गर्नुहोस्',
+    'export_desc'              => 'तपाईंका हालका सेटिङहरू ब्याकअप फाइलको रूपमा डाउनलोड गर्नुहोस्।',
+    'export'                   => 'निर्यात गर्नुहोस्',
+    'security_settings'        => 'सुरक्षा सेटिङहरू',
+    'security_desc'            => 'सुरक्षासँग सम्बन्धित सेटिङ र कन्फिगरेसनहरू व्यवस्थापन गर्नुहोस्।',
+    'configure_security'       => 'सुरक्षा कन्फिगर गर्नुहोस्',
+
+// प्रणाली जानकारी
+    'php_version'              => 'PHP संस्करण',
+    'mysql_version'            => 'MySQL संस्करण',
+    'server_software'          => 'सर्भर सफ्टवेयर',
+    'upload_max_filesize'      => 'अपलोड गर्न सकिने अधिकतम फाइल आकार',
+    'memory_limit'             => 'मेमोरी सीमा',
+    'max_execution_time'       => 'अधिकतम कार्य समय (सेकेन्डमा)',
 
     // User side
     "home" => "गृहपृष्ठ",

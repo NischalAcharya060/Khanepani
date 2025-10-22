@@ -209,7 +209,7 @@ $lang = [
 
     // Settings
     'settings_title' => 'Settings',
-    'basic_site_settings' => 'Basic Site Settings',
+    'site_settings' => 'Site Settings',
     'contact_email' => 'Contact Email',
     'contact_phone' => 'Contact Phone',
     'facebook_link' => 'Facebook Page Link',
@@ -221,6 +221,30 @@ $lang = [
     'update_failed' => '❌ Failed to update settings: ',
     'map_embed' => 'Map Embed Code (Google Maps Iframe)',
     'map_placeholder' => 'Paste your Google Maps iframe code here...',
+    'general_settings' => 'General',
+    'advanced' => 'Advanced',
+    'site_info' => 'Site Information',
+    'admin_site_title' => 'Site Tittle',
+    'site_description' => 'Site Description',
+    'contact_info' => 'Contact Information',
+
+// Advanced Settings Section
+    'advanced_settings'       => 'Advanced Settings',
+    'system_info'              => 'System Information',
+    'export_settings'          => 'Export Settings',
+    'export_desc'              => 'Download your current settings as a backup file.',
+    'export'                   => 'Export',
+    'security_settings'        => 'Security Settings',
+    'security_desc'            => 'Manage security-related settings and configurations.',
+    'configure_security'       => 'Configure Security',
+
+// System Information Labels
+    'php_version'              => 'PHP Version',
+    'mysql_version'            => 'MySQL Version',
+    'server_software'          => 'Server Software',
+    'upload_max_filesize'      => 'Upload Max Filesize',
+    'memory_limit'             => 'Memory Limit',
+    'max_execution_time'       => 'Max Execution Time (seconds)',
 
     // User side
     "home" => "Home",

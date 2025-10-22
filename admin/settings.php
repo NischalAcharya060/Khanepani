@@ -742,7 +742,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
             </button>
             <button class="tab-button" data-tab="contact">
                 <i data-feather="mail"></i>
-                <?= $lang['contact_info'] ?? 'Contact' ?>
+                <?= $lang['contact'] ?? 'Contact' ?>
             </button>
             <button class="tab-button" data-tab="social">
                 <i data-feather="share-2"></i>
@@ -766,7 +766,7 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
                     <div class="form-group">
                         <label for="site_title">
                             <i data-feather="type"></i>
-                            <?= $lang['site_title'] ?? 'Site Title' ?>
+                            <?= $lang['admin_site_title'] ?? 'Site Title' ?>
                         </label>
                         <input type="text" name="site_title" id="site_title"
                                value="<?= htmlspecialchars($settings['site_title']) ?>"
@@ -863,15 +863,6 @@ if ($result && $fetched = mysqli_fetch_assoc($result)) {
                                placeholder="https://facebook.com/yourpage">
                     </div>
 
-                    <div class="setting-card">
-                        <h4 style="margin-bottom: 15px; color: var(--text-dark);">
-                            <i data-feather="info"></i>
-                            <?= $lang['social_tips'] ?? 'Social Media Tips' ?>
-                        </h4>
-                        <p style="color: var(--text-light); font-size: 14px; line-height: 1.5;">
-                            <?= $lang['social_tips_desc'] ?? 'Add your social media links to help visitors connect with your organization. More platforms can be added in the future.' ?>
-                        </p>
-                    </div>
                 </div>
             </div>
 
